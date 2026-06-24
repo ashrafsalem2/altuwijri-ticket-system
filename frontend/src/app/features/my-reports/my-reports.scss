@@ -1,0 +1,57 @@
+.ctrl-row { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+.date-range { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.date-range label { font-size: .85rem; font-weight: 600; white-space: nowrap; }
+.date-range .input, .ticket-pick .input { min-width: 160px; }
+.seg-btn-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.seg-btn-group button { padding: .4rem .9rem; border: none; background: var(--surface); color: var(--text); cursor: pointer; font-size: .85rem; border-right: 1px solid var(--border); &:last-child { border-right: none; } &.active { background: var(--primary); color: #fff; } }
+.err { background: #fee2e2; color: #b91c1c; padding: .45rem .7rem; border-radius: var(--radius-sm); font-size: .85rem; margin-top: .5rem; }
+
+/* Report sheet */
+.report-sheet { padding: 2rem; }
+.rep-head { display: flex; gap: 1.5rem; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 2px solid var(--primary); padding-bottom: 1rem; }
+.rep-brand { display: flex; flex-direction: column; align-items: center; gap: .25rem; }
+.logo-mark { width: 44px; height: 44px; background: var(--primary); color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+.rep-sys { font-size: .7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+.rep-meta { flex: 1; }
+.rep-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 .25rem; }
+.section-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 1.5rem 0 .75rem; border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+
+/* KPIs */
+.kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: .75rem; margin-bottom: 1rem; }
+.kpi { background: var(--surface-2); border-radius: var(--radius-sm); padding: .75rem; display: flex; flex-direction: column; align-items: center; }
+.kv { font-size: 1.5rem; font-weight: 700; }
+.kl { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; }
+.text-blue { color: #3b82f6; } .text-amber { color: #f59e0b; }
+.text-green { color: #22c55e; } .text-red { color: #ef4444; }
+
+/* Pie charts */
+.pies { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.pie-card { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+.pie-label { font-size: .8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+
+/* Table */
+.rep-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.rep-table th { text-align: left; padding: .5rem .6rem; background: var(--surface-2); border-bottom: 2px solid var(--border); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.rep-table td { padding: .45rem .6rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.rep-table tr:last-child td { border-bottom: none; }
+.mono { font-family: monospace; color: var(--text-muted); }
+.print-link { color: var(--primary); text-decoration: none; font-weight: 600; }
+.prio-badge { color: #fff; font-size: .7rem; font-weight: 700; padding: .15rem .5rem; border-radius: 999px; }
+.st-badge { font-size: .75rem; font-weight: 600; padding: .15rem .5rem; border-radius: 999px; background: var(--surface-2); }
+.prog-cell { display: flex; align-items: center; gap: .4rem; }
+.pb-wrap { width: 60px; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.pb-fill { height: 100%; background: var(--success); border-radius: 3px; }
+
+.no-break { break-inside: avoid; }
+.rep-foot { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+@media (max-width: 760px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .ctrl-row { flex-direction: column; align-items: stretch; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .report-sheet { box-shadow: none; border: none; padding: 0; }
+  @page { margin: 1.5cm; }
+}

@@ -1,0 +1,43 @@
+# ── Deploy output (contains live credentials & built binaries) ──
+deploy/
+
+# ── .NET build & publish artifacts ──
+backend/**/bin/
+backend/**/obj/
+backend/**/publish/
+backend/api_pub/
+backend/publish/
+backend/**/*.user
+backend/**/*.suo
+backend/.vs/
+*.DotSettings.user
+
+# ── Claude Code session files ──
+.claude/
+
+# ── Local secrets (never commit real credentials) ──
+**/appsettings.Local.json
+**/appsettings.Production.json
+**/appsettings.Development.json
+
+# ── Angular / Node ──
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.sass-cache/
+
+# ── OS & editor ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Misc ──
+*.bak
+*.tmp

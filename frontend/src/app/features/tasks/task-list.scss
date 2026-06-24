@@ -1,0 +1,76 @@
+/* ── Filter bar ───────────────────────────────────────────── */
+.filters {
+  display: grid;
+  grid-template-columns: 2fr repeat(5, 1fr) auto;
+  gap: .6rem;
+  align-items: center;
+}
+.filters .chk {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .82rem;
+  white-space: nowrap;
+}
+
+/* ── Table wrapper — enables horizontal scroll on narrow screens */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Table ────────────────────────────────────────────────── */
+.table { min-width: 680px; }
+.t-title { font-weight: 600; }
+.proj-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: .25rem; }
+.avatar.sm { width: 24px; height: 24px; font-size: .65rem; }
+.overdue { color: var(--danger); font-weight: 600; }
+.table th { cursor: pointer; user-select: none; }
+
+/* ── Sticky first column (Title) ──────────────────────────── */
+.table th:first-child,
+.table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  /* shadow pseudo-element needs a positioning context */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; right: -8px; bottom: 0;
+    width: 8px;
+    background: linear-gradient(to right, rgba(0,0,0,.06), transparent);
+    pointer-events: none;
+  }
+}
+.table tbody tr:hover td:first-child {
+  background: var(--surface-2);
+}
+
+/* ── Pager ────────────────────────────────────────────────── */
+.pager { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem; }
+
+/* ── Hide non-essential columns on smaller screens ────────── */
+/* ≤900px: hide Type column (5th) */
+@media (max-width: 900px) {
+  .table th:nth-child(5),
+  .table td:nth-child(5) { display: none; }
+}
+
+/* ≤620px: also hide Project column (2nd) */
+@media (max-width: 620px) {
+  .table th:nth-child(2),
+  .table td:nth-child(2) { display: none; }
+}
+
+/* ── Filter grid breakpoints ──────────────────────────────── */
+@media (max-width: 1100px) {
+  .filters { grid-template-columns: 1fr 1fr 1fr; }
+}
+@media (max-width: 700px) {
+  .filters { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .filters { grid-template-columns: 1fr; }
+}

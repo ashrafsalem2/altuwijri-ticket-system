@@ -1,0 +1,19 @@
+.overlay {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, .5); z-index: 500;
+  display: flex; align-items: flex-start; justify-content: center; padding: 2.5rem 1rem; overflow: auto;
+}
+.modal { width: 100%; max-width: 640px; display: flex; flex-direction: column; }
+.modal-head, .modal-foot {
+  display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem;
+}
+.modal-head { border-bottom: 1px solid var(--border); }
+.modal-head h3 { margin: 0; }
+.modal-foot { border-top: 1px solid var(--border); gap: .6rem; justify-content: flex-end; }
+.modal-body { padding: 1.25rem; }
+.err { background: #fee2e2; color: #b91c1c; padding: .5rem .7rem; border-radius: var(--radius-sm); font-size: .82rem; }
+.tags-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .35rem; }
+.tags-header label { margin-bottom: 0; }
+.tag-chip {
+  border: 1px solid; border-radius: 999px; padding: .2rem .65rem; font-size: .76rem; font-weight: 600;
+  cursor: pointer; background: transparent;
+}

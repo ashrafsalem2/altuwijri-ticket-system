@@ -1,0 +1,13 @@
+.pie-wrap { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.pie { width: 160px; height: 160px; flex-shrink: 0; }
+.seg { transition: stroke-dasharray .4s; }
+.pie-total { font-size: 1.5rem; font-weight: 750; fill: var(--text); }
+.pie-cap { font-size: .7rem; fill: var(--text-muted); }
+.legend { display: flex; flex-direction: column; gap: .35rem; min-width: 140px; }
+.leg-item { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
+.leg-dot { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+.leg-lbl { color: var(--text); }
+.leg-val { margin-left: auto; color: var(--text-muted); font-weight: 600; }
+.clickable { cursor: pointer; }
+.clickable:hover { opacity: .8; transition: opacity .15s; }
+.leg-item.clickable:hover .leg-lbl { color: var(--primary); }

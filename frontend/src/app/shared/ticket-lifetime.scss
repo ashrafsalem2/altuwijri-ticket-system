@@ -1,0 +1,59 @@
+/* ── Inline badge mode ─────────────────────────────── */
+.lt-wrap {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .2rem .5rem; border-radius: 999px; font-size: .72rem; font-weight: 700;
+  white-space: nowrap; user-select: none;
+}
+.lt-green { background: #dcfce7; color: #15803d; }
+.lt-yellow { background: #fef9c3; color: #a16207; }
+.lt-amber  { background: #ffedd5; color: #c2410c; animation: lt-pulse 1.8s ease-in-out infinite; }
+.lt-red    { background: #fee2e2; color: #b91c1c; animation: lt-pulse 1.2s ease-in-out infinite; }
+
+.lt-icon { font-size: .8rem; }
+.lt-overdue { font-weight: 800; letter-spacing: .02em; }
+.lt-none { color: var(--text-muted); font-size: .8rem; }
+
+.lt-bar { width: 40px; height: 4px; background: rgba(0,0,0,.12); border-radius: 2px; overflow: hidden; }
+.lt-fill { height: 100%; background: currentColor; border-radius: 2px; transition: width .4s; opacity: .7; }
+
+/* ── Card mode ─────────────────────────────────────── */
+.lt-card {
+  border-radius: 12px; padding: 1rem 1.2rem;
+  border: 1.5px solid transparent;
+  transition: box-shadow .2s;
+}
+.lt-card-green  { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac; color: #166534; }
+.lt-card-yellow { background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-color: #fde047; color: #854d0e; }
+.lt-card-amber  { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-color: #fb923c; color: #9a3412; animation: lt-pulse 1.8s ease-in-out infinite; }
+.lt-card-red    { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-color: #f87171; color: #991b1b; animation: lt-pulse 1.2s ease-in-out infinite; }
+.lt-card-none   { background: var(--surface); border-color: var(--border); color: var(--text-muted); display: flex; align-items: center; gap: .6rem; }
+
+.lt-card-row { display: flex; align-items: center; gap: .9rem; margin-bottom: .8rem; }
+.lt-card-done { display: flex; align-items: center; gap: .6rem; }
+
+.lt-big-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.lt-big-icon.lt-pulse { animation: lt-pulse 1s ease-in-out infinite; }
+
+.lt-card-text { display: flex; flex-direction: column; gap: .1rem; }
+.lt-remaining-lbl { font-size: .7rem; font-weight: 600; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
+.lt-overdue-lbl   { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.lt-big-num { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+.lt-big-label { font-size: 1.1rem; font-weight: 700; }
+.lt-sub { font-size: .72rem; opacity: .8; }
+
+.lt-bar-wrap { margin-bottom: .7rem; }
+.lt-bar-track { height: 8px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
+.lt-bar-fill { height: 100%; background: currentColor; opacity: .7; border-radius: 999px; transition: width .6s ease; }
+.lt-bar-labels { display: flex; justify-content: space-between; font-size: .65rem; opacity: .65; margin-top: .25rem; }
+
+.lt-dates { display: flex; gap: .7rem; flex-wrap: wrap; font-size: .72rem; opacity: .85; }
+.lt-date-item { display: flex; align-items: center; gap: .25rem; }
+.lt-date-due { font-weight: 700; }
+
+.lt-none-icon { font-size: 1.2rem; }
+.lt-none-text { font-size: .85rem; }
+
+@keyframes lt-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .65; }
+}

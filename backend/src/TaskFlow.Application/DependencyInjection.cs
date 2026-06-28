@@ -4,11 +4,13 @@ using TaskFlow.Application.Features.Auth;
 using TaskFlow.Application.Features.Chat;
 using TaskFlow.Application.Features.Comments;
 using TaskFlow.Application.Features.Dashboard;
+using TaskFlow.Application.Features.Departments;
 using TaskFlow.Application.Features.Notifications;
 using TaskFlow.Application.Features.Organization;
 using TaskFlow.Application.Features.Projects;
 using TaskFlow.Application.Features.Reports;
 using TaskFlow.Application.Features.Tasks;
+using TaskFlow.Application.Features.TicketCategories;
 using TaskFlow.Application.Features.Users;
 
 namespace TaskFlow.Application;
@@ -30,6 +32,8 @@ public static class DependencyInjection
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<ITicketCategoryService, TicketCategoryService>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
         return services;
     }
 }

@@ -14,3 +14,19 @@
 .modal-foot { display: flex; justify-content: flex-end; gap: .6rem; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
 .err { background: #fee2e2; color: #b91c1c; padding: .5rem .7rem; border-radius: var(--radius-sm); font-size: .82rem; }
 input[type=color] { width: 60px; height: 38px; padding: 2px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+
+.import-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .55rem 1rem; border-radius: var(--radius-sm); margin-bottom: .75rem;
+  font-size: .84rem; font-weight: 600;
+  background: #dcfce7; color: #15803d;
+  &.has-errors { background: #fef9c3; color: #854d0e; }
+}
+.import-errors {
+  margin-bottom: .75rem; max-height: 200px; overflow-y: auto;
+  .ie-row {
+    padding: .4rem 1rem; font-size: .8rem; color: var(--danger, #dc2626);
+    border-bottom: 1px solid var(--border);
+    &:last-child { border-bottom: none; }
+  }
+}

@@ -14,14 +14,10 @@ public class WorkTask : AuditableEntity
     public TaskType Type { get; set; } = TaskType.Task;
 
     public DateTime? StartDate { get; set; }
-    public DateTime? DueDate { get; set; }
     public DateTime? CompletedAt { get; set; }
 
-    /// <summary>SLA deadline used to flag breaches for incidents/service requests.</summary>
-    public DateTime? SlaDueDate { get; set; }
-
-    public decimal? EstimatedHours { get; set; }
-    public decimal? ActualHours { get; set; }
+    /// <summary>When a technician first accepted/claimed this ticket (set once, never overwritten).</summary>
+    public DateTime? ClaimedAt { get; set; }
 
     /// <summary>Completion percentage 0-100.</summary>
     public int Progress { get; set; }
@@ -35,6 +31,10 @@ public class WorkTask : AuditableEntity
     /// <summary>Branch this ticket concerns (defaults from the reporter's branch).</summary>
     public int? BranchId { get; set; }
     public Branch? Branch { get; set; }
+
+    /// <summary>Service category / technician group this ticket belongs to.</summary>
+    public int? CategoryId { get; set; }
+    public TicketCategory? Category { get; set; }
 
     public int? AssigneeId { get; set; }
     public User? Assignee { get; set; }

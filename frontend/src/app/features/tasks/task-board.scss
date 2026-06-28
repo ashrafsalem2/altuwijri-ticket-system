@@ -1,3 +1,63 @@
+/* ── Filter button ───────────────────────────────────────── */
+.brd-filter-btn {
+  display: flex; align-items: center; gap: .35rem; white-space: nowrap;
+  &.brd-filter-btn-active { border-color: var(--primary); color: var(--primary); }
+}
+.brd-filter-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--primary); color: #fff;
+  min-width: 18px; height: 18px; padding: 0 .3rem;
+  border-radius: 999px; font-size: .67rem; font-weight: 700; line-height: 1;
+}
+
+/* ── Filter bar ──────────────────────────────────────────── */
+.brd-filter-bar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .55rem;
+  padding: .65rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: .75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+.brd-search {
+  width: 200px; min-width: 130px; flex-shrink: 0;
+  padding: .38rem .65rem; font-size: .82rem;
+}
+
+/* Priority pill row */
+.brd-prio-pills {
+  display: flex; align-items: center; gap: .3rem; flex-wrap: wrap;
+}
+.brd-prio-all {
+  background: var(--surface-2); color: var(--text-muted);
+  border: 1px solid var(--border); cursor: pointer;
+  font-size: .72rem; padding: .2rem .6rem;
+  &.brd-pill-active { background: var(--primary); color: #fff; border-color: var(--primary); }
+}
+.brd-prio-pills .badge {
+  cursor: pointer; opacity: .55; transition: opacity .12s, transform .1s;
+  border: 1.5px solid transparent;
+  &:hover    { opacity: .85; transform: translateY(-1px); }
+  &.brd-pill-active { opacity: 1; border-color: rgba(0,0,0,.18); transform: none; box-shadow: 0 0 0 2px rgba(0,0,0,.12); }
+}
+
+.brd-select {
+  padding: .38rem .6rem; font-size: .82rem;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text);
+  cursor: pointer; min-width: 120px;
+}
+
+.brd-filter-end {
+  display: flex; align-items: center; gap: .6rem;
+  margin-inline-start: auto;
+}
+.brd-clear-btn { color: var(--danger); border-color: transparent; font-size: .8rem; }
+.brd-showing { white-space: nowrap; }
+.brd-showing strong { color: var(--primary); }
+
 /* ── Board container ─────────────────────────────────────── */
 .board {
   display: flex;

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Application.Common.Authorization;
 using TaskFlow.Application.Common.Interfaces;
 using TaskFlow.Application.Features.Reports;
 
@@ -35,4 +37,35 @@ public class ReportsController(IReportService reports, ICurrentUserService curre
     [HttpGet("by-user")]
     public async Task<ActionResult<ByUserReportDto>> ByUser(CancellationToken ct)
         => Ok(await reports.GetByUserAsync(ct));
+
+    [HttpGet("by-group")]
+    public async Task<ActionResult<ByGroupReportDto>> ByGroup(CancellationToken ct)
+        => Ok(await reports.GetByGroupAsync(ct));
+
+    [Authorize(Roles = Roles.Admin)]
+    [HttpGet("by-department")]
+    public async Task<ActionResult<ByDepartmentReportDto>> ByDepartment(CancellationToken ct)
+        => Ok(await reports.GetByDepartmentAsync(ct));
+
+    [HttpGet("user/{userId:int}")]
+    public async Task<ActionResult<SingleUserReportDto>> SingleUser(
+        int userId, [FromQuery] DateTime? from, [FromQuery] DateTime? to, CancellationToken ct)
+        => Ok(await reports.GetSingleUserAsync(userId, from, to, ct));
+
+    [HttpGet("task/{taskId:int}")]
+    public async Task<ActionResult<SingleTaskReportDto>> SingleTask(int taskId, CancellationToken ct)
+        => Ok(await reports.GetSingleTaskAsync(taskId, ct));
+
+    [HttpGet("all-tasks")]
+    public async Task<ActionResult<AllTasksReportDto>> AllTasks(
+        [FromQuery] DateTime? from, [FromQuery] DateTime? to, CancellationToken ct)
+        => Ok(await reports.GetAllTasksAsync(from, to, ct));
+
+    [HttpGet("trend")]
+    public async Task<ActionResult<TrendReportDto>> Trend(CancellationToken ct)
+        => Ok(await reports.GetTrendAsync(ct));
+
+    [HttpGet("overdue")]
+    public async Task<ActionResult<OverdueReportDto>> Overdue(CancellationToken ct)
+        => Ok(await reports.GetOverdueAsync(ct));
 }

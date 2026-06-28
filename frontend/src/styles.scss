@@ -1,23 +1,25 @@
 /* ===== Altuwijri Ticket System — global theme ===== */
+/* Primary accent derived from logo color #6b1a1a (deep maroon) */
 :root {
-  --bg: #f1f5f9;
+  --bg: #fdf8f8;
   --surface: #ffffff;
-  --surface-2: #f8fafc;
-  --border: #e2e8f0;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-soft: #dbeafe;
+  --surface-2: #fdf5f5;
+  --border: #e8dede;
+  --text: #1a0808;
+  --text-muted: #7a5858;
+  --primary: #6b1a1a;
+  --primary-dark: #521212;
+  --primary-soft: #fdeaea;
+  --primary-rgb: 107, 26, 26;
   --danger: #dc2626;
   --warning: #d97706;
   --success: #16a34a;
   --radius: 10px;
   --radius-sm: 7px;
-  --shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 1px 2px rgba(15, 23, 42, .06);
-  --shadow-lg: 0 10px 25px rgba(15, 23, 42, .12);
-  --sidebar: #0f172a;
-  --sidebar-muted: #94a3b8;
+  --shadow: 0 1px 3px rgba(107,26,26,.08), 0 1px 2px rgba(15,23,42,.05);
+  --shadow-lg: 0 10px 25px rgba(107,26,26,.14);
+  --sidebar: #1e0606;
+  --sidebar-muted: #c9a0a0;
 }
 
 * { box-sizing: border-box; }
@@ -135,6 +137,13 @@ textarea { resize: vertical; min-height: 90px; }
   border-radius: 50%; animation: spin 0.8s linear infinite; margin: 2rem auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Custom scrollbar — adapts via --primary-rgb (light: 107,26,26 / dark: 192,85,85) ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), .22); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary-rgb), .48); }
+* { scrollbar-width: thin; scrollbar-color: rgba(var(--primary-rgb), .22) transparent; }
+
 /* ----- print: show only report content ----- */
 @media print {
   .sidebar, .topbar, .backdrop, .no-print { display: none !important; }
@@ -142,3 +151,40 @@ textarea { resize: vertical; min-height: 90px; }
   body { background: #fff; }
   @page { margin: 1.4cm; }
 }
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] {
+  --bg: #180808;
+  --surface: #2a1010;
+  --surface-2: #341515;
+  --border: #4a2020;
+  --text: #f0e8e8;
+  --text-muted: #c9a0a0;
+  --primary: #c05555;
+  --primary-dark: #a03838;
+  --primary-soft: #3d1010;
+  --primary-rgb: 192, 85, 85;
+  --sidebar: #180808;            /* overridden with gradient in shell.scss dark block */
+  --sidebar-muted: #a87878;
+  --shadow: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.65);
+}
+[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+[data-theme="dark"] .input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+[data-theme="dark"] .card { background: var(--surface); border-color: var(--border); }
+[data-theme="dark"] .st-Backlog   { background: #1e0a0a; color: #c9a0a0; }
+[data-theme="dark"] .st-ToDo      { background: #312e81; color: #a5b4fc; }
+[data-theme="dark"] .st-InProgress{ background: #1e3a8a; color: #93c5fd; }
+[data-theme="dark"] .st-InReview  { background: #78350f; color: #fcd34d; }
+[data-theme="dark"] .st-Blocked   { background: #7f1d1d; color: #fca5a5; }
+[data-theme="dark"] .st-Done      { background: #14532d; color: #86efac; }
+[data-theme="dark"] .st-Cancelled { background: #1e0a0a; color: #7a5858; }
+[data-theme="dark"] .prio-Low     { background: #1e0a0a; color: #c9a0a0; }
+[data-theme="dark"] .prio-Medium  { background: #0c4a6e; color: #7dd3fc; }
+[data-theme="dark"] .prio-High    { background: #431407; color: #fdba74; }
+[data-theme="dark"] .prio-Critical{ background: #7f1d1d; color: #fca5a5; }
+[data-theme="dark"] .avail-toggle.on { background: #14532d; border-color: #166534; color: #86efac; }
+[data-theme="dark"] .type-cell { background: var(--surface-2); border-color: var(--border); }
+[data-theme="dark"] .type-cell:hover { background: var(--primary-soft); }

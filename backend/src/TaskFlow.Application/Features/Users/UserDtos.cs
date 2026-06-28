@@ -6,7 +6,8 @@ public record UserDto(
     string Email,
     string FullName,
     string? JobTitle,
-    string? Department,
+    int? DepartmentId,
+    string? DepartmentName,
     string? PhoneNumber,
     string? AvatarColor,
     bool IsActive,
@@ -16,6 +17,10 @@ public record UserDto(
     int? BranchId,
     string? BranchName,
     string? AreaName,
+    List<int> CategoryIds,
+    List<string> CategoryNames,
+    List<int> BranchIds,
+    List<string> BranchNames,
     DateTime? LastLoginAt,
     DateTime CreatedAt);
 
@@ -26,8 +31,10 @@ public record CreateUserRequest(
     string Password,
     int RoleId,
     int? BranchId,
+    List<int>? CategoryIds,
+    List<int>? BranchIds,
     string? JobTitle,
-    string? Department,
+    int? DepartmentId,
     string? PhoneNumber);
 
 public record UpdateUserRequest(
@@ -35,8 +42,10 @@ public record UpdateUserRequest(
     string Email,
     int RoleId,
     int? BranchId,
+    List<int>? CategoryIds,
+    List<int>? BranchIds,
     string? JobTitle,
-    string? Department,
+    int? DepartmentId,
     string? PhoneNumber,
     bool IsActive);
 

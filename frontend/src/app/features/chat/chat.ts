@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { ChatService } from '../../core/services/data.services';
@@ -113,9 +113,12 @@ import { initials, timeAgo } from '../../shared/util';
         <div class="modal-head"><h3>{{ 'chat.startTitle' | t }}</h3><button class="btn btn-icon btn-ghost" (click)="showNew.set(false)">✕</button></div>
         <div class="modal-body">
           <div class="field"><label>{{ 'chat.subject' | t }}</label><input class="input" [(ngModel)]="newSubject" placeholder="{{ 'chat.subjectPlaceholder' | t }}" /></div>
+          <div class="field mt-1">
+            <input class="input" [(ngModel)]="techSearch" [placeholder]="'chat.searchUser' | t" />
+          </div>
           <label class="text-sm muted">{{ 'chat.availTechs' | t }}</label>
           <div class="tech-list">
-            @for (t of technicians(); track t.id) {
+            @for (t of filteredTechs(); track t.id) {
               <button class="tech-item" [class.on]="selectedTech === t.id" (click)="selectedTech = t.id">
                 <div class="conv-avatar-wrap">
                   <span class="avatar" [style.background]="t.avatarColor || '#64748b'" [class.offline]="!t.isAvailable">{{ ini(t.fullName) }}</span>
@@ -153,7 +156,13 @@ export class Chat implements OnInit, OnDestroy {
   error = signal('');
   draft = '';
   newSubject = '';
+  techSearch = '';
   selectedTech?: number;
+
+  filteredTechs = computed(() => {
+    const s = this.techSearch.trim().toLowerCase();
+    return s ? this.technicians().filter(t => t.fullName.toLowerCase().includes(s)) : this.technicians();
+  });
   private poll?: any;
 
   /** Availability map: userId -> isAvailable */
@@ -161,8 +170,12 @@ export class Chat implements OnInit, OnDestroy {
 
   ini = initials; ago = timeAgo;
 
-  ngOnInit() {
-    this.loadConversations();
+  ngOnInit() { this.initChat(); }
+  ngOnDestroy() { clearInterval(this.poll); }
+
+  private initChat() {
+    clearInterval(this.poll);
+    this.loadConversations(true);
     this.loadAvailability();
     this.poll = setInterval(() => {
       this.loadConversations(false);
@@ -170,7 +183,6 @@ export class Chat implements OnInit, OnDestroy {
       if (this.active()) this.loadMessages(this.active()!.id);
     }, 5000);
   }
-  ngOnDestroy() { clearInterval(this.poll); }
 
   private me() { return this.auth.user()?.id; }
 
@@ -195,7 +207,11 @@ export class Chat implements OnInit, OnDestroy {
       this.conversations.set(cs);
       const cur = this.active();
       if (cur) { const upd = cs.find(c => c.id === cur.id); if (upd) this.active.set(upd); }
-      else if (selectFirst && cs.length) this.select(cs[0]);
+      else if (selectFirst && cs.length) {
+        // Prefer the conversation that has unread messages, fallback to most recent
+        const withUnread = cs.find(c => c.unreadCount > 0);
+        this.select(withUnread ?? cs[0]);
+      }
     });
   }
 
@@ -204,6 +220,8 @@ export class Chat implements OnInit, OnDestroy {
   loadMessages(id: number) {
     this.chatSvc.messages(id).subscribe(m => {
       this.messages.set(m);
+      // Backend marks messages as read on GET; refresh badge immediately
+      this.chatSvc.refreshUnread();
       setTimeout(() => { const el = document.querySelector('.msgs'); if (el) el.scrollTop = el.scrollHeight; });
     });
   }
@@ -222,7 +240,7 @@ export class Chat implements OnInit, OnDestroy {
   close(c: Conversation) { this.chatSvc.close(c.id).subscribe(() => this.loadConversations(false)); }
 
   openNew() {
-    this.error.set(''); this.newSubject = ''; this.selectedTech = undefined;
+    this.error.set(''); this.newSubject = ''; this.techSearch = ''; this.selectedTech = undefined;
     this.chatSvc.technicians(false).subscribe(t => {
       this.technicians.set(t.filter(x => x.id !== this.me()));
       t.forEach(x => this.availMap.set(x.id, x.isAvailable));

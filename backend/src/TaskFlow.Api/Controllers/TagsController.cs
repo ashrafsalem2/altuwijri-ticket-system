@@ -12,17 +12,17 @@ public class TagsController(ITagService tags) : ApiControllerBase
     public async Task<ActionResult<IReadOnlyList<TagDto>>> GetAll(CancellationToken ct)
         => Ok(await tags.GetAllAsync(ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     public async Task<ActionResult<TagDto>> Create(CreateTagRequest request, CancellationToken ct)
         => Ok(await tags.CreateAsync(request, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<TagDto>> Update(int id, UpdateTagRequest request, CancellationToken ct)
         => Ok(await tags.UpdateAsync(id, request, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

@@ -10,8 +10,10 @@ public class User : AuditableEntity
     public string FullName { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     public string? JobTitle { get; set; }
-    public string? Department { get; set; }
     public string? PhoneNumber { get; set; }
+
+    public int? DepartmentId { get; set; }
+    public Department? Department { get; set; }
     public string? AvatarColor { get; set; }
     public bool IsActive { get; set; } = true;
     /// <summary>Whether a technician is currently available for live chat/assignment.</summary>
@@ -24,6 +26,12 @@ public class User : AuditableEntity
     /// <summary>Branch the user (or ticket issuer) belongs to. Null for global/admin accounts.</summary>
     public int? BranchId { get; set; }
     public Branch? Branch { get; set; }
+
+    /// <summary>For Technicians: the service groups/categories they handle (many-to-many).</summary>
+    public ICollection<UserCategory> Categories { get; set; } = new List<UserCategory>();
+
+    /// <summary>For Cam-Employee: all branches they belong to (many-to-many).</summary>
+    public ICollection<UserBranch> Branches { get; set; } = new List<UserBranch>();
 
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<WorkTask> AssignedTasks { get; set; } = new List<WorkTask>();

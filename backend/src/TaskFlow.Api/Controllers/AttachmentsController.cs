@@ -13,7 +13,7 @@ public class AttachmentsController(IAttachmentService attachments) : ApiControll
     public async Task<ActionResult<IReadOnlyList<AttachmentDto>>> GetForTask(int taskId, CancellationToken ct)
         => Ok(await attachments.GetForTaskAsync(taskId, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician},{Roles.Employee}")]
+    [Authorize(Roles = Roles.AllRoles)]
     [HttpPost("upload")]
     [RequestSizeLimit(26_214_400)] // 25 MB
     public async Task<ActionResult<AttachmentDto>> Upload(int taskId, IFormFile file, CancellationToken ct)
@@ -25,7 +25,7 @@ public class AttachmentsController(IAttachmentService attachments) : ApiControll
         return Ok(dto);
     }
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician},{Roles.Employee}")]
+    [Authorize(Roles = Roles.AllRoles)]
     [HttpPost("link")]
     public async Task<ActionResult<AttachmentDto>> AddLink(int taskId, AddLinkRequest request, CancellationToken ct)
         => Ok(await attachments.AddLinkAsync(taskId, request, ct));
@@ -37,7 +37,7 @@ public class AttachmentsController(IAttachmentService attachments) : ApiControll
         return File(f.Content, f.ContentType, f.FileName);
     }
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician},{Roles.Employee}")]
+    [Authorize(Roles = Roles.AllRoles)]
     [HttpDelete("{attachmentId:int}")]
     public async Task<IActionResult> Delete(int taskId, int attachmentId, CancellationToken ct)
     {

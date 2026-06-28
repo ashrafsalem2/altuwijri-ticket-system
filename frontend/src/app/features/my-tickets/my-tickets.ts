@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { TaskService } from '../../core/services/task.service';
@@ -48,7 +48,7 @@ const FILTER_STATUSES: Record<EmpFilter, WorkTaskStatus[] | null> = {
   <div class="page" [attr.dir]="i18n.dir()">
     <div class="page-header">
       <h2>{{ 'myt.title' | t }}</h2>
-      <button class="btn btn-primary" (click)="openForm()">{{ 'myt.new' | t }}</button>
+      <button class="btn btn-primary" (click)="newTicket()">{{ 'myt.new' | t }}</button>
     </div>
 
     <!-- Search + filter chips -->
@@ -77,7 +77,8 @@ const FILTER_STATUSES: Record<EmpFilter, WorkTaskStatus[] | null> = {
               <div class="tr-info">
                 <span class="tr-title">{{ t.title }}</span>
                 <span class="tr-meta text-sm muted">
-                  #{{ t.id }} · {{ t.dueDate ? (t.dueDate | date:'mediumDate') : ('lt.noDeadline' | t) }}
+                  #{{ t.id }}
+                  @if (t.startDate) { · {{ t.startDate | date:'mediumDate' }} }
                   @if (t.assigneeName) { · {{ t.assigneeName }} }
                 </span>
               </div>
@@ -227,6 +228,7 @@ export class MyTickets implements OnInit {
   private taskSvc = inject(TaskService);
   private chatSvc = inject(ChatService);
   private attSvc = inject(AttachmentService);
+  private router = inject(Router);
   i18n = inject(I18nService);
 
   allTickets = signal<TaskListItem[]>([]);
@@ -294,7 +296,7 @@ export class MyTickets implements OnInit {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
     if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
       e.preventDefault();
-      if (!this.showForm()) this.openForm();
+      if (!this.showForm()) this.newTicket();
     }
     if (e.key === 'Escape' && this.showForm()) this.closeForm();
   }
@@ -315,6 +317,8 @@ export class MyTickets implements OnInit {
   setFilter(f: EmpFilter) { this.activeFilter.set(f); this._page.set(1); }
   applySearch() { this._page.set(1); }
   goPage(p: number) { this._page.set(Math.max(1, Math.min(p, this.totalPages()))); }
+
+  newTicket() { this.router.navigate(['/new-ticket']); }
 
   openForm() {
     this.form = { title: '', description: '', priority: 'Medium', assigneeId: null };

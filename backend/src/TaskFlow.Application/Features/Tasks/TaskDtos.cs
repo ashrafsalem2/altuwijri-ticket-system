@@ -9,22 +9,25 @@ public record TaskListItemDto(
     WorkTaskStatus Status,
     TaskPriority Priority,
     TaskType Type,
-    DateTime? DueDate,
-    DateTime? SlaDueDate,
     int Progress,
     int BoardOrder,
+    DateTime? StartDate,
     int ProjectId,
     string ProjectName,
     string ProjectColor,
     int? BranchId,
     string? BranchName,
+    int? CategoryId,
+    string? CategoryName,
+    string? CategoryIcon,
+    string? CategoryColor,
     int? AssigneeId,
     string? AssigneeName,
     string? AssigneeColor,
     int SubTaskCount,
     int CommentCount,
     IReadOnlyList<TagDto> Tags,
-    bool IsOverdue);
+    DateTime CreatedAt);
 
 public record TaskDetailDto(
     int Id,
@@ -34,16 +37,17 @@ public record TaskDetailDto(
     TaskPriority Priority,
     TaskType Type,
     DateTime? StartDate,
-    DateTime? DueDate,
     DateTime? CompletedAt,
-    DateTime? SlaDueDate,
-    decimal? EstimatedHours,
-    decimal? ActualHours,
+    DateTime? ClaimedAt,
     int Progress,
     int ProjectId,
     string ProjectName,
     int? BranchId,
     string? BranchName,
+    int? CategoryId,
+    string? CategoryName,
+    string? CategoryIcon,
+    string? CategoryColor,
     int? AssigneeId,
     string? AssigneeName,
     int? ReporterId,
@@ -63,11 +67,8 @@ public record CreateTaskRequest(
     TaskType Type,
     int ProjectId,
     int? BranchId,
+    int? CategoryId,
     int? AssigneeId,
-    DateTime? StartDate,
-    DateTime? DueDate,
-    DateTime? SlaDueDate,
-    decimal? EstimatedHours,
     int? ParentTaskId,
     IReadOnlyList<int>? TagIds);
 
@@ -79,17 +80,15 @@ public record UpdateTaskRequest(
     TaskType Type,
     int ProjectId,
     int? BranchId,
+    int? CategoryId,
     int? AssigneeId,
-    DateTime? StartDate,
-    DateTime? DueDate,
-    DateTime? SlaDueDate,
-    decimal? EstimatedHours,
-    decimal? ActualHours,
     int Progress,
     IReadOnlyList<int>? TagIds);
 
 /// <summary>Payload for drag-and-drop moves on the Kanban board.</summary>
 public record MoveTaskRequest(WorkTaskStatus Status, int BoardOrder);
+
+/// <summary>Filtering/sorting options including category.</summary>
 
 public record TagDto(int Id, string Name, string Color, string? Icon);
 
@@ -106,8 +105,8 @@ public class TaskQuery
     public TaskType? Type { get; set; }
     public int? ProjectId { get; set; }
     public int? BranchId { get; set; }
+    public int? CategoryId { get; set; }
     public int? AssigneeId { get; set; }
-    public bool? Overdue { get; set; }
     public string? SortBy { get; set; }
     public bool SortDescending { get; set; }
     public int Page { get; set; } = 1;

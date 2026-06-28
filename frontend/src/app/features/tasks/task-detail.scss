@@ -30,6 +30,9 @@
 
 .meta-divider { height: 1px; background: var(--border); margin: .8rem 0; }
 
+.cat-meta-chip { font-size: .8rem; font-weight: 600; padding: .15rem .5rem; border-radius: 999px; }
+.resp-time-badge { font-size: .8rem; font-weight: 600; color: var(--primary); }
+
 /* Handler sidebar banner */
 .handler-banner {
   border-radius: 10px; border: 1.5px solid #fbbf24;

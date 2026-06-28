@@ -9,90 +9,39 @@ export const TYPE_ICONS: Record<TaskType, string> = {
 /** Type icon with fallback. */
 export function typeIcon(t: TaskType | undefined): string { return t ? TYPE_ICONS[t] : '📋'; }
 
-// ── Working-hours helpers (09:00–18:00, every day) ──────────────────────────
-
-const WH_START = 9;  // 9 AM
-const WH_END   = 18; // 6 PM
-const WH_MINS_PER_DAY = (WH_END - WH_START) * 60; // 540 min
-
-/** Count working minutes between two dates (9 AM–6 PM every day). */
-function workingMins(from: Date, to: Date): number {
-  if (from >= to) return 0;
-  let mins = 0;
-  const cur = new Date(from);
-
-  // Advance cursor into working hours if it starts outside them
-  const snapIn = (d: Date) => {
-    const hm = d.getHours() * 60 + d.getMinutes();
-    if (hm < WH_START * 60) {
-      d.setHours(WH_START, 0, 0, 0);
-    } else if (hm >= WH_END * 60) {
-      d.setDate(d.getDate() + 1);
-      d.setHours(WH_START, 0, 0, 0);
-    }
-  };
-  snapIn(cur);
-
-  while (cur < to) {
-    const eod = new Date(cur);
-    eod.setHours(WH_END, 0, 0, 0);
-    const until = to < eod ? to : eod;
-    const delta = (until.getTime() - cur.getTime()) / 60000;
-    if (delta > 0) mins += delta;
-    if (until >= eod) {
-      cur.setDate(cur.getDate() + 1);
-      cur.setHours(WH_START, 0, 0, 0);
-    } else break;
-  }
-  return mins;
-}
-
-function fmtWorkMins(m: number): string {
-  const a = Math.round(Math.abs(m));
-  const d = Math.floor(a / WH_MINS_PER_DAY);
-  const h = Math.floor((a % WH_MINS_PER_DAY) / 60);
-  if (d >= 1) return h > 0 ? `${d}d ${h}h` : `${d}d`;
-  if (h >= 1) return `${h}h`;
-  return '< 1h';
+function fmtDuration(from: Date, to: Date): string {
+  const ms = Math.max(0, to.getTime() - from.getTime());
+  const totalMins = Math.floor(ms / 60000);
+  const days = Math.floor(totalMins / (24 * 60));
+  const hours = Math.floor((totalMins % (24 * 60)) / 60);
+  const mins = totalMins % 60;
+  if (days >= 1) return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
+  if (hours >= 1) return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  if (totalMins < 1) return '< 1m';
+  return `${totalMins}m`;
 }
 
 /**
- * Compute ticket lifetime info using working hours (9 AM–6 PM).
- * @param startDate  When work officially began (acceptance/start-work timestamp).
- *                   Falls back to createdAt for the progress bar reference.
+ * Informative elapsed-time counter for a ticket.
+ * - pending: work not started yet
+ * - running: started, still active — shows elapsed since startDate
+ * - done: shows total duration startDate → completedAt
+ * - cancelled: no time shown
  */
-export function lifetime(
-  dueDate?: string | null,
-  status?: string | null,
-  createdAt?: string,
+export function elapsed(
   startDate?: string | null,
-) {
-  if (status === 'Done' || status === 'Cancelled') return { kind: status, label: '', pct: 100, color: '' };
-  if (!dueDate) return { kind: 'none', label: '', pct: 0, color: '' };
-
-  const now  = new Date();
-  const due  = new Date(dueDate);
-  const overdue = now > due;
-
-  const label = overdue
-    ? fmtWorkMins(workingMins(due, now))
-    : fmtWorkMins(workingMins(now, due));
-
-  // Progress bar: elapsed / total working minutes from start → due
-  const ref = startDate ? new Date(startDate) : createdAt ? new Date(createdAt) : null;
-  const totalW   = ref ? workingMins(ref, due) : 0;
-  const elapsedW = ref ? workingMins(ref, overdue ? due : now) : 0;
-  const pct = totalW > 0 ? Math.min(100, Math.max(0, Math.round(elapsedW / totalW * 100))) : overdue ? 100 : 50;
-
-  // Color thresholds in working minutes
-  const remW = overdue ? 0 : workingMins(now, due);
-  const color = overdue        ? 'red'
-    : remW <= 60               ? 'red'    // < 1 working hour
-    : remW <= WH_MINS_PER_DAY  ? 'amber'  // < 1 working day
-    : remW <= 3 * WH_MINS_PER_DAY ? 'yellow' // < 3 working days
-    : 'green';
-
-  return { kind: overdue ? 'overdue' : 'future', label, pct, color };
+  status?: string | null,
+  completedAt?: string | null,
+): { kind: string; label: string } {
+  if (status === 'Done') {
+    const label = startDate && completedAt
+      ? fmtDuration(new Date(startDate), new Date(completedAt))
+      : '';
+    return { kind: 'done', label };
+  }
+  if (status === 'Cancelled') return { kind: 'cancelled', label: '' };
+  if (!startDate) return { kind: 'pending', label: '' };
+  return { kind: 'running', label: fmtDuration(new Date(startDate), new Date()) };
 }
 
 /** Initials from a full name, e.g. "Maya Manager" -> "MM". */

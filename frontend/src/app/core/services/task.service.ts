@@ -9,7 +9,7 @@ import {
 
 export interface TaskQuery {
   search?: string; status?: WorkTaskStatus; statuses?: WorkTaskStatus[]; priority?: string; type?: string;
-  projectId?: number; branchId?: number; assigneeId?: number; overdue?: boolean;
+  projectId?: number; branchId?: number; categoryId?: number; assigneeId?: number;
   sortBy?: string; sortDescending?: boolean; page?: number; pageSize?: number;
 }
 
@@ -43,6 +43,7 @@ export class TaskService {
   move(id: number, status: WorkTaskStatus, boardOrder: number): Observable<void> {
     return this.http.patch<void>(`${this.base}/${id}/move`, { status, boardOrder });
   }
+  claim(id: number): Observable<void> { return this.http.post<void>(`${this.base}/${id}/claim`, {}); }
   delete(id: number): Observable<void> { return this.http.delete<void>(`${this.base}/${id}`); }
 
   comments(taskId: number): Observable<Comment[]> { return this.http.get<Comment[]>(`${this.base}/${taskId}/comments`); }

@@ -30,15 +30,15 @@ import { initials, typeIcon } from '../../shared/util';
       <input class="input" placeholder="{{ 'task.search' | t }}" [(ngModel)]="q.search" (keyup.enter)="apply()" />
       <select [(ngModel)]="q.status" (ngModelChange)="apply()">
         <option [ngValue]="undefined">{{ 'task.allStatuses' | t }}</option>
-        @for (s of statuses; track s) { <option [ngValue]="s">{{ label(s) }}</option> }
+        @for (s of statuses; track s) { <option [ngValue]="s">{{ 'st.' + s | t }}</option> }
       </select>
       <select [(ngModel)]="q.priority" (ngModelChange)="apply()">
         <option [ngValue]="undefined">{{ 'task.allPriorities' | t }}</option>
-        @for (p of priorities; track p) { <option [ngValue]="p">{{ p }}</option> }
+        @for (p of priorities; track p) { <option [ngValue]="p">{{ 'pr.' + p | t }}</option> }
       </select>
       <select [(ngModel)]="q.type" (ngModelChange)="apply()">
         <option [ngValue]="undefined">{{ 'task.allTypes' | t }}</option>
-        @for (t of types; track t) { <option [ngValue]="t">{{ icon(t) }} {{ typeLabel(t) }}</option> }
+        @for (t of types; track t) { <option [ngValue]="t">{{ icon(t) }} {{ 'ty.' + t | t }}</option> }
       </select>
       <select [(ngModel)]="q.projectId" (ngModelChange)="apply()">
         <option [ngValue]="undefined">{{ 'task.allProjects' | t }}</option>
@@ -54,7 +54,6 @@ import { initials, typeIcon } from '../../shared/util';
           @for (u of users(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
         </select>
       }
-      <label class="chk"><input type="checkbox" [(ngModel)]="q.overdue" (ngModelChange)="apply()" /> {{ 'task.overdueOnly' | t }}</label>
     </div>
 
     <div class="card mt-2">
@@ -68,23 +67,23 @@ import { initials, typeIcon } from '../../shared/util';
             <th>{{ 'task.priority' | t }}</th>
             <th>{{ 'task.type' | t }}</th>
             <th>{{ 'task.assignee' | t }}</th>
-            <th (click)="sort('duedate')">{{ 'task.due' | t }}</th>
+            <th>{{ 'task.elapsed' | t }}</th>
           </tr></thead>
           <tbody>
             @for (t of page()?.items; track t.id) {
               <tr>
                 <td><a [routerLink]="['/tasks', t.id]" class="t-title" dir="auto">{{ t.title }}</a></td>
                 <td><span class="proj-dot" [style.background]="t.projectColor"></span> {{ t.projectName }}</td>
-                <td><span class="badge" [class]="'st-' + t.status">{{ label(t.status) }}</span></td>
-                <td><span class="badge" [class]="'prio-' + t.priority">{{ t.priority }}</span></td>
-                <td class="text-sm"><span class="type-em">{{ icon(t.type) }}</span> {{ typeLabel(t.type) }}</td>
+                <td><span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span></td>
+                <td><span class="badge" [class]="'prio-' + t.priority">{{ 'pr.' + t.priority | t }}</span></td>
+                <td class="text-sm"><span class="type-em">{{ icon(t.type) }}</span> {{ 'ty.' + t.type | t }}</td>
                 <td>
                   @if (t.assigneeName) {
                     <span class="flex items-center gap-1"><span class="avatar sm" [style.background]="t.assigneeColor || '#64748b'">{{ ini(t.assigneeName) }}</span> <span class="text-sm">{{ t.assigneeName }}</span></span>
                   } @else { <span class="muted text-sm">{{ 'task.unassigned' | t }}</span> }
                 </td>
                 <td>
-                  <app-ticket-lifetime [dueDate]="t.dueDate" [status]="t.status" [showEmpty]="true"></app-ticket-lifetime>
+                  <app-ticket-lifetime [startDate]="t.startDate" [status]="t.status" [completedAt]="undefined" [showEmpty]="false"></app-ticket-lifetime>
                 </td>
               </tr>
             } @empty { <tr><td colspan="7"><div class="empty">{{ 'task.noMatch' | t }}</div></td></tr> }
@@ -129,7 +128,7 @@ export class TaskList implements OnInit {
   icon = (t: TaskType) => typeIcon(t);
   label = (s: WorkTaskStatus) => STATUS_LABELS[s];
   typeLabel = (t: TaskType) => TYPE_LABELS[t];
-  canEdit = () => this.auth.hasRole('Admin', 'Manager', 'Technician');
+  canEdit = () => this.auth.hasRole('Admin', 'Technician');
   isTechnician = () => this.auth.user()?.role === 'Technician';
 
   ngOnInit() {
@@ -143,8 +142,6 @@ export class TaskList implements OnInit {
     if (params['priority']) this.q.priority = params['priority'];
     if (params['type']) this.q.type = params['type'];
     if (params['assigneeId']) this.q.assigneeId = Number(params['assigneeId']);
-    if (params['overdue'] === 'true') this.q.overdue = true;
-
     this.projectSvc.getAll().subscribe(p => this.projects.set(p));
     this.userSvc.getAll().subscribe(u => this.users.set(u));
     this.orgSvc.getBranches().subscribe(b => this.branches.set(b));

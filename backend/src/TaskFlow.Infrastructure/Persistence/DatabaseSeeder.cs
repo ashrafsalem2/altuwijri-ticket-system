@@ -23,12 +23,104 @@ public static class DatabaseSeeder
         await db.Database.MigrateAsync();
 
         await SeedRolesAsync(db);
+        await MigrateOldRolesAsync(db);   // one-time: move old roles to new equivalents
         await SeedAreasAndBranchesAsync(db);
+        await SeedDepartmentsAsync(db);
+        await SeedTicketCategoriesAsync(db);
+        await MigrateTicketCategoryDefaultTypesAsync(db);
         await SeedUsersAsync(db, hasher);
         await SeedTagsAsync(db);
         await SeedProjectsAndTasksAsync(db);
 
         logger.LogInformation("Database seeding complete.");
+    }
+
+    /// <summary>
+    /// One-time migration: reassign users that still carry the removed Manager / Viewer / Employee roles
+    /// to their closest new equivalents. Idempotent — does nothing once every user has a current role.
+    /// </summary>
+    private static async Task MigrateOldRolesAsync(ApplicationDbContext db)
+    {
+        var allRoles = await db.Roles.ToDictionaryAsync(r => r.Name, r => r.Id);
+
+        // Map old role names → new role names
+        var mapping = new Dictionary<string, string>
+        {
+            ["Employee"] = Roles.BranchEmployee,   // Employee → Branch-Employee
+            ["Viewer"]   = Roles.BranchEmployee,   // Viewer   → Branch-Employee (read-only removed)
+            ["Manager"]  = Roles.HoEmployee,       // Manager  → HO-Employee (no branch panel, similar access)
+        };
+
+        foreach (var (oldName, newName) in mapping)
+        {
+            if (!allRoles.TryGetValue(oldName, out var oldId)) continue;
+            if (!allRoles.TryGetValue(newName, out var newId)) continue;
+
+            var staleUsers = await db.Users.IgnoreQueryFilters()
+                .Where(u => u.RoleId == oldId).ToListAsync();
+            foreach (var u in staleUsers) u.RoleId = newId;
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedDepartmentsAsync(ApplicationDbContext db)
+    {
+        if (await db.Departments.AnyAsync()) return;
+        db.Departments.AddRange(
+            new Department { Name = "IT",             Code = "IT",     Description = "Information Technology" },
+            new Department { Name = "Infrastructure", Code = "INFRA",  Description = "Network and infrastructure" },
+            new Department { Name = "Support",        Code = "SUP",    Description = "Help desk and support" },
+            new Department { Name = "Operations",     Code = "OPS",    Description = "Branch operations" },
+            new Department { Name = "Finance",        Code = "FIN",    Description = "Finance and accounting" },
+            new Department { Name = "Compliance",     Code = "COMP",   Description = "Compliance and audit" }
+        );
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedTicketCategoriesAsync(ApplicationDbContext db)
+    {
+        if (await db.TicketCategories.AnyAsync()) return;
+        var categories = new[]
+        {
+            new TicketCategory { Name = "Technical Support",          Description = "Hardware, software, and general IT issues.",         Icon = "🔧", Color = "#3b82f6", DisplayOrder = 1, IsActive = true, DefaultType = TaskType.Incident        },
+            new TicketCategory { Name = "Network & Connectivity",     Description = "Internet, VPN, and network access problems.",        Icon = "🌐", Color = "#06b6d4", DisplayOrder = 2, IsActive = true, DefaultType = TaskType.Incident        },
+            new TicketCategory { Name = "Software & Applications",    Description = "Application crashes, installation, and licensing.",  Icon = "💻", Color = "#8b5cf6", DisplayOrder = 3, IsActive = true, DefaultType = TaskType.Bug             },
+            new TicketCategory { Name = "Account & Access",           Description = "Password resets, permissions, and user accounts.",   Icon = "🔐", Color = "#f59e0b", DisplayOrder = 4, IsActive = true, DefaultType = TaskType.ServiceRequest  },
+            new TicketCategory { Name = "Preventive Maintenance",     Description = "Scheduled maintenance and hardware inspections.",    Icon = "🛡", Color = "#22c55e", DisplayOrder = 5, IsActive = true, DefaultType = TaskType.Maintenance     },
+            new TicketCategory { Name = "Report a Problem",           Description = "General issues or bugs to investigate.",            Icon = "🐛", Color = "#ef4444", DisplayOrder = 6, IsActive = true, DefaultType = TaskType.Bug             },
+            new TicketCategory { Name = "Request a New Feature",      Description = "Suggest enhancements or new functionality.",        Icon = "✨", Color = "#ec4899", DisplayOrder = 7, IsActive = true, DefaultType = TaskType.Feature         },
+            new TicketCategory { Name = "Integration & Development",  Description = "API integrations, custom development, and R&D.",    Icon = "⚙️", Color = "#64748b", DisplayOrder = 8, IsActive = true, DefaultType = TaskType.Change          },
+        };
+        db.TicketCategories.AddRange(categories);
+        await db.SaveChangesAsync();
+    }
+
+    /// <summary>Back-fills DefaultType on categories that were seeded before this field existed.</summary>
+    private static async Task MigrateTicketCategoryDefaultTypesAsync(ApplicationDbContext db)
+    {
+        var mapping = new Dictionary<string, TaskType>
+        {
+            ["Technical Support"]         = TaskType.Incident,
+            ["Network & Connectivity"]    = TaskType.Incident,
+            ["Software & Applications"]   = TaskType.Bug,
+            ["Account & Access"]          = TaskType.ServiceRequest,
+            ["Preventive Maintenance"]    = TaskType.Maintenance,
+            ["Report a Problem"]          = TaskType.Bug,
+            ["Request a New Feature"]     = TaskType.Feature,
+            ["Integration & Development"] = TaskType.Change,
+        };
+
+        var needsUpdate = await db.TicketCategories
+            .Where(c => c.DefaultType == null)
+            .ToListAsync();
+
+        foreach (var cat in needsUpdate)
+            if (mapping.TryGetValue(cat.Name, out var type))
+                cat.DefaultType = type;
+
+        if (needsUpdate.Any(c => c.DefaultType != null))
+            await db.SaveChangesAsync();
     }
 
     private static async Task SeedRolesAsync(ApplicationDbContext db)
@@ -37,11 +129,11 @@ public static class DatabaseSeeder
         var existing = await db.Roles.Select(r => r.Name).ToHashSetAsync();
         var toAdd = new[]
         {
-            new Role { Name = Roles.Admin,       Description = "Full system administration." },
-            new Role { Name = Roles.Manager,     Description = "Manage projects, tasks and people." },
-            new Role { Name = Roles.Technician,  Description = "Work on and update assigned tasks." },
-            new Role { Name = Roles.Viewer,      Description = "Read-only access." },
-            new Role { Name = Roles.Employee,    Description = "Branch employee — submit and track support tickets." }
+            new Role { Name = Roles.Admin,          Description = "Full system administration." },
+            new Role { Name = Roles.Technician,     Description = "Work on and update assigned tasks." },
+            new Role { Name = Roles.BranchEmployee, Description = "Branch employee — submit and track tickets, sees branch card." },
+            new Role { Name = Roles.HoEmployee,     Description = "Head-office employee — same as Branch-Employee but no branch panel." },
+            new Role { Name = Roles.CamEmployee,    Description = "Camera/multi-site employee — belongs to multiple branches, no branch panel." },
         }.Where(r => !existing.Contains(r.Name)).ToList();
         if (toAdd.Count == 0) return;
         db.Roles.AddRange(toAdd);
@@ -69,41 +161,38 @@ public static class DatabaseSeeder
     {
         // Always ensure employee demo accounts exist, even on an already-seeded database
         var existingUserNames = await db.Users.IgnoreQueryFilters().Select(u => u.UserName).ToHashSetAsync();
-        if (existingUserNames.Count > 0 && existingUserNames.IsSupersetOf(new[] { "emp1", "emp2" })) return;
+        if (existingUserNames.Count > 0 && existingUserNames.IsSupersetOf(new[] { "emp1", "emp2", "emp3" })) return;
         if (!await db.Users.IgnoreQueryFilters().AnyAsync())
             existingUserNames = new HashSet<string>();
 
-        var roles = await db.Roles.ToDictionaryAsync(r => r.Name, r => r.Id);
+        var roles    = await db.Roles.ToDictionaryAsync(r => r.Name, r => r.Id);
         var branches = await db.Branches.ToDictionaryAsync(br => br.Code, br => br.Id);
+        var depts    = await db.Departments.ToDictionaryAsync(d => d.Name, d => d.Id);
+        int? D(string name) => depts.TryGetValue(name, out var id) ? id : null;
+
         var users = new[]
         {
             new User { UserName = "admin", Email = "admin@itdept.local", FullName = "System Administrator",
-                RoleId = roles[Roles.Admin], JobTitle = "IT Director", Department = "IT", AvatarColor = "#3b82f6",
+                RoleId = roles[Roles.Admin], JobTitle = "IT Director", DepartmentId = D("IT"), AvatarColor = "#3b82f6",
                 BranchId = branches["HQ"], PasswordHash = hasher.Hash("Admin@123") },
-            new User { UserName = "mmanager", Email = "manager@itdept.local", FullName = "Maya Manager",
-                RoleId = roles[Roles.Manager], JobTitle = "IT Operations Manager", Department = "IT", AvatarColor = "#8b5cf6",
-                BranchId = branches["HQ"], PasswordHash = hasher.Hash("Manager@123") },
             new User { UserName = "ttech", Email = "tech@itdept.local", FullName = "Tariq Technician",
-                RoleId = roles[Roles.Technician], JobTitle = "Systems Engineer", Department = "Infrastructure", AvatarColor = "#22c55e",
+                RoleId = roles[Roles.Technician], JobTitle = "Systems Engineer", DepartmentId = D("Infrastructure"), AvatarColor = "#22c55e",
                 BranchId = branches["HQ"], IsAvailable = true, PasswordHash = hasher.Hash("Tech@123") },
             new User { UserName = "sara", Email = "sara@itdept.local", FullName = "Sara Helpdesk",
-                RoleId = roles[Roles.Technician], JobTitle = "Helpdesk Analyst", Department = "Support", AvatarColor = "#f97316",
+                RoleId = roles[Roles.Technician], JobTitle = "Helpdesk Analyst", DepartmentId = D("Support"), AvatarColor = "#f97316",
                 BranchId = branches["DT"], IsAvailable = true, PasswordHash = hasher.Hash("Tech@123") },
             new User { UserName = "omar", Email = "omar@itdept.local", FullName = "Omar Field",
-                RoleId = roles[Roles.Technician], JobTitle = "Field Engineer", Department = "Infrastructure", AvatarColor = "#0ea5e9",
+                RoleId = roles[Roles.Technician], JobTitle = "Field Engineer", DepartmentId = D("Infrastructure"), AvatarColor = "#0ea5e9",
                 BranchId = branches["HB"], IsAvailable = false, PasswordHash = hasher.Hash("Tech@123") },
-            new User { UserName = "lara", Email = "lara@itdept.local", FullName = "Lara Requester",
-                RoleId = roles[Roles.Viewer], JobTitle = "Branch Coordinator", Department = "Operations", AvatarColor = "#ec4899",
-                BranchId = branches["AP"], PasswordHash = hasher.Hash("Viewer@123") },
-            new User { UserName = "viewer", Email = "viewer@itdept.local", FullName = "Victor Viewer",
-                RoleId = roles[Roles.Viewer], JobTitle = "Auditor", Department = "Compliance", AvatarColor = "#64748b",
-                BranchId = branches["DT"], PasswordHash = hasher.Hash("Viewer@123") },
-            new User { UserName = "emp1", Email = "emp1@itdept.local", FullName = "Emma Employee",
-                RoleId = roles[Roles.Employee], JobTitle = "Branch Coordinator", Department = "Operations", AvatarColor = "#06b6d4",
+            new User { UserName = "emp1", Email = "emp1@itdept.local", FullName = "Emma Branch",
+                RoleId = roles[Roles.BranchEmployee], JobTitle = "Branch Coordinator", DepartmentId = D("Operations"), AvatarColor = "#06b6d4",
                 BranchId = branches["DT"], PasswordHash = hasher.Hash("Emp@123") },
-            new User { UserName = "emp2", Email = "emp2@itdept.local", FullName = "Eddie Employee",
-                RoleId = roles[Roles.Employee], JobTitle = "Finance Officer", Department = "Finance", AvatarColor = "#84cc16",
-                BranchId = branches["HB"], PasswordHash = hasher.Hash("Emp@123") }
+            new User { UserName = "emp2", Email = "emp2@itdept.local", FullName = "Hassan HO",
+                RoleId = roles[Roles.HoEmployee], JobTitle = "Finance Officer", DepartmentId = D("Finance"), AvatarColor = "#84cc16",
+                PasswordHash = hasher.Hash("Emp@123") },
+            new User { UserName = "emp3", Email = "emp3@itdept.local", FullName = "Cam User",
+                RoleId = roles[Roles.CamEmployee], JobTitle = "Multi-Site Coordinator", DepartmentId = D("Operations"), AvatarColor = "#a855f7",
+                PasswordHash = hasher.Hash("Emp@123") },
         };
         var toAdd = users.Where(u => !existingUserNames.Contains(u.UserName)).ToList();
         if (toAdd.Count > 0) { db.Users.AddRange(toAdd); await db.SaveChangesAsync(); }
@@ -134,7 +223,7 @@ public static class DatabaseSeeder
         {
             new Project { Name = "Infrastructure Upgrade 2026", Code = "INFRA", Color = "#3b82f6",
                 Description = "Datacenter and network modernization program.", Status = ProjectStatus.Active,
-                LeadId = U("mmanager"), StartDate = DateTime.UtcNow.AddDays(-30) },
+                LeadId = U("admin"), StartDate = DateTime.UtcNow.AddDays(-30) },
             new Project { Name = "Helpdesk & Support", Code = "SUP", Color = "#f97316",
                 Description = "Day-to-day incident and service-request handling.", Status = ProjectStatus.Active,
                 LeadId = U("sara") },
@@ -180,9 +269,7 @@ public static class DatabaseSeeder
                 BranchId = BranchOf(s.Assignee),
                 AssigneeId = U(s.Assignee),
                 ReporterId = U("mmanager"),
-                DueDate = DateTime.UtcNow.AddDays(s.DueOffset),
-                SlaDueDate = s.Type is TaskType.Incident ? DateTime.UtcNow.AddDays(s.DueOffset) : null,
-                EstimatedHours = rnd.Next(2, 16),
+                StartDate = s.Status == WorkTaskStatus.InProgress || s.Status == WorkTaskStatus.Done ? DateTime.UtcNow.AddDays(s.DueOffset - 5) : null,
                 Progress = s.Status == WorkTaskStatus.Done ? 100 : s.Status == WorkTaskStatus.InProgress ? rnd.Next(20, 80) : 0,
                 CompletedAt = s.Status == WorkTaskStatus.Done ? DateTime.UtcNow.AddDays(s.DueOffset) : null,
                 BoardOrder = order++

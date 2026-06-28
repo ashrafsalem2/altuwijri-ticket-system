@@ -16,7 +16,7 @@ public class ProjectsController(IProjectService projects) : ApiControllerBase
     public async Task<ActionResult<ProjectDto>> Get(int id, CancellationToken ct)
         => Ok(await projects.GetByIdAsync(id, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     public async Task<ActionResult<ProjectDto>> Create(CreateProjectRequest request, CancellationToken ct)
     {
@@ -24,7 +24,7 @@ public class ProjectsController(IProjectService projects) : ApiControllerBase
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<ProjectDto>> Update(int id, UpdateProjectRequest request, CancellationToken ct)
         => Ok(await projects.UpdateAsync(id, request, ct));

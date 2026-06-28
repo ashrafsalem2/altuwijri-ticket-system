@@ -17,6 +17,7 @@ public interface ITaskService
     Task<TaskDetailDto> CreateAsync(CreateTaskRequest request, CancellationToken ct = default);
     Task<TaskDetailDto> UpdateAsync(int id, UpdateTaskRequest request, CancellationToken ct = default);
     Task MoveAsync(int id, MoveTaskRequest request, CancellationToken ct = default);
+    Task ClaimAsync(int id, CancellationToken ct = default);
     Task DeleteAsync(int id, CancellationToken ct = default);
 }
 
@@ -26,6 +27,7 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         .Where(t => !t.IsDeleted)
         .Include(t => t.Project)
         .Include(t => t.Branch)
+        .Include(t => t.Category)
         .Include(t => t.Assignee)
         .Include(t => t.SubTasks)
         .Include(t => t.Comments)
@@ -48,16 +50,21 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         if (query.ProjectId.HasValue) q = q.Where(t => t.ProjectId == query.ProjectId);
         if (query.BranchId.HasValue) q = q.Where(t => t.BranchId == query.BranchId);
         if (query.AssigneeId.HasValue) q = q.Where(t => t.AssigneeId == query.AssigneeId);
-        if (query.Overdue == true)
-            q = q.Where(t => t.DueDate != null && t.DueDate < DateTime.UtcNow &&
-                             t.Status != WorkTaskStatus.Done && t.Status != WorkTaskStatus.Cancelled);
+        if (query.CategoryId.HasValue) q = q.Where(t => t.CategoryId == query.CategoryId);
 
-        // Technicians only see tasks assigned to them
+        // Technicians see: their assigned tasks + unassigned tickets in their categories.
+        // If no categories are assigned yet, show ALL unassigned tickets so nothing falls through.
         if (currentUser.Role == Roles.Technician && currentUser.UserId.HasValue)
-            q = q.Where(t => t.AssigneeId == currentUser.UserId.Value);
+        {
+            var uid = currentUser.UserId.Value;
+            var catIds = await db.UserCategories.Where(uc => uc.UserId == uid).Select(uc => uc.CategoryId).ToListAsync(ct);
+            q = catIds.Count > 0
+                ? q.Where(t => t.AssigneeId == uid || (t.CategoryId != null && catIds.Contains(t.CategoryId.Value) && t.AssigneeId == null))
+                : q.Where(t => t.AssigneeId == uid || t.AssigneeId == null);
+        }
 
-        // Employees can only see tickets they submitted
-        if (currentUser.Role == Roles.Employee && currentUser.UserId.HasValue)
+        // Employee roles can only see tickets they submitted
+        if (Roles.EmployeeRoles.Contains(currentUser.Role) && currentUser.UserId.HasValue)
             q = q.Where(t => t.ReporterId == currentUser.UserId.Value);
 
         q = (query.SortBy?.ToLower()) switch
@@ -65,7 +72,6 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
             "title" => query.SortDescending ? q.OrderByDescending(t => t.Title) : q.OrderBy(t => t.Title),
             "priority" => query.SortDescending ? q.OrderByDescending(t => t.Priority) : q.OrderBy(t => t.Priority),
             "status" => query.SortDescending ? q.OrderByDescending(t => t.Status) : q.OrderBy(t => t.Status),
-            "duedate" => query.SortDescending ? q.OrderByDescending(t => t.DueDate) : q.OrderBy(t => t.DueDate),
             _ => query.SortDescending ? q.OrderByDescending(t => t.CreatedAt) : q.OrderBy(t => t.CreatedAt)
         };
 
@@ -79,9 +85,30 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
     public async Task<IReadOnlyList<TaskListItemDto>> GetBoardAsync(int? projectId, CancellationToken ct = default)
     {
         var q = BaseQuery().AsNoTracking().Where(t => t.ParentTaskId == null);
-        if (projectId.HasValue) q = q.Where(t => t.ProjectId == projectId);
+
         if (currentUser.Role == Roles.Technician && currentUser.UserId.HasValue)
-            q = q.Where(t => t.AssigneeId == currentUser.UserId.Value);
+        {
+            var uid = currentUser.UserId.Value;
+            var catIds = await db.UserCategories.Where(uc => uc.UserId == uid).Select(uc => uc.CategoryId).ToListAsync(ct);
+
+            // Technician inbox spans ALL projects — unassigned tickets in their categories are
+            // visible regardless of the project filter so nothing falls off the board.
+            // The project filter still applies to tasks already assigned to the technician.
+            if (catIds.Count > 0)
+                q = q.Where(t =>
+                    (t.AssigneeId == uid && (!projectId.HasValue || t.ProjectId == projectId))
+                    || (t.CategoryId != null && catIds.Contains(t.CategoryId.Value) && t.AssigneeId == null));
+            else
+                // No category assignments: show their tasks (project-filtered) + ALL unassigned
+                q = q.Where(t =>
+                    (t.AssigneeId == uid && (!projectId.HasValue || t.ProjectId == projectId))
+                    || t.AssigneeId == null);
+        }
+        else if (projectId.HasValue)
+        {
+            q = q.Where(t => t.ProjectId == projectId);
+        }
+
         var items = await q.OrderBy(t => t.BoardOrder).ThenByDescending(t => t.CreatedAt).ToListAsync(ct);
         return items.Select(t => t.ToListItem()).ToList();
     }
@@ -93,9 +120,20 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
             .Include(t => t.ParentTask)
             .AsNoTracking();
 
-        // Employees can only view tickets they submitted
-        if (currentUser.Role == Roles.Employee && currentUser.UserId.HasValue)
+        // Employee roles can only view tickets they submitted
+        if (Roles.EmployeeRoles.Contains(currentUser.Role) && currentUser.UserId.HasValue)
             q = q.Where(t => t.ReporterId == currentUser.UserId.Value);
+
+        // Technicians can view tickets assigned to them or in their categories (unassigned or not).
+        // No-category fallback: show all unassigned tickets so techs can always open what they see on the board.
+        if (currentUser.Role == Roles.Technician && currentUser.UserId.HasValue)
+        {
+            var uid = currentUser.UserId.Value;
+            var catIds = await db.UserCategories.Where(uc => uc.UserId == uid).Select(uc => uc.CategoryId).ToListAsync(ct);
+            q = catIds.Count > 0
+                ? q.Where(t => t.AssigneeId == uid || (t.CategoryId != null && catIds.Contains(t.CategoryId.Value)))
+                : q.Where(t => t.AssigneeId == uid || t.AssigneeId == null);
+        }
 
         var task = await q.FirstOrDefaultAsync(t => t.Id == id, ct)
             ?? throw new NotFoundException("Task", id);
@@ -107,7 +145,7 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         // Employees don't pick a project — auto-assign the first active one.
         // Also accepts projectId=0 from any caller as "auto".
         int effectiveProjectId = request.ProjectId;
-        if (effectiveProjectId <= 0 || currentUser.Role == Roles.Employee)
+        if (effectiveProjectId <= 0 || Roles.EmployeeRoles.Contains(currentUser.Role))
         {
             var projValid = effectiveProjectId > 0 &&
                             await db.Projects.AnyAsync(p => p.Id == effectiveProjectId && !p.IsDeleted, ct);
@@ -130,25 +168,32 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         if (branchId is null && currentUser.UserId is int uid)
             branchId = await db.Users.Where(u => u.Id == uid).Select(u => u.BranchId).FirstOrDefaultAsync(ct);
 
+        // Employee-submitted tickets are always ServiceRequest — the category tells you WHAT
+        // the issue is about; the type is set by admin/technician when they assess it.
+        var effectiveType = Roles.EmployeeRoles.Contains(currentUser.Role)
+            ? TaskType.ServiceRequest
+            : request.Type;
+
         var task = new WorkTask
         {
             Title = request.Title.Trim(),
             Description = request.Description,
             Status = request.Status,
             Priority = request.Priority,
-            Type = currentUser.Role == Roles.Employee ? TaskType.ServiceRequest : request.Type,
+            Type = effectiveType,
             ProjectId = effectiveProjectId,
             BranchId = branchId,
+            CategoryId = request.CategoryId,
             AssigneeId = request.AssigneeId,
             ReporterId = currentUser.UserId,
-            StartDate = request.StartDate,
-            DueDate = request.DueDate,
-            SlaDueDate = request.SlaDueDate,
-            EstimatedHours = request.EstimatedHours,
             ParentTaskId = request.ParentTaskId,
             BoardOrder = maxOrder + 1,
             CreatedById = currentUser.UserId
         };
+
+        // Auto-set StartDate when created directly as InProgress
+        if (request.Status == WorkTaskStatus.InProgress)
+            task.StartDate = DateTime.UtcNow;
 
         if (request.TagIds is { Count: > 0 })
             foreach (var tagId in request.TagIds.Distinct())
@@ -177,12 +222,6 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
             (request.Status == WorkTaskStatus.Done || request.Status == WorkTaskStatus.Cancelled))
             throw new BadRequestException("Technicians cannot close tickets. Set status to 'In Review' to request manager approval.");
 
-        // Due date must not be before the ticket's creation date
-        if (request.DueDate.HasValue && request.DueDate.Value.Date < task.CreatedAt.Date)
-            throw new BadRequestException("Due date cannot be earlier than the ticket creation date.");
-        if (request.SlaDueDate.HasValue && request.DueDate.HasValue && request.SlaDueDate.Value.Date < request.DueDate.Value.Date)
-            throw new BadRequestException("SLA due date cannot be earlier than the due date.");
-
         if (task.Status != request.Status)
             LogActivity(id, "status changed", "Status", task.Status.ToString(), request.Status.ToString());
         if (task.AssigneeId != request.AssigneeId && request.AssigneeId.HasValue)
@@ -196,25 +235,20 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         task.Type = request.Type;
         task.ProjectId = request.ProjectId;
         task.BranchId = request.BranchId;
+        task.CategoryId = request.CategoryId;
         task.AssigneeId = request.AssigneeId;
-        task.StartDate = request.StartDate;
-        task.DueDate = request.DueDate;
-        task.SlaDueDate = request.SlaDueDate;
-        task.EstimatedHours = request.EstimatedHours;
-        task.ActualHours = request.ActualHours;
         task.Progress = Math.Clamp(request.Progress, 0, 100);
         task.UpdatedAt = DateTime.UtcNow;
         task.UpdatedById = currentUser.UserId;
 
+        // Auto-set StartDate when first entering InProgress
+        if (request.Status == WorkTaskStatus.InProgress && task.StartDate == null)
+            task.StartDate = DateTime.UtcNow;
+
         if (request.Status == WorkTaskStatus.Done)
-        {
             task.CompletedAt ??= DateTime.UtcNow;
-            task.Progress = 100;
-        }
         else
-        {
             task.CompletedAt = null;
-        }
 
         // Re-sync tags
         if (request.TagIds is not null)
@@ -240,7 +274,49 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         task.BoardOrder = request.BoardOrder;
         task.UpdatedAt = DateTime.UtcNow;
         task.UpdatedById = currentUser.UserId;
-        if (request.Status == WorkTaskStatus.Done) { task.CompletedAt ??= DateTime.UtcNow; task.Progress = 100; }
+
+        if (request.Status == WorkTaskStatus.InProgress && task.StartDate == null)
+            task.StartDate = DateTime.UtcNow;
+
+        if (request.Status == WorkTaskStatus.Done)
+            task.CompletedAt ??= DateTime.UtcNow;
+        else
+            task.CompletedAt = null;
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task ClaimAsync(int id, CancellationToken ct = default)
+    {
+        if (!currentUser.UserId.HasValue)
+            throw new BadRequestException("Not authenticated.");
+
+        var task = await db.Tasks.FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted, ct)
+            ?? throw new NotFoundException("Task", id);
+
+        if (task.AssigneeId.HasValue)
+            throw new BadRequestException("This ticket is already claimed by someone.");
+
+        var uid = currentUser.UserId.Value;
+
+        // Technicians can only claim tickets in their categories
+        if (currentUser.Role == Roles.Technician)
+        {
+            var techCatIds = await db.UserCategories.Where(uc => uc.UserId == uid).Select(uc => uc.CategoryId).ToListAsync(ct);
+            if (task.CategoryId.HasValue && techCatIds.Count > 0 && !techCatIds.Contains(task.CategoryId.Value))
+                throw new BadRequestException("This ticket does not belong to your category.");
+        }
+
+        task.AssigneeId = uid;
+        task.Status = WorkTaskStatus.InProgress;
+        task.StartDate ??= DateTime.UtcNow;
+        task.ClaimedAt ??= DateTime.UtcNow;
+        task.UpdatedAt = DateTime.UtcNow;
+        task.UpdatedById = uid;
+
+        LogActivity(id, "claimed", "Assignee", null, uid.ToString());
+        await db.SaveChangesAsync(ct);
+        await NotifyAsync(uid, NotificationType.TaskAssigned, "You accepted a ticket", task.Title, id, ct);
         await db.SaveChangesAsync(ct);
     }
 
@@ -293,10 +369,9 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         if (!string.IsNullOrWhiteSpace(user.Email))
             await emailService.SendTaskAssignedAsync(user.Email, user.FullName, message, taskId, priority, project, ct);
 
-        // Use the user's stored phone; fall back to the configured fallback number
         var phone = !string.IsNullOrWhiteSpace(user.PhoneNumber)
             ? user.PhoneNumber
-            : null; // WhatsAppService reads FallbackPhone from config when toPhone is empty
+            : null;
 
         await whatsApp.SendTaskAssignedAsync(phone ?? "", user.FullName, message, taskId, priority, project, ct);
     }

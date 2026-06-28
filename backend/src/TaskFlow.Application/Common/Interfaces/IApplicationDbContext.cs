@@ -8,9 +8,11 @@ public interface IApplicationDbContext
 {
     DbSet<User> Users { get; }
     DbSet<Role> Roles { get; }
+    DbSet<Department> Departments { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<Area> Areas { get; }
     DbSet<Branch> Branches { get; }
+    DbSet<Device> Devices { get; }
     DbSet<Project> Projects { get; }
     DbSet<ChatConversation> ChatConversations { get; }
     DbSet<ChatMessage> ChatMessages { get; }
@@ -21,6 +23,11 @@ public interface IApplicationDbContext
     DbSet<TaskTag> TaskTags { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<ActivityLog> ActivityLogs { get; }
+    DbSet<AppLink> AppLinks { get; }
+    DbSet<Guideline> Guidelines { get; }
+    DbSet<TicketCategory> TicketCategories { get; }
+    DbSet<UserCategory> UserCategories { get; }
+    DbSet<UserBranch> UserBranches { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

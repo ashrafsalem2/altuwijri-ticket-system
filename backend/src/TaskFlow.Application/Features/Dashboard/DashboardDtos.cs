@@ -5,8 +5,6 @@ public record DashboardStatsDto(
     int OpenTasks,
     int InProgressTasks,
     int CompletedTasks,
-    int OverdueTasks,
-    int SlaBreaches,
     int UnassignedTasks,
     int MyOpenTasks,
     int ActiveProjects,

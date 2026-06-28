@@ -22,7 +22,7 @@ public class TasksController(ITaskService tasks, ICommentService comments) : Api
     public async Task<ActionResult<TaskDetailDto>> Get(int id, CancellationToken ct)
         => Ok(await tasks.GetByIdAsync(id, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician},{Roles.Employee}")]
+    [Authorize(Roles = Roles.AllRoles)]
     [HttpPost]
     public async Task<ActionResult<TaskDetailDto>> Create(CreateTaskRequest request, CancellationToken ct)
     {
@@ -30,12 +30,12 @@ public class TasksController(ITaskService tasks, ICommentService comments) : Api
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician}")]
+    [Authorize(Roles = Roles.AllStaff)]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<TaskDetailDto>> Update(int id, UpdateTaskRequest request, CancellationToken ct)
         => Ok(await tasks.UpdateAsync(id, request, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician}")]
+    [Authorize(Roles = Roles.AllStaff)]
     [HttpPatch("{id:int}/move")]
     public async Task<IActionResult> Move(int id, MoveTaskRequest request, CancellationToken ct)
     {
@@ -43,7 +43,15 @@ public class TasksController(ITaskService tasks, ICommentService comments) : Api
         return NoContent();
     }
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
+    [Authorize(Roles = Roles.AllStaff)]
+    [HttpPost("{id:int}/claim")]
+    public async Task<IActionResult> Claim(int id, CancellationToken ct)
+    {
+        await tasks.ClaimAsync(id, ct);
+        return NoContent();
+    }
+
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
@@ -57,7 +65,7 @@ public class TasksController(ITaskService tasks, ICommentService comments) : Api
     public async Task<ActionResult<IReadOnlyList<CommentDto>>> GetComments(int id, CancellationToken ct)
         => Ok(await comments.GetForTaskAsync(id, ct));
 
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.Technician},{Roles.Employee}")]
+    [Authorize(Roles = Roles.AllRoles)]
     [HttpPost("{id:int}/comments")]
     public async Task<ActionResult<CommentDto>> AddComment(int id, CreateCommentRequest request, CancellationToken ct)
         => Ok(await comments.AddAsync(id, request, ct));

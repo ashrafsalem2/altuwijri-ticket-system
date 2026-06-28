@@ -23,10 +23,17 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
     private static readonly string[] Palette =
         ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
 
+    private IQueryable<User> UserQuery() => db.Users
+        .Include(u => u.Role)
+        .Include(u => u.Branch!).ThenInclude(b => b.Area)
+        .Include(u => u.Department)
+        .Include(u => u.Categories).ThenInclude(uc => uc.Category)
+        .Include(u => u.Branches).ThenInclude(ub => ub.Branch)
+        .AsNoTracking();
+
     public async Task<IReadOnlyList<UserDto>> GetAllAsync(bool includeInactive, CancellationToken ct = default)
     {
-        var query = db.Users.Include(u => u.Role).Include(u => u.Branch!).ThenInclude(b => b.Area)
-            .AsNoTracking().AsQueryable();
+        var query = UserQuery().AsQueryable();
         if (!includeInactive) query = query.Where(u => u.IsActive);
         var users = await query.OrderBy(u => u.FullName).ToListAsync(ct);
         return users.Select(u => u.ToDto()).ToList();
@@ -34,8 +41,7 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
 
     public async Task<UserDto> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        var user = await db.Users.Include(u => u.Role).Include(u => u.Branch!).ThenInclude(b => b.Area)
-            .AsNoTracking().FirstOrDefaultAsync(u => u.Id == id, ct) ?? throw new NotFoundException("User", id);
+        var user = await UserQuery().FirstOrDefaultAsync(u => u.Id == id, ct) ?? throw new NotFoundException("User", id);
         return user.ToDto();
     }
 
@@ -60,13 +66,17 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
             RoleId = request.RoleId,
             BranchId = request.BranchId,
             JobTitle = request.JobTitle,
-            Department = request.Department,
+            DepartmentId = request.DepartmentId,
             PhoneNumber = request.PhoneNumber,
             AvatarColor = Palette[Random.Shared.Next(Palette.Length)],
             IsActive = true
         };
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
+
+        await SyncCategoriesAsync(user.Id, request.CategoryIds, ct);
+        await SyncBranchesAsync(user.Id, request.BranchIds, ct);
+
         return await GetByIdAsync(user.Id, ct);
     }
 
@@ -86,10 +96,14 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
         user.RoleId = request.RoleId;
         user.BranchId = request.BranchId;
         user.JobTitle = request.JobTitle;
-        user.Department = request.Department;
+        user.DepartmentId = request.DepartmentId;
         user.PhoneNumber = request.PhoneNumber;
         user.IsActive = request.IsActive;
         await db.SaveChangesAsync(ct);
+
+        await SyncCategoriesAsync(id, request.CategoryIds, ct);
+        await SyncBranchesAsync(id, request.BranchIds, ct);
+
         return await GetByIdAsync(id, ct);
     }
 
@@ -123,5 +137,29 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
     {
         var roles = await db.Roles.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct);
         return roles.Select(r => r.ToDto()).ToList();
+    }
+
+    private async Task SyncCategoriesAsync(int userId, List<int>? categoryIds, CancellationToken ct)
+    {
+        var existing = await db.UserCategories.Where(uc => uc.UserId == userId).ToListAsync(ct);
+        db.UserCategories.RemoveRange(existing);
+        if (categoryIds?.Count > 0)
+        {
+            foreach (var catId in categoryIds.Distinct())
+                db.UserCategories.Add(new UserCategory { UserId = userId, CategoryId = catId });
+        }
+        await db.SaveChangesAsync(ct);
+    }
+
+    private async Task SyncBranchesAsync(int userId, List<int>? branchIds, CancellationToken ct)
+    {
+        var existing = await db.UserBranches.Where(ub => ub.UserId == userId).ToListAsync(ct);
+        db.UserBranches.RemoveRange(existing);
+        if (branchIds?.Count > 0)
+        {
+            foreach (var branchId in branchIds.Distinct())
+                db.UserBranches.Add(new UserBranch { UserId = userId, BranchId = branchId });
+        }
+        await db.SaveChangesAsync(ct);
     }
 }

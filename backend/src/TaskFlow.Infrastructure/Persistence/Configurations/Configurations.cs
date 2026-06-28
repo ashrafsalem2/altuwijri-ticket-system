@@ -4,6 +4,18 @@ using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Infrastructure.Persistence.Configurations;
 
+public class DepartmentConfig : IEntityTypeConfiguration<Department>
+{
+    public void Configure(EntityTypeBuilder<Department> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        b.Property(x => x.Code).HasMaxLength(20);
+        b.Property(x => x.Description).HasMaxLength(500);
+        b.HasIndex(x => x.Name).IsUnique();
+        b.HasQueryFilter(x => !x.IsDeleted);
+    }
+}
+
 public class RoleConfig : IEntityTypeConfiguration<Role>
 {
     public void Configure(EntityTypeBuilder<Role> b)
@@ -23,7 +35,6 @@ public class UserConfig : IEntityTypeConfiguration<User>
         b.Property(x => x.FullName).HasMaxLength(150).IsRequired();
         b.Property(x => x.PasswordHash).IsRequired();
         b.Property(x => x.JobTitle).HasMaxLength(100);
-        b.Property(x => x.Department).HasMaxLength(100);
         b.Property(x => x.PhoneNumber).HasMaxLength(30);
         b.Property(x => x.AvatarColor).HasMaxLength(20);
         b.HasIndex(x => x.UserName).IsUnique();
@@ -31,6 +42,7 @@ public class UserConfig : IEntityTypeConfiguration<User>
         b.HasQueryFilter(x => !x.IsDeleted);
         b.HasOne(x => x.Role).WithMany(r => r.Users).HasForeignKey(x => x.RoleId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.Branch).WithMany(br => br.Users).HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.SetNull);
+        b.HasOne(x => x.Department).WithMany(d => d.Users).HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.SetNull);
     }
 }
 
@@ -71,6 +83,16 @@ public class RefreshTokenConfig : IEntityTypeConfiguration<RefreshToken>
     }
 }
 
+public class UserBranchConfig : IEntityTypeConfiguration<UserBranch>
+{
+    public void Configure(EntityTypeBuilder<UserBranch> b)
+    {
+        b.HasKey(x => new { x.UserId, x.BranchId });
+        b.HasOne(x => x.User).WithMany(u => u.Branches).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public class ProjectConfig : IEntityTypeConfiguration<Project>
 {
     public void Configure(EntityTypeBuilder<Project> b)
@@ -85,22 +107,45 @@ public class ProjectConfig : IEntityTypeConfiguration<Project>
     }
 }
 
+public class UserCategoryConfig : IEntityTypeConfiguration<UserCategory>
+{
+    public void Configure(EntityTypeBuilder<UserCategory> b)
+    {
+        b.HasKey(x => new { x.UserId, x.CategoryId });
+        b.HasOne(x => x.User).WithMany(u => u.Categories).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Category).WithMany(c => c.UserCategories).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class TicketCategoryConfig : IEntityTypeConfiguration<TicketCategory>
+{
+    public void Configure(EntityTypeBuilder<TicketCategory> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        b.Property(x => x.NameAr).HasMaxLength(100);
+        b.Property(x => x.Description).HasMaxLength(500);
+        b.Property(x => x.Icon).HasMaxLength(20).IsRequired();
+        b.Property(x => x.Color).HasMaxLength(20);
+        b.HasQueryFilter(x => !x.IsDeleted);
+    }
+}
+
 public class WorkTaskConfig : IEntityTypeConfiguration<WorkTask>
 {
     public void Configure(EntityTypeBuilder<WorkTask> b)
     {
         b.Property(x => x.Title).HasMaxLength(250).IsRequired();
         b.Property(x => x.Description).HasMaxLength(8000);
-        b.Property(x => x.EstimatedHours).HasPrecision(8, 2);
-        b.Property(x => x.ActualHours).HasPrecision(8, 2);
         b.HasIndex(x => x.Status);
         b.HasIndex(x => x.ProjectId);
         b.HasIndex(x => x.AssigneeId);
+        b.HasIndex(x => x.CategoryId);
         b.HasQueryFilter(x => !x.IsDeleted);
 
         b.HasIndex(x => x.BranchId);
         b.HasOne(x => x.Project).WithMany(p => p.Tasks).HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.Branch).WithMany(br => br.Tasks).HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.SetNull);
+        b.HasOne(x => x.Category).WithMany(c => c.Tasks).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.SetNull);
         b.HasOne(x => x.Assignee).WithMany(u => u.AssignedTasks).HasForeignKey(x => x.AssigneeId).OnDelete(DeleteBehavior.SetNull);
         b.HasOne(x => x.Reporter).WithMany(u => u.ReportedTasks).HasForeignKey(x => x.ReporterId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.ParentTask).WithMany(t => t.SubTasks).HasForeignKey(x => x.ParentTaskId).OnDelete(DeleteBehavior.Restrict);

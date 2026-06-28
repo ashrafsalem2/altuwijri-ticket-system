@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, inject, signal, computed } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, OnDestroy, SimpleChanges, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -125,8 +125,8 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
         </div>
 
         <div class="card card-pad meta">
-          <!-- Pretty lifetime card at the top of meta panel -->
-          <app-ticket-lifetime [dueDate]="t.dueDate" [status]="t.status" [createdAt]="t.createdAt" [startDate]="t.startDate" [card]="true" [showEmpty]="true"></app-ticket-lifetime>
+          <!-- Informative elapsed-time card -->
+          <app-ticket-lifetime [startDate]="t.startDate" [completedAt]="t.completedAt" [status]="t.status" [card]="true" [showEmpty]="true"></app-ticket-lifetime>
 
           <!-- Handler banner — Admin/Manager only -->
           @if (showHandlerPanel() && !isTechnician()) {
@@ -154,10 +154,10 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
               } @else if (task()!.status === 'Cancelled') {
                 <div class="tech-closed tech-cancelled">✕ {{ 'tech.cancelled' | t }}</div>
               } @else if (task()!.status === 'Backlog' || task()!.status === 'ToDo') {
-                <!-- Accept phase: commit to an estimate before work begins -->
+                <!-- Accept phase: one click to start work -->
                 <p class="tech-accept-hint">{{ 'tech.acceptHint' | t }}</p>
                 <button class="btn btn-primary" style="width:100%"
-                  (click)="showTechAcceptModal.set(true)" [disabled]="quickSaving()">
+                  (click)="techAccept(task()!)" [disabled]="quickSaving()">
                   ✓ {{ 'tech.acceptBtn' | t }}
                 </button>
               } @else {
@@ -175,18 +175,6 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
                     <input type="range" min="0" max="100" step="5" [(ngModel)]="quickProgress" style="flex:1" />
                     <span class="text-sm mono" style="width:2.8rem;text-align:end">{{ quickProgress }}%</span>
                   </div>
-                </div>
-
-                <div class="m-row">
-                  <span class="m-lbl">{{ 'tech.estHours' | t }}</span>
-                  <input class="input" type="number" min="0" step="0.5" [(ngModel)]="quickEstHours"
-                    placeholder="hrs" style="width:80px" />
-                </div>
-
-                <div class="m-row">
-                  <span class="m-lbl">{{ 'tech.actHours' | t }}</span>
-                  <input class="input" type="number" min="0" step="0.5" [(ngModel)]="quickActHours"
-                    placeholder="hrs" style="width:80px" />
                 </div>
 
                 <button class="btn btn-primary" style="width:100%;margin-top:.6rem"
@@ -213,14 +201,24 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
           <div class="meta-divider"></div>
           <div class="m-row"><span class="m-lbl">{{ 'task.project' | t }}</span><span>{{ t.projectName }}</span></div>
           <div class="m-row"><span class="m-lbl">{{ 'org.branch' | t }}</span><span>{{ t.branchName || '—' }}</span></div>
+          @if (t.categoryName) {
+            <div class="m-row">
+              <span class="m-lbl">{{ 'tc.title' | t }}</span>
+              <span class="cat-meta-chip" [style.background]="t.categoryColor ? t.categoryColor + '18' : ''" [style.color]="t.categoryColor || ''">
+                @if (t.categoryIcon) { {{ t.categoryIcon }} } {{ t.categoryName }}
+              </span>
+            </div>
+          }
           <div class="m-row"><span class="m-lbl">{{ 'task.type' | t }}</span><span>{{ tIcon(t.type) }} {{ typeLabel(t.type) }}</span></div>
           <div class="m-row"><span class="m-lbl">{{ 'task.assignee' | t }}</span><span>{{ t.assigneeName || ('task.unassigned' | t) }}</span></div>
           <div class="m-row"><span class="m-lbl">{{ 'task.reporter' | t }}</span><span>{{ t.reporterName || '—' }}</span></div>
-          <div class="m-row"><span class="m-lbl">{{ 'task.startDate' | t }}</span><span>{{ t.startDate ? (t.startDate | date:'mediumDate') : '—' }}</span></div>
-          <div class="m-row"><span class="m-lbl">{{ 'task.dueDate' | t }}</span><span>{{ t.dueDate ? (t.dueDate | date:'mediumDate') : '—' }}</span></div>
-          <div class="m-row"><span class="m-lbl">{{ 'task.slaDue' | t }}</span><span>{{ t.slaDueDate ? (t.slaDueDate | date:'mediumDate') : '—' }}</span></div>
-          <div class="m-row"><span class="m-lbl">{{ 'task.estimate' | t }}</span><span>{{ t.estimatedHours ?? '—' }} h</span></div>
-          <div class="m-row"><span class="m-lbl">{{ 'task.actual' | t }}</span><span>{{ t.actualHours ?? '—' }} h</span></div>
+          <div class="m-row"><span class="m-lbl">{{ 'task.startDate' | t }}</span><span>{{ t.startDate ? (t.startDate | date:'medium') : '—' }}</span></div>
+          @if (t.claimedAt) {
+            <div class="m-row"><span class="m-lbl">{{ 'task.acceptedIn' | t }}</span><span class="resp-time-badge">{{ responseTime(t) }}</span></div>
+          }
+          @if (t.completedAt) {
+            <div class="m-row"><span class="m-lbl">{{ 'task.completedAt' | t }}</span><span>{{ t.completedAt | date:'medium' }}</span></div>
+          }
           <div class="m-row"><span class="m-lbl">{{ 'task.progress' | t }}</span><span>{{ t.progress }}%</span></div>
           <div class="progress"><div class="progress-fill" [style.width.%]="t.progress"></div></div>
           <div class="m-row mt-1"><span class="m-lbl">{{ 'task.created' | t }}</span><span class="text-sm">{{ t.createdAt | date:'medium' }}</span></div>
@@ -231,69 +229,6 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
 
   @if (showEdit() && task()) {
     <app-task-form [task]="task()!" (saved)="onSaved()" (cancel)="showEdit.set(false)"></app-task-form>
-  }
-
-  <!-- Technician accept modal -->
-  @if (showTechAcceptModal() && task(); as t) {
-    <div class="hm-overlay" (click)="showTechAcceptModal.set(false)">
-      <div class="hm-modal card" (click)="$event.stopPropagation()">
-
-        <div class="hm-head">
-          <div class="hm-head-left">
-            <span class="hm-head-icon">✅</span>
-            <div>
-              <h3 class="hm-title">{{ 'tech.acceptBtn' | t }}</h3>
-              <p class="hm-subtitle">{{ 'tech.acceptHint' | t }}</p>
-            </div>
-          </div>
-          <button class="hm-close" (click)="showTechAcceptModal.set(false)">✕</button>
-        </div>
-
-        <div class="hm-body">
-          <div class="tech-accept-ticket-ref" dir="auto">#{{ t.id }} — {{ t.title }}</div>
-
-          <div class="hm-grid">
-
-            <div class="hm-field">
-              <label>{{ 'handler.due' | t }}</label>
-              @if (t.dueDate) {
-                <div class="tech-accept-info">📅 {{ t.dueDate | date:'mediumDate' }} <span class="muted text-xs">({{ 'tech.dueMgr' | t }})</span></div>
-              } @else {
-                <input class="input" type="date" [(ngModel)]="techAcceptDue" [min]="todayStr()"
-                  placeholder="{{ 'tech.dueYou' | t }}" />
-              }
-            </div>
-
-            <div class="hm-field">
-              <label>{{ 'handler.sla' | t }}</label>
-              @if (t.slaDueDate) {
-                <div class="tech-accept-info">📅 {{ t.slaDueDate | date:'mediumDate' }} <span class="muted text-xs">({{ 'tech.dueMgr' | t }})</span></div>
-              } @else {
-                <input class="input" type="date" [(ngModel)]="techAcceptSla"
-                  [min]="techAcceptDue || todayStr()" />
-              }
-            </div>
-
-            <div class="hm-field hm-field-full">
-              <label>{{ 'handler.hours' | t }} <span style="color:var(--danger)">*</span></label>
-              <input class="input" type="number" min="0" step="0.5" [(ngModel)]="techAcceptHours"
-                placeholder="e.g. 4" style="max-width:160px" />
-            </div>
-
-          </div>
-
-          @if (techAcceptErr()) { <div class="hm-err">{{ techAcceptErr() | t }}</div> }
-        </div>
-
-        <div class="hm-foot">
-          <button class="btn btn-ghost" (click)="showTechAcceptModal.set(false)">{{ 'c.cancel' | t }}</button>
-          <button class="btn btn-primary" (click)="techAccept(t)" [disabled]="quickSaving()">
-            {{ quickSaving() ? ('c.saving' | t) : ('tech.confirmStart' | t) }}
-          </button>
-        </div>
-
-      </div>
-    </div>
   }
 
   <!-- Handler accept modal -->
@@ -332,24 +267,6 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
               </div>
             }
 
-            <div class="hm-field">
-              <label>{{ 'handler.due' | t }}</label>
-              <input class="input" type="date" [(ngModel)]="hDueDate" [min]="todayStr()" />
-            </div>
-
-            <div class="hm-field">
-              <label>
-                {{ 'handler.sla' | t }}
-                <span class="hm-label-hint">{{ 'handler.slaHint' | t }}</span>
-              </label>
-              <input class="input" type="date" [(ngModel)]="hSlaDate" [min]="hDueDate || todayStr()" />
-            </div>
-
-            <div class="hm-field">
-              <label>{{ 'handler.hours' | t }}</label>
-              <input class="input" type="number" min="0" step="0.5" [(ngModel)]="hHours" placeholder="e.g. 4" />
-            </div>
-
           </div>
         </div>
 
@@ -375,7 +292,7 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
   }
   `
 })
-export class TaskDetail implements OnInit, OnChanges {
+export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   @Input() id!: string;
   private taskSvc = inject(TaskService);
   private auth = inject(AuthService);
@@ -406,9 +323,6 @@ export class TaskDetail implements OnInit, OnChanges {
   handlerErr = signal('');
   hStatus = 'InProgress';
   hAssigneeId: number | null = null;
-  hDueDate = '';
-  hSlaDate = '';
-  hHours: number | null = null;
 
   readonly statuses = TASK_STATUSES;
 
@@ -416,38 +330,31 @@ export class TaskDetail implements OnInit, OnChanges {
   tIcon = (t: string) => typeIcon(t as any);
   label = (s: any) => STATUS_LABELS[s as keyof typeof STATUS_LABELS] ?? s;
   typeLabel = (t: any) => TYPE_LABELS[t as keyof typeof TYPE_LABELS] ?? t;
-  canEdit = () => this.auth.hasRole('Admin', 'Manager', 'Technician');
-  canDelete = () => this.auth.hasRole('Admin', 'Manager');
-  isStaff = () => this.auth.hasRole('Admin', 'Manager', 'Technician');
+  canEdit = () => this.auth.hasRole('Admin', 'Technician');
+  canDelete = () => this.auth.hasRole('Admin');
+  isStaff = () => this.auth.hasRole('Admin', 'Technician');
   isTechnician = () => this.auth.user()?.role === 'Technician';
 
   showHandlerPanel = computed(() => {
     if (!this.isStaff()) return false;
     const t = this.task();
     if (!t) return false;
-    return !t.dueDate || !t.assigneeId || !t.estimatedHours;
+    return !t.assigneeId;
   });
 
   // Technician quick-update state (Done is excluded — only manager can close)
   readonly techStatuses = ['InProgress', 'InReview', 'Blocked'] as const;
   quickStatus = 'InProgress';
   quickProgress = 0;
-  quickEstHours: number | null = null;
-  quickActHours: number | null = null;
   quickSaving = signal(false);
   quickSaved = signal(false);
-
-  // Technician accept modal state
-  showTechAcceptModal = signal(false);
-  techAcceptDue = '';
-  techAcceptSla = '';
-  techAcceptHours: number | null = null;
-  techAcceptErr = signal('');
+  private commentPoll?: any;
 
   ngOnInit() { this.load(); }
   ngOnChanges(changes: SimpleChanges) {
     if (changes['id'] && !changes['id'].firstChange) this.load();
   }
+  ngOnDestroy() { clearInterval(this.commentPoll); }
 
   load() {
     const id = Number(this.id);
@@ -459,21 +366,18 @@ export class TaskDetail implements OnInit, OnChanges {
         if (this.isStaff()) {
           this.hStatus = t.status === 'Backlog' || t.status === 'ToDo' ? 'InProgress' : t.status;
           this.hAssigneeId = t.assigneeId ?? null;
-          this.hDueDate = t.dueDate?.substring(0, 10) ?? '';
-          this.hSlaDate = t.slaDueDate?.substring(0, 10) ?? '';
-          this.hHours = t.estimatedHours ?? null;
           this.userSvc.getAll().subscribe(u => this.staffUsers.set(u));
         }
         if (this.isTechnician()) {
           this.quickStatus = (t.status === 'Backlog' || t.status === 'ToDo') ? 'InProgress' : t.status;
           this.quickProgress = t.progress ?? 0;
-          this.quickEstHours = t.estimatedHours ?? null;
-          this.quickActHours = t.actualHours ?? null;
         }
       },
       error: () => this.loading.set(false)
     });
     this.taskSvc.comments(id).subscribe(c => this.comments.set(c));
+    clearInterval(this.commentPoll);
+    this.commentPoll = setInterval(() => this.taskSvc.comments(id).subscribe(c => this.comments.set(c)), 10000);
     this.attachmentSvc.list(id).subscribe(a => { this.attachments.set(a); this.loadThumbnails(a); });
   }
 
@@ -534,31 +438,14 @@ export class TaskDetail implements OnInit, OnChanges {
   }
 
   techAccept(t: TaskDetailModel) {
-    if (!this.techAcceptHours) { this.techAcceptErr.set('tech.estRequired'); return; }
-    this.techAcceptErr.set('');
     this.quickSaving.set(true);
-    const payload = {
-      title: t.title, description: t.description, status: 'InProgress' as any,
-      priority: t.priority, type: t.type, projectId: t.projectId,
-      branchId: t.branchId ?? null, assigneeId: t.assigneeId ?? null,
-      startDate: new Date().toISOString(),
-      dueDate: t.dueDate ?? (this.techAcceptDue ? `${this.techAcceptDue}T18:00:00` : null),
-      slaDueDate: t.slaDueDate ?? (this.techAcceptSla ? `${this.techAcceptSla}T18:00:00` : null),
-      estimatedHours: this.techAcceptHours,
-      actualHours: t.actualHours ?? null,
-      progress: 5,
-      tagIds: t.tags.map(tg => tg.id)
-    };
-    this.taskSvc.update(t.id, payload as any).subscribe({
+    this.taskSvc.claim(t.id).subscribe({
       next: () => {
         this.quickSaving.set(false);
-        this.showTechAcceptModal.set(false);
         this.quickStatus = 'InProgress';
-        this.quickProgress = 5;
-        this.quickEstHours = this.techAcceptHours;
         this.load();
       },
-      error: e => { this.quickSaving.set(false); this.techAcceptErr.set(e?.error?.title ?? 'Save failed.'); }
+      error: () => this.quickSaving.set(false)
     });
   }
 
@@ -568,14 +455,9 @@ export class TaskDetail implements OnInit, OnChanges {
     const payload = {
       title: t.title, description: t.description, status: this.hStatus as any,
       priority: t.priority, type: t.type, projectId: t.projectId,
-      branchId: t.branchId ?? null, assigneeId: this.hAssigneeId,
-      startDate: new Date().toISOString(),   // record exact acceptance time
-      dueDate: this.hDueDate ? `${this.hDueDate}T18:00:00` : null,
-      slaDueDate: this.hSlaDate ? `${this.hSlaDate}T18:00:00` : null,
-      estimatedHours: this.hHours,
-      actualHours: t.actualHours ?? null,
-      progress: t.progress,
-      tagIds: t.tags.map(tg => tg.id)
+      branchId: t.branchId ?? null, categoryId: t.categoryId ?? null,
+      assigneeId: this.hAssigneeId,
+      progress: t.progress, tagIds: t.tags.map(tg => tg.id)
     };
     this.taskSvc.update(t.id, payload as any).subscribe({
       next: () => {
@@ -619,14 +501,14 @@ export class TaskDetail implements OnInit, OnChanges {
 
   todayStr() { return new Date().toISOString().substring(0, 10); }
 
-  startWork(t: TaskDetailModel) {
-    this.quickStatus = 'InProgress';
-    this.quickProgress = this.quickProgress || 5;
-    this._startedNow = new Date().toISOString(); // capture exact work-start time
-    this.quickUpdate(t);
+  responseTime(t: TaskDetailModel): string {
+    if (!t.claimedAt) return '—';
+    const mins = Math.round((new Date(t.claimedAt).getTime() - new Date(t.createdAt).getTime()) / 60000);
+    if (mins < 1) return '< 1 min';
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
   }
-
-  private _startedNow: string | null = null;
 
   requestReview(t: TaskDetailModel) {
     this.quickStatus = 'InReview';
@@ -641,22 +523,16 @@ export class TaskDetail implements OnInit, OnChanges {
       status: this.quickStatus as any,
       priority: t.priority, type: t.type, projectId: t.projectId,
       branchId: t.branchId ?? null, assigneeId: t.assigneeId ?? null,
-      startDate: this._startedNow ?? t.startDate ?? null,
-      dueDate: t.dueDate ?? null,
-      slaDueDate: t.slaDueDate ?? null,
-      estimatedHours: this.quickEstHours,
-      actualHours: this.quickActHours,
       progress: this.quickProgress,
       tagIds: t.tags.map(tg => tg.id)
     };
     this.taskSvc.update(t.id, payload as any).subscribe({
       next: () => {
-        this._startedNow = null;
         this.quickSaving.set(false);
         this.quickSaved.set(true);
         setTimeout(() => { this.quickSaved.set(false); this.load(); }, 1200);
       },
-      error: () => { this._startedNow = null; this.quickSaving.set(false); }
+      error: () => this.quickSaving.set(false)
     });
   }
 }

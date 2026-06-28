@@ -11,9 +11,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Department> Departments => Set<Department>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<Branch> Branches => Set<Branch>();
+    public DbSet<Device> Devices => Set<Device>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ChatConversation> ChatConversations => Set<ChatConversation>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
@@ -24,6 +26,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TaskTag> TaskTags => Set<TaskTag>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+    public DbSet<AppLink> AppLinks => Set<AppLink>();
+    public DbSet<Guideline> Guidelines => Set<Guideline>();
+    public DbSet<TicketCategory> TicketCategories => Set<TicketCategory>();
+    public DbSet<UserCategory> UserCategories => Set<UserCategory>();
+    public DbSet<UserBranch> UserBranches => Set<UserBranch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

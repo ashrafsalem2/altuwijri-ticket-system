@@ -94,7 +94,6 @@ const PRIORITY_COLORS: Record<string, string> = {
           <div class="kpi"><span class="kv text-blue">{{ report()!.stats.open }}</span><span class="kl">{{ 'rep.openLbl' | t }}</span></div>
           <div class="kpi"><span class="kv text-amber">{{ report()!.stats.inProgress }}</span><span class="kl">{{ 'rep.inProgLbl' | t }}</span></div>
           <div class="kpi"><span class="kv text-green">{{ report()!.stats.completed }}</span><span class="kl">{{ 'rep.completedLbl' | t }}</span></div>
-          <div class="kpi"><span class="kv text-red">{{ report()!.stats.overdue }}</span><span class="kl">{{ 'rep.overdueLbl' | t }}</span></div>
           <div class="kpi"><span class="kv text-green">{{ report()!.stats.completionRate }}%</span><span class="kl">{{ 'rep.rateLbl' | t }}</span></div>
         </div>
 
@@ -122,8 +121,7 @@ const PRIORITY_COLORS: Record<string, string> = {
           <table class="rep-table">
             <thead><tr>
               <th>#</th><th>Title</th><th>Priority</th><th>Status</th><th>Progress</th>
-              <th>Technician</th><th>Created</th>
-              @if (mode() !== 'single') { <th>Due</th> }
+              <th>Technician</th><th>Started</th>
             </tr></thead>
             <tbody>
               @for (t of displayTickets(); track t.id) {
@@ -139,8 +137,7 @@ const PRIORITY_COLORS: Record<string, string> = {
                     </div>
                   </td>
                   <td class="text-sm">{{ t.assigneeName ?? '—' }}</td>
-                  <td class="text-sm">{{ t.dueDate ? (t.dueDate | date:'shortDate') : '—' }}</td>
-                  @if (mode() !== 'single') { <td class="text-sm">{{ t.dueDate ? (t.dueDate | date:'shortDate') : '—' }}</td> }
+                  <td class="text-sm">{{ t.startDate ? (t.startDate | date:'shortDate') : '—' }}</td>
                 </tr>
               }
             </tbody>

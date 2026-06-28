@@ -9,10 +9,12 @@ public class Branch : AuditableEntity
     public string Code { get; set; } = string.Empty;
     public string? Address { get; set; }
     public string? Phone { get; set; }
+    public string? Email { get; set; }
 
     public int AreaId { get; set; }
     public Area Area { get; set; } = null!;
 
     public ICollection<User> Users { get; set; } = new List<User>();
     public ICollection<WorkTask> Tasks { get; set; } = new List<WorkTask>();
+    public ICollection<Device> Devices { get; set; } = new List<Device>();
 }

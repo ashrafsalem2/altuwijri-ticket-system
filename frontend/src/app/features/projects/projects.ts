@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ProjectService, UserService } from '../../core/services/data.services';
+import { ProjectService, UserService, ExcelService } from '../../core/services/data.services';
 import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
-import { PROJECT_STATUSES, Project, ProjectStatus, User } from '../../core/models/models';
+import { PROJECT_STATUSES, ImportResult, Project, ProjectStatus, User } from '../../core/models/models';
 
 @Component({
   selector: 'app-projects',
@@ -14,8 +14,32 @@ import { PROJECT_STATUSES, Project, ProjectStatus, User } from '../../core/model
   <div class="page" [attr.dir]="i18n.dir()">
     <div class="page-header">
       <h2>{{ 'proj.title' | t }}</h2>
-      @if (canEdit()) { <button class="btn btn-primary" (click)="openNew()">+ {{ 'proj.new' | t }}</button> }
+      @if (canEdit()) {
+        <div class="flex gap-1 items-center">
+          <button class="btn btn-ghost" (click)="xlDownload()">{{ 'xl.template' | t }}</button>
+          <label class="btn btn-ghost" [class.loading]="importing()">
+            {{ 'xl.import' | t }}
+            <input type="file" accept=".xlsx,.xls" style="display:none" (change)="xlImport($event)" />
+          </label>
+          <button class="btn btn-primary" (click)="openNew()">+ {{ 'proj.new' | t }}</button>
+        </div>
+      }
     </div>
+
+    @if (importResult()) {
+      <div class="import-bar" [class.has-errors]="(importResult()?.failed ?? 0) > 0">
+        <span>
+          ✓ {{ importResult()?.imported }} {{ 'xl.imported' | t }}
+          @if ((importResult()?.failed ?? 0) > 0) { · ✗ {{ importResult()?.failed }} {{ 'xl.failed' | t }} }
+        </span>
+        <button class="btn btn-sm btn-ghost" (click)="importResult.set(null)">✕</button>
+      </div>
+      @if (importResult()!.errors.length) {
+        <div class="card import-errors">
+          @for (e of importResult()!.errors; track $index) { <div class="ie-row">{{ e }}</div> }
+        </div>
+      }
+    }
 
     @if (loading()) { <div class="spin"></div> } @else {
       <div class="grid proj-grid">
@@ -86,6 +110,7 @@ import { PROJECT_STATUSES, Project, ProjectStatus, User } from '../../core/model
 export class Projects implements OnInit {
   private svc = inject(ProjectService);
   private userSvc = inject(UserService);
+  private xlSvc = inject(ExcelService);
   private auth = inject(AuthService);
   i18n = inject(I18nService);
 
@@ -95,12 +120,14 @@ export class Projects implements OnInit {
   showForm = signal(false);
   saving = signal(false);
   error = signal('');
+  importing = signal(false);
+  importResult = signal<ImportResult | null>(null);
   editing = false;
   editId?: number;
   statuses = PROJECT_STATUSES;
   model: any = {};
 
-  canEdit = () => this.auth.hasRole('Admin', 'Manager');
+  canEdit = () => this.auth.hasRole('Admin');
   isAdmin = () => this.auth.hasRole('Admin');
 
   ngOnInit() { this.userSvc.getAll().subscribe(u => this.users.set(u)); this.load(); }
@@ -133,5 +160,18 @@ export class Projects implements OnInit {
   remove(p: Project) {
     if (!confirm(`Delete project "${p.name}"?`)) return;
     this.svc.delete(p.id).subscribe({ next: () => this.load(), error: e => alert(e?.error?.title ?? 'Delete failed.') });
+  }
+
+  xlDownload() { this.xlSvc.downloadTemplate('projects'); }
+  xlImport(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.importing.set(true);
+    this.importResult.set(null);
+    this.xlSvc.import('projects', file).subscribe({
+      next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
+      error: e => { this.importing.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+    });
+    (event.target as HTMLInputElement).value = '';
   }
 }

@@ -23,7 +23,7 @@ public class ChatService(IApplicationDbContext db) : IChatService
     public async Task<IReadOnlyList<AvailableTechnicianDto>> GetTechniciansAsync(bool onlyAvailable, CancellationToken ct = default)
     {
         var q = db.Users.Include(u => u.Role).Include(u => u.Branch).AsNoTracking()
-            .Where(u => u.IsActive && (u.Role.Name == Roles.Technician || u.Role.Name == Roles.Admin || u.Role.Name == Roles.Manager));
+            .Where(u => u.IsActive && (u.Role.Name == Roles.Technician || u.Role.Name == Roles.Admin));
         if (onlyAvailable) q = q.Where(u => u.IsAvailable);
         return await q.OrderByDescending(u => u.IsAvailable).ThenBy(u => u.FullName)
             .Select(u => new AvailableTechnicianDto(u.Id, u.FullName, u.JobTitle, u.AvatarColor, u.Branch!.Name, u.IsAvailable))

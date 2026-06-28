@@ -1,13 +1,18 @@
 namespace TaskFlow.Application.Common.Authorization;
 
-/// <summary>Canonical role names used across the application for authorization.</summary>
 public static class Roles
 {
-    public const string Admin = "Admin";
-    public const string Manager = "Manager";
-    public const string Technician = "Technician";
-    public const string Viewer = "Viewer";
-    public const string Employee = "Employee";
+    public const string Admin          = "Admin";
+    public const string Technician     = "Technician";
+    public const string BranchEmployee = "Branch-Employee";
+    public const string HoEmployee     = "HO-Employee";
+    public const string CamEmployee    = "Cam-Employee";
 
-    public static readonly string[] All = [Admin, Manager, Technician, Viewer, Employee];
+    // Convenience composites for [Authorize] attributes
+    public const string AllStaff      = $"{Admin},{Technician}";
+    public const string AllEmployees  = $"{BranchEmployee},{HoEmployee},{CamEmployee}";
+    public const string AllRoles      = $"{Admin},{Technician},{BranchEmployee},{HoEmployee},{CamEmployee}";
+
+    public static readonly string[] All          = [Admin, Technician, BranchEmployee, HoEmployee, CamEmployee];
+    public static readonly string[] EmployeeRoles = [BranchEmployee, HoEmployee, CamEmployee];
 }

@@ -16,16 +16,11 @@ public class DashboardService(IApplicationDbContext db) : IDashboardService
     public async Task<DashboardStatsDto> GetStatsAsync(int? currentUserId, CancellationToken ct = default)
     {
         var tasks = db.Tasks.Where(t => !t.IsDeleted);
-        var now = DateTime.UtcNow;
 
         var total = await tasks.CountAsync(ct);
         var open = await tasks.CountAsync(t => t.Status != WorkTaskStatus.Done && t.Status != WorkTaskStatus.Cancelled, ct);
         var inProgress = await tasks.CountAsync(t => t.Status == WorkTaskStatus.InProgress, ct);
         var completed = await tasks.CountAsync(t => t.Status == WorkTaskStatus.Done, ct);
-        var overdue = await tasks.CountAsync(t => t.DueDate != null && t.DueDate < now &&
-            t.Status != WorkTaskStatus.Done && t.Status != WorkTaskStatus.Cancelled, ct);
-        var sla = await tasks.CountAsync(t => t.SlaDueDate != null && t.SlaDueDate < now &&
-            t.Status != WorkTaskStatus.Done && t.Status != WorkTaskStatus.Cancelled, ct);
         var unassigned = await tasks.CountAsync(t => t.AssigneeId == null &&
             t.Status != WorkTaskStatus.Done && t.Status != WorkTaskStatus.Cancelled, ct);
         var mine = currentUserId is null ? 0 : await tasks.CountAsync(t => t.AssigneeId == currentUserId &&
@@ -33,7 +28,7 @@ public class DashboardService(IApplicationDbContext db) : IDashboardService
         var activeProjects = await db.Projects.CountAsync(p => !p.IsDeleted && p.Status == ProjectStatus.Active, ct);
         var completionRate = total == 0 ? 0 : Math.Round(completed * 100.0 / total, 1);
 
-        return new DashboardStatsDto(total, open, inProgress, completed, overdue, sla, unassigned, mine, activeProjects, completionRate);
+        return new DashboardStatsDto(total, open, inProgress, completed, unassigned, mine, activeProjects, completionRate);
     }
 
     public async Task<DashboardChartsDto> GetChartsAsync(CancellationToken ct = default)

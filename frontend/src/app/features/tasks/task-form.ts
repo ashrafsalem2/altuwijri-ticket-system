@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../core/services/task.service';
-import { ProjectService, TagService, UserService, OrganizationService } from '../../core/services/data.services';
+import { ProjectService, TagService, UserService, OrganizationService, TicketCategoryService } from '../../core/services/data.services';
 import { AuthService } from '../../core/services/auth.service';
-import { Branch } from '../../core/models/models';
+import { Branch, TicketCategory } from '../../core/models/models';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TagPicker } from '../../shared/tag-picker';
 import { TagManager } from '../../shared/tag-manager';
@@ -50,23 +50,24 @@ import { TYPE_ICONS } from '../../shared/util';
         </div>
 
         <div class="form-row">
+          <div class="field"><label>{{ 'task.category' | t }}</label>
+            <select [(ngModel)]="model.categoryId">
+              <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
+              @for (c of categories(); track c.id) { <option [ngValue]="c.id">{{ c.icon }} {{ c.name }}</option> }
+            </select>
+          </div>
           <div class="field"><label>{{ 'task.assignee' | t }}</label>
             <select [(ngModel)]="model.assigneeId">
               <option [ngValue]="null">— {{ 'task.unassigned' | t }} —</option>
               @for (u of users(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
             </select>
           </div>
-          <div class="field"><label>{{ 'task.type' | t }}</label>
-            <select [(ngModel)]="model.type">
-              @for (t of types; track t) { <option [value]="t">{{ typeIcon(t) }} {{ typeLabel(t) }}</option> }
-            </select>
-          </div>
         </div>
 
         <div class="form-row">
-          <div class="field"><label>{{ 'task.status' | t }}</label>
-            <select [(ngModel)]="model.status">
-              @for (s of statuses; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+          <div class="field"><label>{{ 'task.type' | t }}</label>
+            <select [(ngModel)]="model.type">
+              @for (t of types; track t) { <option [value]="t">{{ typeIcon(t) }} {{ typeLabel(t) }}</option> }
             </select>
           </div>
           <div class="field"><label>{{ 'task.priority' | t }}</label>
@@ -77,21 +78,19 @@ import { TYPE_ICONS } from '../../shared/util';
         </div>
 
         <div class="form-row">
-          <div class="field"><label>{{ 'task.estimatedHours' | t }}</label>
-            <input class="input" type="number" min="0" [(ngModel)]="model.estimatedHours" />
+          <div class="field"><label>{{ 'task.status' | t }}</label>
+            <select [(ngModel)]="model.status">
+              @for (s of statuses; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+            </select>
           </div>
-          <div class="field"><label>{{ 'task.slaDue' | t }}</label><input class="input" type="date" [(ngModel)]="model.slaDueDate" /></div>
-        </div>
-
-        <div class="form-row">
-          <div class="field"><label>{{ 'task.startDate' | t }}</label><input class="input" type="date" [(ngModel)]="model.startDate" /></div>
-          <div class="field"><label>{{ 'task.dueDate' | t }}</label><input class="input" type="date" [(ngModel)]="model.dueDate" /></div>
+          <div class="field"></div>
         </div>
 
         @if (editing) {
           <div class="form-row">
-            <div class="field"><label>{{ 'task.actual' | t }}</label><input class="input" type="number" min="0" [(ngModel)]="actualHours" /></div>
-            <div class="field"><label>{{ 'task.progress' | t }} %</label><input class="input" type="number" min="0" max="100" [(ngModel)]="progress" /></div>
+            <div class="field"><label>{{ 'task.progress' | t }} %</label>
+              <input class="input" type="number" min="0" max="100" [(ngModel)]="progress" />
+            </div>
           </div>
         }
 
@@ -137,26 +136,27 @@ export class TaskForm implements OnInit {
   private userSvc = inject(UserService);
   private tagSvc = inject(TagService);
   private orgSvc = inject(OrganizationService);
+  private catSvc = inject(TicketCategoryService);
   private auth = inject(AuthService);
 
   projects = signal<Project[]>([]);
   users = signal<User[]>([]);
   tags = signal<Tag[]>([]);
   branches = signal<Branch[]>([]);
+  categories = signal<TicketCategory[]>([]);
   saving = signal(false);
   error = signal('');
   showTagManager = signal(false);
-  canManageTags = () => this.auth.hasRole('Admin', 'Manager');
+  canManageTags = () => this.auth.hasRole('Admin');
 
   statuses = TASK_STATUSES; priorities = PRIORITIES; types = TASK_TYPES;
   selectedTagIds: number[] = [];
   editing = false;
-  actualHours: number | null = null;
   progress = 0;
 
   model: CreateTaskRequest = {
     title: '', description: '', status: 'Backlog', priority: 'Medium', type: 'Task',
-    projectId: 0, branchId: null, assigneeId: null, startDate: null, dueDate: null, slaDueDate: null, estimatedHours: null
+    projectId: 0, branchId: null, categoryId: null, assigneeId: null
   };
 
   statusLabel = (s: WorkTaskStatus) => STATUS_LABELS[s];
@@ -171,17 +171,15 @@ export class TaskForm implements OnInit {
     this.userSvc.getAll().subscribe(u => this.users.set(u));
     this.tagSvc.getAll().subscribe(t => this.tags.set(t));
     this.orgSvc.getBranches().subscribe(b => this.branches.set(b));
+    this.catSvc.getAll().subscribe(c => this.categories.set(c));
 
     if (this.task) {
       this.editing = true;
       const t = this.task;
       this.model = {
         title: t.title, description: t.description, status: t.status, priority: t.priority, type: t.type,
-        projectId: t.projectId, branchId: t.branchId ?? null, assigneeId: t.assigneeId ?? null,
-        startDate: t.startDate?.substring(0, 10) ?? null, dueDate: t.dueDate?.substring(0, 10) ?? null,
-        slaDueDate: t.slaDueDate?.substring(0, 10) ?? null, estimatedHours: t.estimatedHours ?? null
+        projectId: t.projectId, branchId: t.branchId ?? null, categoryId: t.categoryId ?? null, assigneeId: t.assigneeId ?? null
       };
-      this.actualHours = t.actualHours ?? null;
       this.progress = t.progress;
       this.selectedTagIds = t.tags.map(tag => tag.id);
     } else if (this.defaultStatus) {
@@ -200,11 +198,10 @@ export class TaskForm implements OnInit {
     if (!this.model.projectId) { this.error.set('Project is required.'); return; }
     this.saving.set(true);
     this.error.set('');
-    const payload: any = { ...this.model, estimatedHours: numOrNull(this.model.estimatedHours), tagIds: this.selectedTagIds };
 
     const obs = this.editing && this.task
-      ? this.taskSvc.update(this.task.id, { ...payload, actualHours: numOrNull(this.actualHours), progress: Number(this.progress) } as UpdateTaskRequest)
-      : this.taskSvc.create(payload as CreateTaskRequest);
+      ? this.taskSvc.update(this.task.id, { ...this.model, progress: Number(this.progress), tagIds: this.selectedTagIds } as UpdateTaskRequest)
+      : this.taskSvc.create({ ...this.model, tagIds: this.selectedTagIds } as CreateTaskRequest);
 
     obs.subscribe({
       next: () => { this.saving.set(false); this.saved.emit(); },
@@ -212,5 +209,3 @@ export class TaskForm implements OnInit {
     });
   }
 }
-
-function numOrNull(v: any): number | null { return v === '' || v === null || v === undefined ? null : Number(v); }

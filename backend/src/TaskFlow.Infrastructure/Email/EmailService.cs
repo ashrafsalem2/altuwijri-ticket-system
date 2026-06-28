@@ -32,27 +32,27 @@ public sealed class EmailService(IConfiguration config, ILogger<EmailService> lo
             return;
         }
 
-        var subject = $"[ATS] Task Assigned: {taskTitle}";
-        var body = BuildHtmlBody(toName, taskTitle, taskId, priority, projectName, baseUrl);
-
-        using var client = new SmtpClient(host, port)
-        {
-            Credentials = new NetworkCredential(username, password),
-            EnableSsl = enableSsl,
-            DeliveryMethod = SmtpDeliveryMethod.Network
-        };
-
-        var msg = new MailMessage
-        {
-            From = new MailAddress(fromAddr, fromName),
-            Subject = subject,
-            Body = body,
-            IsBodyHtml = true
-        };
-        msg.To.Add(new MailAddress(toEmail, toName));
-
         try
         {
+            var subject = $"[ATS] Task Assigned: {taskTitle}";
+            var body = BuildHtmlBody(toName, taskTitle, taskId, priority, projectName, baseUrl);
+
+            using var client = new SmtpClient(host, port)
+            {
+                Credentials = new NetworkCredential(username, password),
+                EnableSsl = enableSsl,
+                DeliveryMethod = SmtpDeliveryMethod.Network
+            };
+
+            var msg = new MailMessage
+            {
+                From = new MailAddress(fromAddr, fromName),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+            msg.To.Add(new MailAddress(toEmail, toName));
+
             await client.SendMailAsync(msg, ct);
             logger.LogInformation("Email sent to {Email} for task #{TaskId}", toEmail, taskId);
         }

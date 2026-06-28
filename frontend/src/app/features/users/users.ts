@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { UserService, OrganizationService } from '../../core/services/data.services';
+import { UserService, OrganizationService, TicketCategoryService, ExcelService, DepartmentService } from '../../core/services/data.services';
 import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
-import { Branch, Role, User } from '../../core/models/models';
+import { Branch, Department, ImportResult, Role, TicketCategory, User } from '../../core/models/models';
 import { initials } from '../../shared/util';
 
 @Component({
@@ -16,11 +16,35 @@ import { initials } from '../../shared/util';
   <div class="page" [attr.dir]="i18n.dir()">
     <div class="page-header">
       <h2>{{ 'usr.title' | t }}</h2>
-      <div class="flex gap-1 items-center">
+      <div class="flex gap-1 items-center flex-wrap">
         <label class="chk"><input type="checkbox" [(ngModel)]="includeInactive" (ngModelChange)="load()" /> {{ 'usr.showInactive' | t }}</label>
-        @if (isAdmin()) { <button class="btn btn-primary" (click)="openNew()">+ {{ 'usr.newUser' | t }}</button> }
+        @if (isAdmin()) {
+          <button class="btn btn-ghost" (click)="xlDownload()">{{ 'xl.template' | t }}</button>
+          <label class="btn btn-ghost" [class.loading]="importing()">
+            {{ 'xl.import' | t }}
+            <input type="file" accept=".xlsx,.xls" style="display:none" (change)="xlImport($event)" />
+          </label>
+          <button class="btn btn-primary" (click)="openNew()">+ {{ 'usr.newUser' | t }}</button>
+        }
       </div>
     </div>
+
+    @if (importResult()) {
+      <div class="import-bar" [class.has-errors]="(importResult()?.failed ?? 0) > 0">
+        <span>
+          ✓ {{ importResult()?.imported }} {{ 'xl.imported' | t }}
+          @if ((importResult()?.failed ?? 0) > 0) { · ✗ {{ importResult()?.failed }} {{ 'xl.failed' | t }} }
+        </span>
+        <button class="btn btn-sm btn-ghost" (click)="importResult.set(null)">✕</button>
+      </div>
+      @if (importResult()!.errors.length) {
+        <div class="card import-errors">
+          @for (e of importResult()!.errors; track $index) {
+            <div class="ie-row">{{ e }}</div>
+          }
+        </div>
+      }
+    }
 
     <div class="card">
       @if (loading()) { <div class="spin"></div> } @else {
@@ -32,8 +56,14 @@ import { initials } from '../../shared/util';
                 <td><span class="flex items-center gap-1"><span class="avatar sm" [style.background]="u.avatarColor || '#64748b'">{{ ini(u.fullName) }}</span> {{ u.fullName }}</span></td>
                 <td class="text-sm">{{ u.userName }}</td>
                 <td><span class="badge st-ToDo">{{ u.roleName }}</span></td>
-                <td class="text-sm">{{ u.branchName || '—' }}<br><span class="text-xs muted">{{ u.areaName }}</span></td>
-                <td class="text-sm">{{ u.department || '—' }}</td>
+                <td class="text-sm">
+                  @if (u.roleName === 'Cam-Employee' && u.branchNames?.length) {
+                    {{ u.branchNames.join(', ') }}
+                  } @else {
+                    {{ u.branchName || '—' }}<br><span class="text-xs muted">{{ u.areaName }}</span>
+                  }
+                </td>
+                <td class="text-sm">{{ u.departmentName || '—' }}</td>
                 <td class="text-sm">{{ u.lastLoginAt ? (u.lastLoginAt | date:'short') : ('c.never' | t) }}</td>
                 <td>@if (u.isActive) { <span class="badge st-Done">{{ 'usr.active' | t }}</span> } @else { <span class="badge st-Cancelled">{{ 'usr.inactive' | t }}</span> }</td>
                 @if (isAdmin()) {
@@ -68,21 +98,58 @@ import { initials } from '../../shared/util';
             <div class="field"><label>{{ 'usr.role' | t }}</label>
               <select [(ngModel)]="model.roleId">@for (r of roles(); track r.id) { <option [ngValue]="r.id">{{ r.name }}</option> }</select>
             </div>
-            <div class="field"><label>{{ 'usr.branch' | t }}</label>
-              <select [(ngModel)]="model.branchId">
+            @if (!isCamRole()) {
+              <div class="field"><label>{{ 'usr.branch' | t }}</label>
+                <select [(ngModel)]="model.branchId">
+                  <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
+                  @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }} ({{ b.areaName }})</option> }
+                </select>
+              </div>
+            }
+          </div>
+          @if (isCamRole()) {
+            <div class="field">
+              <label>{{ 'usr.branches' | t }}</label>
+              <div class="cat-check-list">
+                @for (b of branches(); track b.id) {
+                  <label class="cat-check-item">
+                    <input type="checkbox"
+                           [checked]="model.branchIds?.includes(b.id)"
+                           (change)="toggleBranch(b.id, $event)" />
+                    <span class="cat-check-name">{{ b.name }} <span class="text-xs muted">({{ b.areaName }})</span></span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+          <div class="form-row">
+            <div class="field"><label>{{ 'usr.dept' | t }}</label>
+              <select [(ngModel)]="model.departmentId">
                 <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
-                @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }} ({{ b.areaName }})</option> }
+                @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
               </select>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="field"><label>{{ 'usr.dept' | t }}</label><input class="input" [(ngModel)]="model.department" /></div>
             <div class="field"><label>{{ 'usr.jobTitle' | t }}</label><input class="input" [(ngModel)]="model.jobTitle" /></div>
           </div>
-          <div class="form-row">
-            <div class="field"><label>{{ 'usr.phone' | t }}</label><input class="input" [(ngModel)]="model.phoneNumber" /></div>
-            <div class="field"></div>
-          </div>
+          <div class="field"><label>{{ 'usr.phone' | t }}</label><input class="input" [(ngModel)]="model.phoneNumber" /></div>
+          @if (isTechnicianRole()) {
+            <div class="field">
+              <label>{{ 'usr.category' | t }}</label>
+              <div class="cat-check-list">
+                @for (c of categories(); track c.id) {
+                  @if (c.isActive) {
+                    <label class="cat-check-item">
+                      <input type="checkbox"
+                             [checked]="model.categoryIds?.includes(c.id)"
+                             (change)="toggleCat(c.id, $event)" />
+                      <span class="cat-check-icon" [style.background]="c.color + '22'" [style.border-color]="c.color + '55'">{{ c.icon }}</span>
+                      <span class="cat-check-name">{{ c.name }}</span>
+                    </label>
+                  }
+                }
+              </div>
+            </div>
+          }
           @if (editing) {
             <label class="chk"><input type="checkbox" [(ngModel)]="model.isActive" /> {{ 'usr.active' | t }}</label>
           }
@@ -100,27 +167,38 @@ import { initials } from '../../shared/util';
 export class Users implements OnInit {
   private svc = inject(UserService);
   private orgSvc = inject(OrganizationService);
+  private catSvc = inject(TicketCategoryService);
+  private deptSvc = inject(DepartmentService);
   private auth = inject(AuthService);
+  private xlSvc = inject(ExcelService);
   i18n = inject(I18nService);
 
   users = signal<User[]>([]);
   roles = signal<Role[]>([]);
   branches = signal<Branch[]>([]);
+  categories = signal<TicketCategory[]>([]);
+  departments = signal<Department[]>([]);
   loading = signal(true);
   showForm = signal(false);
   saving = signal(false);
   error = signal('');
+  importing = signal(false);
+  importResult = signal<ImportResult | null>(null);
   includeInactive = false;
   editing = false;
   editId?: number;
   model: any = {};
 
   ini = initials;
-  isAdmin = () => this.auth.hasRole('Admin');
+  isAdmin          = () => this.auth.hasRole('Admin');
+  isTechnicianRole = () => this.roles().find(r => r.id === this.model.roleId)?.name === 'Technician';
+  isCamRole        = () => this.roles().find(r => r.id === this.model.roleId)?.name === 'Cam-Employee';
 
   ngOnInit() {
     this.svc.roles().subscribe(r => this.roles.set(r));
     this.orgSvc.getBranches().subscribe(b => this.branches.set(b));
+    this.catSvc.getAll().subscribe(c => this.categories.set(c));
+    this.deptSvc.getAll().subscribe(d => this.departments.set(d));
     this.load();
   }
 
@@ -128,13 +206,27 @@ export class Users implements OnInit {
 
   openNew() {
     this.editing = false; this.error.set('');
-    this.model = { fullName: '', userName: '', email: '', password: '', roleId: this.roles()[0]?.id, isActive: true };
+    this.model = { fullName: '', userName: '', email: '', password: '', roleId: this.roles()[0]?.id, isActive: true, categoryIds: [], branchIds: [] };
     this.showForm.set(true);
   }
   openEdit(u: User) {
     this.editing = true; this.editId = u.id; this.error.set('');
-    this.model = { ...u };
+    this.model = { ...u, categoryIds: [...(u.categoryIds ?? [])], branchIds: [...(u.branchIds ?? [])] };
     this.showForm.set(true);
+  }
+
+  toggleCat(id: number, e: Event) {
+    const checked = (e.target as HTMLInputElement).checked;
+    if (!this.model.categoryIds) this.model.categoryIds = [];
+    if (checked) { if (!this.model.categoryIds.includes(id)) this.model.categoryIds.push(id); }
+    else          { this.model.categoryIds = this.model.categoryIds.filter((x: number) => x !== id); }
+  }
+
+  toggleBranch(id: number, e: Event) {
+    const checked = (e.target as HTMLInputElement).checked;
+    if (!this.model.branchIds) this.model.branchIds = [];
+    if (checked) { if (!this.model.branchIds.includes(id)) this.model.branchIds.push(id); }
+    else          { this.model.branchIds = this.model.branchIds.filter((x: number) => x !== id); }
   }
 
   save() {
@@ -152,5 +244,19 @@ export class Users implements OnInit {
     const pw = prompt(`New password for ${u.fullName} (min 6 chars):`);
     if (!pw) return;
     this.svc.resetPassword(u.id, pw).subscribe({ next: () => alert('Password reset.'), error: e => alert(e?.error?.title ?? 'Failed.') });
+  }
+
+  xlDownload() { this.xlSvc.downloadTemplate('users'); }
+
+  xlImport(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.importing.set(true);
+    this.importResult.set(null);
+    this.xlSvc.import('users', file).subscribe({
+      next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
+      error: e => { this.importing.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+    });
+    (event.target as HTMLInputElement).value = '';
   }
 }

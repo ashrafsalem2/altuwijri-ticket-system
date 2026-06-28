@@ -15,7 +15,7 @@ import { initials, timeAgo } from '../shared/util';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, FormsModule],
   styleUrl: './shell.scss',
   template: `
-  <div class="layout" [class.sidebar-open]="sidebarOpen()" [attr.dir]="i18n.dir()">
+  <div class="layout" [class.sidebar-open]="sidebarOpen()" [class.sidebar-collapsed]="sidebarCollapsed()" [attr.dir]="i18n.dir()">
     <div class="backdrop" (click)="sidebarOpen.set(false)"></div>
 
     <!-- ═══ SIDEBAR ═══ -->
@@ -35,33 +35,33 @@ import { initials, timeAgo } from '../shared/util';
       </div>
 
       <nav>
-        <a routerLink="/dashboard" routerLinkActive="active"><span class="ic">▦</span> {{ 'nav.dashboard' | t }}</a>
-        <a routerLink="/calendar"  routerLinkActive="active"><span class="ic">📅</span> {{ 'nav.calendar'  | t }}</a>
+        <a routerLink="/dashboard" routerLinkActive="active" [title]="'nav.dashboard' | t"><span class="ic">▦</span> <span class="nav-lbl">{{ 'nav.dashboard' | t }}</span></a>
+        <a routerLink="/calendar"  routerLinkActive="active" [title]="'nav.calendar'  | t"><span class="ic">📅</span> <span class="nav-lbl">{{ 'nav.calendar'  | t }}</span></a>
         @if (auth.hasRole('Admin')) {
-          <a routerLink="/board" routerLinkActive="active"><span class="ic">▤</span> {{ 'nav.board' | t }}</a>
+          <a routerLink="/board" routerLinkActive="active" [title]="'nav.board' | t"><span class="ic">▤</span> <span class="nav-lbl">{{ 'nav.board' | t }}</span></a>
         }
         @if (!auth.hasRole('Branch-Employee', 'HO-Employee', 'Cam-Employee')) {
-          <a routerLink="/tasks"    routerLinkActive="active"><span class="ic">☰</span> {{ 'nav.tasks'    | t }}</a>
-          <a routerLink="/projects" routerLinkActive="active"><span class="ic">◫</span> {{ 'nav.projects' | t }}</a>
+          <a routerLink="/tasks"    routerLinkActive="active" [title]="'nav.tasks'    | t"><span class="ic">☰</span> <span class="nav-lbl">{{ 'nav.tasks'    | t }}</span></a>
+          <a routerLink="/projects" routerLinkActive="active" [title]="'nav.projects' | t"><span class="ic">◫</span> <span class="nav-lbl">{{ 'nav.projects' | t }}</span></a>
         }
         @if (auth.hasRole('Branch-Employee', 'HO-Employee', 'Cam-Employee')) {
-          <a routerLink="/my-tickets" routerLinkActive="active"><span class="ic">🎫</span> {{ 'nav.myTickets' | t }}</a>
+          <a routerLink="/my-tickets" routerLinkActive="active" [title]="'nav.myTickets' | t"><span class="ic">🎫</span> <span class="nav-lbl">{{ 'nav.myTickets' | t }}</span></a>
         }
-        <a routerLink="/chat" routerLinkActive="active">
-          <span class="ic">💬</span> {{ 'nav.chat' | t }}
+        <a routerLink="/chat" routerLinkActive="active" [title]="'nav.chat' | t">
+          <span class="ic">💬</span> <span class="nav-lbl">{{ 'nav.chat' | t }}</span>
           @if (chatUnread() > 0) { <span class="side-badge">{{ chatUnread() }}</span> }
         </a>
         @if (auth.hasRole('Admin')) {
-          <a routerLink="/reports" routerLinkActive="active"><span class="ic">📊</span> {{ 'nav.reports' | t }}</a>
+          <a routerLink="/reports" routerLinkActive="active" [title]="'nav.reports' | t"><span class="ic">📊</span> <span class="nav-lbl">{{ 'nav.reports' | t }}</span></a>
         }
         @if (auth.hasRole('Admin')) {
-          <a routerLink="/organization" routerLinkActive="active"><span class="ic">🏢</span> {{ 'nav.org'   | t }}</a>
-          <a routerLink="/users"        routerLinkActive="active"><span class="ic">◑</span>  {{ 'nav.users' | t }}</a>
+          <a routerLink="/organization" routerLinkActive="active" [title]="'nav.org'   | t"><span class="ic">🏢</span> <span class="nav-lbl">{{ 'nav.org'   | t }}</span></a>
+          <a routerLink="/users"        routerLinkActive="active" [title]="'nav.users' | t"><span class="ic">◑</span>  <span class="nav-lbl">{{ 'nav.users' | t }}</span></a>
         }
         @if (auth.hasRole('Admin')) {
-          <a routerLink="/ticket-categories" routerLinkActive="active"><span class="ic">🗂</span> {{ 'nav.ticketCats' | t }}</a>
+          <a routerLink="/ticket-categories" routerLinkActive="active" [title]="'nav.ticketCats' | t"><span class="ic">🗂</span> <span class="nav-lbl">{{ 'nav.ticketCats' | t }}</span></a>
         }
-        <a routerLink="/help" routerLinkActive="active"><span class="ic">❓</span> {{ 'nav.help' | t }}</a>
+        <a routerLink="/help" routerLinkActive="active" [title]="'nav.help' | t"><span class="ic">❓</span> <span class="nav-lbl">{{ 'nav.help' | t }}</span></a>
       </nav>
 
       <!-- ── Branch Card (Branch-Employee only) ── -->
@@ -128,7 +128,8 @@ import { initials, timeAgo } from '../shared/util';
 
       <!-- ═══ TOPBAR ═══ -->
       <header class="topbar">
-        <button class="btn btn-icon btn-ghost hamburger" (click)="sidebarOpen.set(true)" aria-label="Menu">☰</button>
+        <button class="btn btn-icon btn-ghost hamburger" (click)="toggleNav()" aria-label="Menu">☰</button>
+        <span class="topbar-brand">{{ 'app.name' | t }}</span>
         <div class="spacer"></div>
 
         <button class="lang-btn" (click)="i18n.toggle()"
@@ -484,6 +485,7 @@ export class Shell implements OnInit, OnDestroy {
   notifOpen     = signal(false);
   userOpen      = signal(false);
   sidebarOpen   = signal(false);
+  sidebarCollapsed = signal(localStorage.getItem('ats-nav-collapsed') === '1');
   available     = signal(false);
   logoErr       = false;
   private timer?: any;
@@ -644,6 +646,15 @@ export class Shell implements OnInit, OnDestroy {
     }
   }
   toggleUser() { const o = !this.userOpen(); setTimeout(() => this.userOpen.set(o)); this.notifOpen.set(false); }
+  toggleNav() {
+    if (window.innerWidth <= 860) {
+      this.sidebarOpen.set(!this.sidebarOpen());
+    } else {
+      const next = !this.sidebarCollapsed();
+      this.sidebarCollapsed.set(next);
+      localStorage.setItem('ats-nav-collapsed', next ? '1' : '0');
+    }
+  }
   markAll() {
     this.notifSvc.markAllRead().subscribe(() => {
       this.unread.set(0);

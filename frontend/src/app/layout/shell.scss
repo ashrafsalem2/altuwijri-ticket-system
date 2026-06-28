@@ -6,8 +6,9 @@
   width: 240px; background: var(--sidebar); color: #e2e8f0;
   display: flex; flex-direction: column;
   position: sticky; top: 0; height: 100vh; flex-shrink: 0; z-index: 200;
-  overflow: hidden;                       /* sidebar itself fixed — only nav scrolls */
+  overflow: hidden;
   border-right: 1px solid rgba(255,255,255,.06);
+  transition: width .22s cubic-bezier(.4,0,.2,1);
 }
 .brand { display: flex; align-items: center; gap: .5rem; padding: .85rem 1rem; flex-shrink: 0; }
 .logo-wrap { flex-shrink: 0; }
@@ -43,6 +44,29 @@
 .sidebar nav a .ic { width: 18px; text-align: center; }
 .side-badge { margin-left: auto; background: var(--danger); color: #fff; border-radius: 999px; font-size: .65rem; padding: 0 6px; font-weight: 700; }
 .side-foot { margin-top: auto; padding: .75rem 1.25rem; color: var(--sidebar-muted); font-size: .72rem; flex-shrink: 0; }
+
+/* ══════════════════════════════════════════════════════
+   COLLAPSED SIDEBAR — BC icon-only mode
+══════════════════════════════════════════════════════ */
+.layout.sidebar-collapsed .sidebar {
+  width: 52px;
+
+  .brand { padding: .65rem 0; justify-content: center; }
+  .logo-img { width: 32px !important; height: 32px !important; }
+  .logo-txt { width: 32px; height: 32px; font-size: .75rem; }
+  .brand-text, .side-foot { display: none; }
+  .branch-card { display: none; }
+  .close-side { display: none !important; }
+
+  nav { padding: .5rem 0; gap: .1rem; }
+  nav a {
+    justify-content: center; padding: .62rem 0; gap: 0;
+    border-radius: 0;
+    .nav-lbl { display: none; }
+    .ic { width: auto; font-size: 1.1rem; text-align: center; }
+    .side-badge { display: none; }
+  }
+}
 
 /* ══════════════════════════════════════════════════════
    BRANCH CARD (Employee sidebar)
@@ -123,7 +147,11 @@
     &.on { background: rgba(22,163,74,.28); border-color: rgba(34,197,94,.45); color: #86efac; .avail-dot { background: #22c55e; } }
   }
 }
-.hamburger { display: none; font-size: 1.1rem; }
+.hamburger { display: inline-flex; font-size: 1.05rem; }
+.topbar-brand {
+  font-size: .88rem; font-weight: 700; color: rgba(255,255,255,.88);
+  white-space: nowrap; letter-spacing: .01em;
+}
 .spacer { flex: 1; }
 
 .avail-toggle {
@@ -547,7 +575,7 @@
   .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform .25s ease; box-shadow: var(--shadow-lg); height: 100dvh; }
   .layout.sidebar-open .sidebar { transform: translateX(0); }
   .layout.sidebar-open .backdrop { display: block; position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 150; }
-  .hamburger, .close-side { display: inline-flex; }
+  .close-side { display: inline-flex; }
   .u-meta { display: none; }
   [dir="rtl"] .sidebar { left: auto; right: 0; transform: translateX(100%); }
   [dir="rtl"] .layout.sidebar-open .sidebar { transform: translateX(0); }

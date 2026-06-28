@@ -123,9 +123,76 @@ textarea { resize: vertical; min-height: 90px; }
 .muted { color: var(--text-muted); } .text-sm { font-size: .82rem; } .text-xs { font-size: .74rem; }
 .mt-1 { margin-top: .5rem; } .mt-2 { margin-top: 1rem; } .mb-2 { margin-bottom: 1rem; }
 .spacer { flex: 1; } .right { margin-left: auto; }
-.page { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+.page { padding: 1.25rem 1.5rem; max-width: 1400px; margin: 0 auto; }
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; flex-wrap: wrap; gap: .75rem;
+  padding-bottom: .85rem; border-bottom: 1px solid var(--border);
+  h1, h2, h3 { font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--text); }
+}
 .grid { display: grid; gap: 1rem; }
+
+/* ── BC action bar ─────────────────────────────────── */
+.bc-actions {
+  display: flex; align-items: center; gap: .2rem; flex-wrap: wrap;
+  padding: .4rem 0; margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.bc-btn {
+  display: inline-flex; align-items: center; gap: .32rem;
+  padding: .32rem .75rem; font-size: .82rem; font-weight: 500;
+  cursor: pointer; background: transparent; border: 1px solid transparent;
+  border-radius: var(--radius-sm); color: var(--text); transition: all .12s;
+  white-space: nowrap; font-family: inherit;
+  &:hover { background: var(--surface-2); border-color: var(--border); }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+  &.bc-primary { background: var(--primary); color: #fff; border-color: var(--primary); &:hover { background: var(--primary-dark); border-color: var(--primary-dark); } }
+  &.bc-danger  { &:hover { background: #fee2e2; color: #b91c1c; border-color: #fecaca; } }
+}
+.bc-sep { width: 1px; height: 20px; background: var(--border); margin: 0 .25rem; flex-shrink: 0; align-self: center; }
+
+/* ── BC FastTab panels ─────────────────────────────── */
+.fasttab {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: .5rem; overflow: hidden;
+}
+.fasttab-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .55rem 1rem; background: var(--surface-2);
+  cursor: pointer; user-select: none; font-weight: 600; font-size: .88rem;
+  border: none; width: 100%; text-align: left; color: var(--text); font-family: inherit;
+  gap: .5rem;
+  &:hover { background: var(--border); }
+}
+.fasttab-title { display: flex; align-items: center; gap: .5rem; }
+.fasttab-chevron { font-size: .65rem; color: var(--text-muted); transition: transform .2s; margin-left: auto; &.open { transform: rotate(180deg); } }
+.fasttab-body { padding: 1rem; background: var(--surface); }
+
+/* ── BC two-column layout with FactBox ─────────────── */
+.bc-layout { display: flex; gap: 1rem; align-items: flex-start; }
+.bc-main   { flex: 1; min-width: 0; }
+.bc-factbox {
+  width: 268px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.bc-factbox-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.bc-factbox-head {
+  padding: .45rem .85rem; background: var(--surface-2);
+  font-size: .78rem; font-weight: 700; border-bottom: 1px solid var(--border);
+  color: var(--text); text-transform: uppercase; letter-spacing: .04em;
+}
+.bc-factbox-body { padding: .65rem .85rem; }
+.bc-fact-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: .28rem 0; border-bottom: 1px solid var(--surface-2);
+  font-size: .82rem;
+  &:last-child { border-bottom: none; }
+}
+.bc-fact-lbl { color: var(--text-muted); }
+.bc-fact-val { font-weight: 600; color: var(--text); }
 
 .toast-error {
   position: fixed; bottom: 1.25rem; right: 1.25rem; background: var(--danger); color: #fff;

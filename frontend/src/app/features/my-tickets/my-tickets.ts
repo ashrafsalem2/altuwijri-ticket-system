@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -224,7 +224,7 @@ const FILTER_STATUSES: Record<EmpFilter, WorkTaskStatus[] | null> = {
   }
   `
 })
-export class MyTickets implements OnInit {
+export class MyTickets implements OnInit, OnDestroy {
   private taskSvc = inject(TaskService);
   private chatSvc = inject(ChatService);
   private attSvc = inject(AttachmentService);
@@ -244,6 +244,8 @@ export class MyTickets implements OnInit {
   activeFilter = signal<EmpFilter>('all');
   private _page = signal(1);
   currentPage = this._page.asReadonly();
+  private listPoll?: any;
+  ngOnDestroy() { clearInterval(this.listPoll); }
 
   search = '';
   linkTitle = '';
@@ -304,6 +306,7 @@ export class MyTickets implements OnInit {
   ngOnInit() {
     this.load();
     this.chatSvc.technicians(false).subscribe(t => this.technicians.set(t));
+    this.listPoll = setInterval(() => this.silentRefresh(), 20000);
   }
 
   load() {
@@ -311,6 +314,12 @@ export class MyTickets implements OnInit {
     this.taskSvc.query({ sortBy: 'createdAt', sortDescending: true, pageSize: 1000 }).subscribe({
       next: r => { this.allTickets.set(r.items); this.loading.set(false); },
       error: () => this.loading.set(false)
+    });
+  }
+
+  private silentRefresh() {
+    this.taskSvc.query({ sortBy: 'createdAt', sortDescending: true, pageSize: 1000 }).subscribe({
+      next: r => this.allTickets.set(r.items)
     });
   }
 

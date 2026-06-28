@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TaskQuery, TaskService } from '../../core/services/task.service';
@@ -105,7 +105,7 @@ import { initials, typeIcon } from '../../shared/util';
   @if (showForm()) { <app-task-form (saved)="onSaved()" (cancel)="showForm.set(false)"></app-task-form> }
   `
 })
-export class TaskList implements OnInit {
+export class TaskList implements OnInit, OnDestroy {
   private taskSvc = inject(TaskService);
   private projectSvc = inject(ProjectService);
   private userSvc = inject(UserService);
@@ -131,6 +131,9 @@ export class TaskList implements OnInit {
   canEdit = () => this.auth.hasRole('Admin', 'Technician');
   isTechnician = () => this.auth.user()?.role === 'Technician';
 
+  private listPoll?: any;
+  ngOnDestroy() { clearInterval(this.listPoll); }
+
   ngOnInit() {
     // Pre-populate filters from query params (dashboard clickthrough)
     const params = this.route.snapshot.queryParams;
@@ -146,6 +149,7 @@ export class TaskList implements OnInit {
     this.userSvc.getAll().subscribe(u => this.users.set(u));
     this.orgSvc.getBranches().subscribe(b => this.branches.set(b));
     this.load();
+    this.listPoll = setInterval(() => this.silentRefresh(), 20000);
   }
 
   load() {
@@ -153,6 +157,12 @@ export class TaskList implements OnInit {
     this.taskSvc.query(this.q).subscribe({
       next: r => { this.page.set(r); this.loading.set(false); },
       error: () => this.loading.set(false)
+    });
+  }
+
+  private silentRefresh() {
+    this.taskSvc.query(this.q).subscribe({
+      next: r => this.page.set(r)
     });
   }
 

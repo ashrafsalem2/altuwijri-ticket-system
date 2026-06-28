@@ -349,12 +349,13 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   quickSaving = signal(false);
   quickSaved = signal(false);
   private commentPoll?: any;
+  private taskPoll?: any;
 
   ngOnInit() { this.load(); }
   ngOnChanges(changes: SimpleChanges) {
     if (changes['id'] && !changes['id'].firstChange) this.load();
   }
-  ngOnDestroy() { clearInterval(this.commentPoll); }
+  ngOnDestroy() { clearInterval(this.commentPoll); clearInterval(this.taskPoll); }
 
   load() {
     const id = Number(this.id);
@@ -379,6 +380,23 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
     clearInterval(this.commentPoll);
     this.commentPoll = setInterval(() => this.taskSvc.comments(id).subscribe(c => this.comments.set(c)), 10000);
     this.attachmentSvc.list(id).subscribe(a => { this.attachments.set(a); this.loadThumbnails(a); });
+
+    // Poll the task itself so status changes by other users are reflected without a page refresh.
+    clearInterval(this.taskPoll);
+    this.taskPoll = setInterval(() => this.pollTask(id), 15000);
+  }
+
+  private pollTask(id: number) {
+    this.taskSvc.get(id).subscribe({
+      next: fresh => {
+        const cur = this.task();
+        if (!cur) return;
+        if (fresh.status !== cur.status || fresh.progress !== cur.progress ||
+            fresh.assigneeId !== cur.assigneeId || fresh.assigneeName !== cur.assigneeName) {
+          this.task.set(fresh);
+        }
+      }
+    });
   }
 
   private loadThumbnails(items: Attachment[]) {

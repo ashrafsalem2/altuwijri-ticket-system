@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Altuwijri Ticket System — Employee Guide</title>
+<style>
+  /* ── Reset & Variables ─────────────────────────────────── */
+  :root {
+    --bg:       #0f172a;
+    --surface:  #1e293b;
+    --surface2: #273449;
+    --border:   #334155;
+    --text:     #e2e8f0;
+    --muted:    #94a3b8;
+    --primary:  #3b82f6;
+    --emp:      #059669;
+    --tech:     #7c3aed;
+    --adm:      #dc2626;
+    --yellow:   #eab308;
+    --green:    #22c55e;
+    --orange:   #f97316;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+  }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── TOC sidebar ── */
+  .toc {
+    width: 235px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 1rem;
+  }
+  .toc-brand {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1.25rem;
+    font-weight: 800;
+    font-size: .9rem;
+  }
+  .toc-brand .char-mini { font-size: 1.6rem; }
+  .toc a {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted);
+    padding: .28rem .6rem;
+    border-radius: .35rem;
+    transition: all .15s;
+  }
+  .toc a:hover, .toc a.on { color: var(--text); background: var(--surface2); text-decoration: none; }
+  .toc .indent { padding-left: 1.3rem; font-size: .76rem; }
+  .toc hr { border: none; border-top: 1px solid var(--border); margin: .6rem 0; }
+  .toc a.emp-link.on { background: rgba(5,150,105,.18); color: #6ee7b7; }
+
+  /* ── Main content ── */
+  .content {
+    flex: 1;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2.5rem 2.5rem 4rem;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 60%, #0d9488 100%);
+    border-radius: 1.25rem;
+    padding: 2.25rem 2.5rem;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-text { flex: 1; }
+  .hero h1 { font-size: 2.1rem; font-weight: 800; color: #fff; margin-bottom: .4rem; }
+  .hero p  { color: rgba(255,255,255,.85); font-size: 1rem; max-width: 500px; }
+  .hero-badge {
+    display: inline-block;
+    margin-top: .75rem;
+    background: rgba(255,255,255,.2);
+    border-radius: 2rem;
+    padding: .25rem .9rem;
+    font-size: .8rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .05em;
+  }
+  .hero-char { flex-shrink: 0; }
+
+  /* ── Animated cartoon character ── */
+  .guide-char {
+    width: 110px;
+    height: 185px;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,.4));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  .arm-l { transform-origin: 19px 94px; animation: wave 2s ease-in-out infinite; }
+  @keyframes wave {
+    0%,100% { transform: rotate(0deg); }
+    30%     { transform: rotate(28deg); }
+    70%     { transform: rotate(-10deg); }
+  }
+  .eye  { animation: blink 5s ease-in-out infinite; transform-origin: center; }
+  .eye2 { animation: blink 5s ease-in-out infinite .12s; transform-origin: center; }
+  @keyframes blink {
+    0%,93%,100% { transform: scaleY(1); }
+    96%,98%     { transform: scaleY(.08); }
+  }
+
+  /* ── Language toggle ── */
+  .lang-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+    gap: .5rem;
+  }
+  .lang-btn {
+    padding: .4rem 1rem;
+    border-radius: 2rem;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .lang-btn.on { background: var(--emp); border-color: var(--emp); color: #fff; }
+  .lang-btn:hover:not(.on) { border-color: var(--emp); color: var(--text); }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: .45rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 1.75rem 0 .75rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  p { margin-bottom: .8rem; }
+
+  /* ── Role section wrapper (green for employee) ── */
+  .role-section {
+    border-radius: 1rem;
+    border: 2px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .role-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    background: linear-gradient(90deg, #065f46, #059669);
+  }
+  .role-header h2 { border: none; margin: 0; padding: 0; font-size: 1.3rem; color: #fff; }
+  .role-header .role-icon { font-size: 1.8rem; }
+  .role-header .role-badge {
+    margin-left: auto;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: .2rem .7rem;
+    border-radius: 2rem;
+    background: rgba(255,255,255,.2);
+    color: #fff;
+  }
+  .role-body { padding: 1.25rem 1.5rem; }
+
+  /* ── Steps ── */
+  .steps { list-style: none; padding: 0; }
+  .steps li {
+    display: flex;
+    gap: .85rem;
+    align-items: flex-start;
+    padding: .7rem .85rem;
+    border-radius: .6rem;
+    margin-bottom: .5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: .88rem;
+    line-height: 1.6;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .73rem;
+    font-weight: 800;
+    color: #fff;
+    background: var(--emp);
+    margin-top: .05rem;
+  }
+  .step-body { flex: 1; }
+
+  /* ── Tip inline ── */
+  .tip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    background: rgba(234,179,8,.1);
+    border: 1px solid rgba(234,179,8,.3);
+    border-radius: .4rem;
+    padding: .25rem .6rem;
+    font-size: .79rem;
+    color: var(--yellow);
+    margin-top: .4rem;
+  }
+
+  /* ── Guide cards ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    gap: .85rem;
+    margin-bottom: 1.25rem;
+  }
+  .guide-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1rem;
+    text-align: center;
+  }
+  .guide-card .gc-icon  { font-size: 2rem; margin-bottom: .5rem; }
+  .guide-card .gc-title { font-size: .85rem; font-weight: 700; margin-bottom: .3rem; }
+  .guide-card .gc-desc  { font-size: .78rem; color: var(--muted); }
+
+  /* ── Status legend ── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: .65rem;
+    margin-bottom: 1.5rem;
+  }
+  .status-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    padding: .65rem .85rem;
+    background: var(--surface2);
+    border-radius: .55rem;
+    border: 1px solid var(--border);
+    font-size: .83rem;
+  }
+  .st-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: .25rem;
+  }
+  .status-item .si-info strong { display: block; font-size: .83rem; }
+  .status-item .si-info span   { color: var(--muted); font-size: .77rem; }
+
+  /* ── Flow diagram ── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-left: 4px solid;
+    border-radius: 0 .6rem .6rem 0;
+    padding: .85rem 1rem;
+    margin: .75rem 0 1rem;
+    font-size: .87rem;
+  }
+  .callout-tip   { border-color: var(--green);   background: rgba(34,197,94,.07); }
+  .callout-info  { border-color: var(--primary);  background: rgba(59,130,246,.07); }
+  .callout-warn  { border-color: var(--yellow);   background: rgba(234,179,8,.07); }
+  .callout-emp   { border-color: var(--emp);      background: rgba(5,150,105,.07); }
+  .callout strong { display: block; margin-bottom: .25rem; }
+
+  /* ── Priority table ── */
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; margin-bottom: 1.25rem; }
+  th { background: var(--surface2); text-align: left; padding: .55rem .75rem; font-weight: 700; border-bottom: 2px solid var(--border); }
+  td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── FAQ ── */
+  .faq { margin-bottom: 2rem; }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: .65rem;
+    margin-bottom: .6rem;
+    overflow: hidden;
+  }
+  .faq-q {
+    width: 100%;
+    background: var(--surface2);
+    border: none;
+    color: var(--text);
+    text-align: left;
+    padding: .85rem 1rem;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+  }
+  [dir='rtl'] .faq-q { text-align: right; }
+  .faq-q .arr { flex-shrink: 0; transition: transform .2s; color: var(--muted); }
+  .faq-q.open .arr { transform: rotate(180deg); }
+  .faq-a {
+    display: none;
+    padding: .8rem 1rem;
+    font-size: .85rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    line-height: 1.65;
+  }
+  .faq-a.open { display: block; }
+
+  /* ── Best-practices grid ── */
+  .bp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .85rem;
+    margin-bottom: 1.25rem;
+  }
+  .bp-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .7rem;
+    padding: .9rem 1rem;
+    font-size: .84rem;
+  }
+  .bp-card .bp-head {
+    font-weight: 700;
+    margin-bottom: .45rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .9rem;
+  }
+  .bp-card ul { padding-left: 1.2rem; color: var(--muted); }
+  .bp-card ul li { margin-bottom: .25rem; }
+  [dir='rtl'] .bp-card ul { padding-left: 0; padding-right: 1.2rem; }
+
+  /* ── Print ── */
+  @media print {
+    .toc, .lang-bar, .no-print { display: none !important; }
+    .content { padding: 0; max-width: 100%; }
+    .hero { background: none !important; color: inherit !important; }
+    .role-header { background: none !important; color: inherit !important; border-bottom: 2px solid #ccc; }
+    .faq-a { display: block !important; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .toc { display: none; }
+    .content { padding: 1.25rem; }
+    .hero { flex-direction: column; }
+    .hero-char { display: none; }
+    .bp-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── RTL overrides ── */
+  [dir='rtl'] .toc   { border-right: none; border-left: 1px solid var(--border); }
+  [dir='rtl'] .role-header .role-badge { margin-left: 0; margin-right: auto; }
+  [dir='rtl'] .callout { border-left: none; border-right: 4px solid; border-radius: .6rem 0 0 .6rem; }
+  [dir='rtl'] .toc a.indent { padding-left: .6rem; padding-right: 1.3rem; }
+  [dir='rtl'] th { text-align: right; }
+
+  /* ── Bilingual visibility ── */
+  .en { display: block; }
+  .ar { display: none;  }
+  [dir='rtl'] .en { display: none;  }
+  [dir='rtl'] .ar { display: block; }
+  span.en { display: inline; }
+  span.ar { display: none;   }
+  [dir='rtl'] span.en { display: none;   }
+  [dir='rtl'] span.ar { display: inline; }
+
+  /* ── Arabic font boost ── */
+  [dir='rtl'] body { font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ═══════════════════ SIDEBAR TOC ═══════════════════ -->
+<nav class="toc" id="toc">
+  <div class="toc-brand">
+    <span class="char-mini">👷</span>
+    <div>
+      <div style="font-size:.72rem;color:var(--muted)">
+        <span class="en">Employee Guide</span>
+        <span class="ar">دليل الموظف</span>
+      </div>
+      <div>ATS</div>
+    </div>
+  </div>
+
+  <a href="#welcome" id="toc-welcome" class="emp-link">
+    <span class="en">🏠 Welcome</span>
+    <span class="ar">🏠 مرحباً</span>
+  </a>
+  <hr>
+  <a href="#signin" id="toc-signin" class="emp-link">
+    <span class="en">🔐 Sign In &amp; First Steps</span>
+    <span class="ar">🔐 تسجيل الدخول</span>
+  </a>
+  <a href="#signin-ui"    class="indent emp-link"><span class="en">Interface overview</span><span class="ar">نظرة على الواجهة</span></a>
+  <hr>
+  <a href="#dashboard" id="toc-dashboard" class="emp-link">
+    <span class="en">📊 Your Dashboard</span>
+    <span class="ar">📊 لوحة التحكم</span>
+  </a>
+  <hr>
+  <a href="#submit" id="toc-submit" class="emp-link">
+    <span class="en">🎫 Submit a Ticket</span>
+    <span class="ar">🎫 إرسال تذكرة</span>
+  </a>
+  <a href="#submit-wizard"  class="indent emp-link"><span class="en">3-step wizard</span><span class="ar">المعالج بثلاث خطوات</span></a>
+  <a href="#submit-writing" class="indent emp-link"><span class="en">Writing a good ticket</span><span class="ar">كتابة تذكرة جيدة</span></a>
+  <a href="#submit-priority" class="indent emp-link"><span class="en">Choosing priority</span><span class="ar">تحديد الأولوية</span></a>
+  <a href="#submit-files"   class="indent emp-link"><span class="en">Files &amp; links</span><span class="ar">الملفات والروابط</span></a>
+  <hr>
+  <a href="#track" id="toc-track" class="emp-link">
+    <span class="en">📋 Track Tickets</span>
+    <span class="ar">📋 متابعة التذاكر</span>
+  </a>
+  <a href="#track-status"   class="indent emp-link"><span class="en">Status meanings</span><span class="ar">معنى الحالات</span></a>
+  <a href="#track-detail"   class="indent emp-link"><span class="en">Ticket detail page</span><span class="ar">صفحة التفاصيل</span></a>
+  <a href="#track-comments" class="indent emp-link"><span class="en">Adding comments</span><span class="ar">إضافة تعليقات</span></a>
+  <hr>
+  <a href="#reports" id="toc-reports" class="emp-link">
+    <span class="en">📈 My Reports</span>
+    <span class="ar">📈 تقاريري</span>
+  </a>
+  <hr>
+  <a href="#chat" id="toc-chat" class="emp-link">
+    <span class="en">💬 Chat with IT</span>
+    <span class="ar">💬 الدردشة مع تقنية المعلومات</span>
+  </a>
+  <hr>
+  <a href="#tips" id="toc-tips" class="emp-link">
+    <span class="en">💡 Tips &amp; Best Practices</span>
+    <span class="ar">💡 النصائح والممارسات</span>
+  </a>
+  <hr>
+  <a href="#faq" id="toc-faq" class="emp-link">
+    <span class="en">🙋 FAQ</span>
+    <span class="ar">🙋 الأسئلة الشائعة</span>
+  </a>
+</nav>
+
+<!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+<div class="content">
+
+  <!-- Language toggle -->
+  <div class="lang-bar no-print">
+    <button class="lang-btn on" onclick="setLang('en')" id="btn-en">English</button>
+    <button class="lang-btn"    onclick="setLang('ar')" id="btn-ar">العربية</button>
+  </div>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-text">
+      <h1>
+        <span class="en">Employee Guide</span>
+        <span class="ar">دليل الموظف</span>
+      </h1>
+      <p>
+        <span class="en">Your complete guide to submitting, tracking, and managing support tickets in the Altuwijri Ticket System.</span>
+        <span class="ar">دليلك الشامل لإرسال طلبات الدعم التقني ومتابعتها وإدارتها في نظام تذاكر العويجري.</span>
+      </p>
+      <div class="hero-badge">
+        <span class="en">Branch-Employee · HO-Employee · Cam-Employee</span>
+        <span class="ar">موظف فرع · موظف مقر · موظف كاميرا</span>
+      </div>
+    </div>
+    <div class="hero-char">
+      <!-- Animated employee character (green shirt) -->
+      <svg class="guide-char" viewBox="0 0 110 185" xmlns="http://www.w3.org/2000/svg">
+        <!-- Body -->
+        <rect x="25" y="82" width="60" height="72" rx="18" fill="#059669"/>
+        <!-- Shirt lines -->
+        <rect x="44" y="93"  width="22" height="3" rx="1.5" fill="rgba(255,255,255,.3)"/>
+        <rect x="44" y="100" width="22" height="3" rx="1.5" fill="rgba(255,255,255,.3)"/>
+        <!-- Left arm (wave) -->
+        <g class="arm-l">
+          <rect x="4" y="83" width="24" height="11" rx="7" fill="#059669" transform="rotate(-25 16 88)"/>
+          <text x="0" y="72" font-size="14">✋</text>
+        </g>
+        <!-- Right arm -->
+        <rect x="82" y="85" width="24" height="11" rx="7" fill="#059669" transform="rotate(15 94 90)"/>
+        <circle cx="107" cy="99" r="8" fill="#fde68a"/>
+        <!-- Legs -->
+        <rect x="33" y="150" width="17" height="30" rx="8" fill="#065f46"/>
+        <rect x="60" y="150" width="17" height="30" rx="8" fill="#065f46"/>
+        <!-- Shoes -->
+        <ellipse cx="41"  cy="181" rx="14" ry="6" fill="#064e3b"/>
+        <ellipse cx="68"  cy="181" rx="14" ry="6" fill="#064e3b"/>
+        <!-- Head -->
+        <circle cx="55" cy="50" r="32" fill="#fde68a"/>
+        <!-- Hair -->
+        <path d="M 23 44 Q 55 10 87 44" fill="#1e293b"/>
+        <!-- Eyes -->
+        <circle cx="43" cy="50" r="6"  fill="white"/>
+        <circle cx="67" cy="50" r="6"  fill="white"/>
+        <circle cx="44" cy="51" r="3.5" fill="#1e293b" class="eye"/>
+        <circle cx="68" cy="51" r="3.5" fill="#1e293b" class="eye2"/>
+        <circle cx="45" cy="49" r="1"  fill="white"/>
+        <circle cx="69" cy="49" r="1"  fill="white"/>
+        <!-- Smile -->
+        <path d="M 40 63 Q 55 76 70 63" stroke="#e07b39" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- ID Badge -->
+        <rect x="31" y="104" width="48" height="20" rx="5" fill="white" opacity=".9"/>
+        <text x="55" y="119" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Segoe UI,sans-serif">EMPLOYEE</text>
+      </svg>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 1. WELCOME -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="welcome">🏠
+    <span class="en">Welcome — What is ATS?</span>
+    <span class="ar">مرحباً — ما هو نظام ATS؟</span>
+  </h2>
+
+  <p>
+    <span class="en">The <strong>Altuwijri Ticket System (ATS)</strong> is the internal IT support platform used across all branches, the head office, and camera-monitoring sites. Instead of calling or messaging IT staff directly, you submit a <strong>support ticket</strong> — a structured request that IT can track, assign, and resolve efficiently.</span>
+    <span class="ar"><strong>نظام تذاكر العويجري (ATS)</strong> هو منصة الدعم التقني الداخلية المستخدمة في جميع الفروع والمقر الرئيسي ومواقع مراقبة الكاميرات. بدلاً من الاتصال أو مراسلة فريق تقنية المعلومات مباشرة، تُرسل <strong>تذكرة دعم</strong> — طلب منظّم يمكن لتقنية المعلومات تتبعه وإسناده وحله بكفاءة.</span>
+  </p>
+
+  <div class="card-grid">
+    <div class="guide-card">
+      <div class="gc-icon">🎫</div>
+      <div class="gc-title"><span class="en">Submit Tickets</span><span class="ar">إرسال التذاكر</span></div>
+      <div class="gc-desc"><span class="en">Log any IT issue quickly with the 3-step wizard</span><span class="ar">سجّل أي مشكلة تقنية بسرعة عبر المعالج الثلاثي</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">📡</div>
+      <div class="gc-title"><span class="en">Track Progress</span><span class="ar">متابعة التقدم</span></div>
+      <div class="gc-desc"><span class="en">See live status updates — no need to chase IT</span><span class="ar">اطّلع على تحديثات الحالة الفورية دون الحاجة للملاحقة</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">💬</div>
+      <div class="gc-title"><span class="en">Chat with IT</span><span class="ar">تواصل مع تقنية المعلومات</span></div>
+      <div class="gc-desc"><span class="en">Real-time chat linked directly to your ticket</span><span class="ar">دردشة فورية مرتبطة مباشرة بتذكرتك</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">📊</div>
+      <div class="gc-title"><span class="en">My Reports</span><span class="ar">تقاريري</span></div>
+      <div class="gc-desc"><span class="en">View your own ticket history and statistics</span><span class="ar">راجع سجل تذاكرك وإحصائياتك الشخصية</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🔔</div>
+      <div class="gc-title"><span class="en">Notifications</span><span class="ar">الإشعارات</span></div>
+      <div class="gc-desc"><span class="en">Get notified when your ticket status changes</span><span class="ar">احصل على إشعار فور تغيير حالة تذكرتك</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🖥</div>
+      <div class="gc-title"><span class="en">Device Info</span><span class="ar">معلومات الجهاز</span></div>
+      <div class="gc-desc"><span class="en">Quick access to your branch AnyDesk ID for remote support</span><span class="ar">وصول سريع لمعرّف AnyDesk الخاص بفرعك للدعم عن بُعد</span></div>
+    </div>
+  </div>
+
+  <div class="callout callout-emp">
+    <strong><span class="en">Your role as an Employee</span><span class="ar">دورك كموظف</span></strong>
+    <span class="en">Employees can: submit new tickets, view and comment on their own tickets, use the chat, and access personal reports. You will <strong>not</strong> see the Board, Tasks list, or administrative menus — those are for technicians and admins.</span>
+    <span class="ar">يستطيع الموظفون: إرسال تذاكر جديدة، عرض تذاكرهم الخاصة والتعليق عليها، استخدام الدردشة، والوصول إلى التقارير الشخصية. <strong>لن</strong> ترى اللوحة أو قائمة المهام أو قوائم الإدارة — تلك مخصصة للتقنيين والمديرين.</span>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 2. SIGN IN & FIRST STEPS -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="signin">🔐
+    <span class="en">Sign In &amp; First Steps</span>
+    <span class="ar">تسجيل الدخول والخطوات الأولى</span>
+  </h2>
+
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <span class="en"><strong>Open ATS in your browser.</strong> Your IT administrator will provide the address (e.g. <code>http://192.168.x.x/</code> on the company network). You can bookmark it for quick access.</span>
+        <span class="ar"><strong>افتح نظام ATS في متصفحك.</strong> سيزوّدك مسؤول تقنية المعلومات بالعنوان (مثلاً <code>http://192.168.x.x/</code> على شبكة الشركة). يمكنك وضع إشارة مرجعية للوصول السريع.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <span class="en"><strong>Enter your credentials.</strong> Type your <strong>username</strong> (or email address) and <strong>password</strong>. Both are created for you by IT — if you have not received them, contact your IT administrator.</span>
+        <span class="ar"><strong>أدخل بيانات الاعتماد.</strong> اكتب <strong>اسم المستخدم</strong> (أو البريد الإلكتروني) و<strong>كلمة المرور</strong>. كلاهما يُنشئه لك فريق تقنية المعلومات — إذا لم تتلقَّهما، تواصل مع مسؤول تقنية المعلومات.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <span class="en"><strong>Click "Sign In".</strong> If your credentials are correct, you will land directly on your Dashboard. If you see an error, double-check your username and password for typos.</span>
+        <span class="ar"><strong>انقر "تسجيل الدخول".</strong> إذا كانت بياناتك صحيحة، ستنتقل مباشرة إلى لوحة التحكم الخاصة بك. إذا رأيت خطأً، تحقق من اسم المستخدم وكلمة المرور بحثاً عن أخطاء إملائية.</span>
+        <div class="tip">💡 <span class="en">Passwords are case-sensitive. Make sure Caps Lock is off.</span><span class="ar">كلمات المرور حساسة لحالة الأحرف. تأكد من إيقاف تشغيل Caps Lock.</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <span class="en"><strong>Change your language.</strong> Click the 🌐 globe icon in the top navigation bar to switch between <strong>English (LTR)</strong> and <strong>Arabic (RTL)</strong>. The entire interface flips direction instantly.</span>
+        <span class="ar"><strong>غيّر لغتك.</strong> انقر أيقونة 🌐 الكرة الأرضية في شريط التنقل العلوي للتبديل بين <strong>الإنجليزية (يسار لليمين)</strong> و<strong>العربية (يمين لليسار)</strong>. تتغير اتجاه الواجهة بالكامل فوراً.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <span class="en"><strong>Switch dark / light theme.</strong> Click the 🌙 (dark) or ☀️ (light) icon in the top bar. Your preference is saved and remembered on your next visit.</span>
+        <span class="ar"><strong>تبديل المظهر الداكن / الفاتح.</strong> انقر أيقونة 🌙 (داكن) أو ☀️ (فاتح) في الشريط العلوي. يُحفظ تفضيلك ويُتذكر في زيارتك القادمة.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <span class="en"><strong>To sign out:</strong> click your name or avatar in the top-right corner, then click "Sign Out". Always sign out on shared computers.</span>
+        <span class="ar"><strong>لتسجيل الخروج:</strong> انقر اسمك أو صورتك في الزاوية العلوية اليمنى، ثم انقر "تسجيل الخروج". احرص دائماً على تسجيل الخروج على أجهزة الكمبيوتر المشتركة.</span>
+      </div>
+    </li>
+  </ol>
+
+  <h3 id="signin-ui">🖥
+    <span class="en">Interface Overview — The Sidebar</span>
+    <span class="ar">نظرة على الواجهة — الشريط الجانبي</span>
+  </h3>
+
+  <div class="card-grid">
+    <div class="guide-card">
+      <div class="gc-icon">📊</div>
+      <div class="gc-title"><span class="en">Dashboard</span><span class="ar">لوحة التحكم</span></div>
+      <div class="gc-desc"><span class="en">Your personal overview and KPI cards</span><span class="ar">نظرتك الشخصية العامة وبطاقات المؤشرات</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🎫</div>
+      <div class="gc-title"><span class="en">My Tickets</span><span class="ar">تذاكري</span></div>
+      <div class="gc-desc"><span class="en">All tickets you have submitted</span><span class="ar">جميع التذاكر التي أرسلتها</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">💬</div>
+      <div class="gc-title"><span class="en">Chat</span><span class="ar">الدردشة</span></div>
+      <div class="gc-desc"><span class="en">Live IT support chat</span><span class="ar">دردشة الدعم التقني المباشر</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">📈</div>
+      <div class="gc-title"><span class="en">My Reports</span><span class="ar">تقاريري</span></div>
+      <div class="gc-desc"><span class="en">Personal ticket statistics</span><span class="ar">إحصائيات تذاكرك الشخصية</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">❓</div>
+      <div class="gc-title"><span class="en">Help Guide</span><span class="ar">دليل المساعدة</span></div>
+      <div class="gc-desc"><span class="en">In-app visual guide anytime</span><span class="ar">دليل مرئي داخل التطبيق في أي وقت</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🖥</div>
+      <div class="gc-title"><span class="en">Device Card</span><span class="ar">بطاقة الجهاز</span></div>
+      <div class="gc-desc"><span class="en">AnyDesk ID for your branch (bottom of sidebar)</span><span class="ar">معرّف AnyDesk لفرعك (أسفل الشريط الجانبي)</span></div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 3. DASHBOARD -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="dashboard">📊
+    <span class="en">Your Dashboard</span>
+    <span class="ar">لوحة التحكم الخاصة بك</span>
+  </h2>
+
+  <p>
+    <span class="en">The Dashboard is the first page you see after logging in. It gives you a quick snapshot of all your support ticket activity.</span>
+    <span class="ar">لوحة التحكم هي الصفحة الأولى التي تراها بعد تسجيل الدخول. تمنحك لمحة سريعة عن جميع نشاطات تذاكر الدعم الخاصة بك.</span>
+  </p>
+
+  <div class="status-grid">
+    <div class="status-item">
+      <div class="st-dot" style="background:#3b82f6"></div>
+      <div class="si-info">
+        <strong><span class="en">Total Submitted</span><span class="ar">إجمالي المُرسلة</span></strong>
+        <span><span class="en">All tickets you have ever submitted</span><span class="ar">جميع التذاكر التي أرسلتها على الإطلاق</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#6366f1"></div>
+      <div class="si-info">
+        <strong><span class="en">Open</span><span class="ar">مفتوحة</span></strong>
+        <span><span class="en">Tickets still in progress (not Done or Cancelled)</span><span class="ar">التذاكر التي لا تزال قيد المعالجة</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#22c55e"></div>
+      <div class="si-info">
+        <strong><span class="en">Completed</span><span class="ar">مكتملة</span></strong>
+        <span><span class="en">Tickets marked Done by an administrator</span><span class="ar">التذاكر التي أغلقها مسؤول كـ"منجزة"</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#059669"></div>
+      <div class="si-info">
+        <strong><span class="en">Completion Rate</span><span class="ar">نسبة الإنجاز</span></strong>
+        <span><span class="en">Percentage of your tickets that were resolved</span><span class="ar">نسبة تذاكرك التي تم حلها</span></span>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    <span class="en">Below the KPI cards you will see a <strong>recent tickets list</strong> — your latest submissions with their current status shown as a colored badge. Click any row to open the full ticket detail.</span>
+    <span class="ar">أسفل بطاقات المؤشرات ستجد <strong>قائمة التذاكر الأخيرة</strong> — أحدث مُرسلاتك مع حالتها الحالية كشارة ملوّنة. انقر أي صف لفتح تفاصيل التذكرة الكاملة.</span>
+  </p>
+
+  <div class="callout callout-tip">
+    <strong><span class="en">Device Card — quick remote support</span><span class="ar">بطاقة الجهاز — الدعم عن بُعد السريع</span></strong>
+    <span class="en">At the bottom of your sidebar you may see a device card for your branch. It shows the computer label and <strong>AnyDesk ID</strong>. When IT needs to connect remotely, they will ask you for this number — it is always visible right there.</span>
+    <span class="ar">في أسفل الشريط الجانبي قد ترى بطاقة جهاز خاصة بفرعك. تعرض تسمية الحاسوب و<strong>معرّف AnyDesk</strong>. عندما تحتاج تقنية المعلومات إلى الاتصال عن بُعد، ستطلب منك هذا الرقم — وهو مرئي دائماً هناك.</span>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 4. SUBMIT A TICKET -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="submit">🎫
+    <span class="en">Submit a Ticket</span>
+    <span class="ar">إرسال تذكرة</span>
+  </h2>
+
+  <p>
+    <span class="en">Submitting a ticket is the primary way to request IT support. The wizard walks you through three steps: picking a category, filling in the details, and confirming submission.</span>
+    <span class="ar">إرسال تذكرة هو الطريقة الرئيسية لطلب الدعم التقني. يأخذك المعالج عبر ثلاث خطوات: اختيار التصنيف، وتعبئة التفاصيل، وتأكيد الإرسال.</span>
+  </p>
+
+  <!-- Wizard flow diagram -->
+  <h3 id="submit-wizard">🗺
+    <span class="en">The 3-Step Ticket Wizard</span>
+    <span class="ar">معالج التذكرة بثلاث خطوات</span>
+  </h3>
+
+  <div class="diagram">
+    <svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L0,8 L8,4 Z" fill="#059669"/>
+        </marker>
+      </defs>
+
+      <!-- Step 1 -->
+      <rect x="10" y="50" width="180" height="80" rx="12" fill="#064e3b" stroke="#059669" stroke-width="2"/>
+      <circle cx="10" cy="50" r="16" fill="#059669" cx="100" cy="44"/>
+      <text x="100" y="48" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="700">STEP 1</text>
+      <text x="100" y="75"  text-anchor="middle" fill="white" font-size="13" font-weight="800">🗂 Category</text>
+      <text x="100" y="94"  text-anchor="middle" fill="#a7f3d0" font-size="10">Choose the type</text>
+      <text x="100" y="110" text-anchor="middle" fill="#a7f3d0" font-size="10">of your issue</text>
+
+      <!-- Arrow 1→2 -->
+      <line x1="192" y1="90" x2="238" y2="90" stroke="#059669" stroke-width="2" marker-end="url(#arr)"/>
+      <text x="215" y="83" text-anchor="middle" fill="#64748b" font-size="9">Next</text>
+
+      <!-- Step 2 -->
+      <rect x="240" y="50" width="200" height="80" rx="12" fill="#064e3b" stroke="#059669" stroke-width="2"/>
+      <text x="340" y="48" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="700">STEP 2</text>
+      <text x="340" y="75"  text-anchor="middle" fill="white" font-size="13" font-weight="800">✏️ Fill Details</text>
+      <text x="340" y="94"  text-anchor="middle" fill="#a7f3d0" font-size="10">Title · Description</text>
+      <text x="340" y="110" text-anchor="middle" fill="#a7f3d0" font-size="10">Priority · Attachments</text>
+
+      <!-- Arrow 2→3 -->
+      <line x1="442" y1="90" x2="488" y2="90" stroke="#059669" stroke-width="2" marker-end="url(#arr)"/>
+      <text x="465" y="83" text-anchor="middle" fill="#64748b" font-size="9">Submit</text>
+
+      <!-- Step 3 -->
+      <rect x="490" y="50" width="180" height="80" rx="12" fill="#052e16" stroke="#22c55e" stroke-width="2"/>
+      <text x="580" y="48" text-anchor="middle" fill="#86efac" font-size="10" font-weight="700">STEP 3</text>
+      <text x="580" y="75"  text-anchor="middle" fill="white" font-size="13" font-weight="800">✅ Confirmed</text>
+      <text x="580" y="94"  text-anchor="middle" fill="#86efac" font-size="10">Ticket created</text>
+      <text x="580" y="110" text-anchor="middle" fill="#86efac" font-size="10">→ Backlog status</text>
+
+      <!-- Bottom note -->
+      <text x="340" y="155" text-anchor="middle" fill="#475569" font-size="9">IT is notified automatically — a technician will claim your ticket soon</text>
+    </svg>
+  </div>
+
+  <p class="en" style="font-size:.87rem;color:var(--muted);margin-top:-.5rem;margin-bottom:1rem">
+    After submission your ticket status starts as <strong style="color:var(--text)">Backlog</strong>. A technician will accept it and it moves to <strong style="color:var(--text)">In Progress</strong>.
+  </p>
+  <p class="ar" style="font-size:.87rem;color:var(--muted);margin-top:-.5rem;margin-bottom:1rem">
+    بعد الإرسال تبدأ حالة تذكرتك كـ<strong style="color:var(--text)">Backlog</strong>. سيقبلها تقني وتنتقل إلى <strong style="color:var(--text)">In Progress</strong>.
+  </p>
+
+  <!-- Full 8-step walkthrough -->
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <span class="en"><strong>Navigate to My Tickets.</strong> Click <strong>"My Tickets"</strong> in the left sidebar. This is your personal ticket list.</span>
+        <span class="ar"><strong>انتقل إلى تذاكري.</strong> انقر <strong>"تذاكري"</strong> في الشريط الجانبي الأيسر. هذه قائمة تذاكرك الشخصية.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <span class="en"><strong>Click "+ New Ticket".</strong> Find the green or blue <strong>"+ New Ticket"</strong> button (usually at the top-right of the page) and click it. The 3-step wizard opens.</span>
+        <span class="ar"><strong>انقر "+ تذكرة جديدة".</strong> ابحث عن الزر الأخضر أو الأزرق <strong>"+ تذكرة جديدة"</strong> (عادةً في أعلى يمين الصفحة) وانقره. يفتح المعالج الثلاثي.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <span class="en"><strong>Step 1 — Choose a Category.</strong> A grid of category cards appears (Network, Software, Hardware, Camera, etc.). Click the one that best describes your problem. The category tells IT which specialist team will handle it.</span>
+        <span class="ar"><strong>الخطوة 1 — اختر التصنيف.</strong> تظهر شبكة من بطاقات التصنيف (الشبكة، البرامج، الأجهزة، الكاميرات، إلخ). انقر الأنسب لمشكلتك. يُخبر التصنيف تقنية المعلومات بأي فريق متخصص سيتعامل معها.</span>
+        <div class="tip">💡 <span class="en">If unsure, choose the closest category. The technician can change it later.</span><span class="ar">إذا لم تكن متأكداً، اختر التصنيف الأقرب. يمكن للتقني تغييره لاحقاً.</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <span class="en"><strong>Step 2 — Write a Title.</strong> Enter a short, specific title. Good example: <em>"Printer on 2nd floor not printing — paper jam"</em>. Bad example: <em>"Printer problem"</em>. A specific title helps the technician prioritise faster.</span>
+        <span class="ar"><strong>الخطوة 2 — اكتب العنوان.</strong> أدخل عنواناً قصيراً ومحدداً. مثال جيد: <em>"طابعة الطابق الثاني لا تطبع — انحشار ورق"</em>. مثال سيئ: <em>"مشكلة في الطابعة"</em>. العنوان المحدد يساعد التقني على تحديد الأولويات بسرعة.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <span class="en"><strong>Write a detailed Description.</strong> Describe the problem fully: when it started, what you were doing, what error messages appeared, what you already tried, and how many people are affected. The more detail, the faster the fix.</span>
+        <span class="ar"><strong>اكتب وصفاً تفصيلياً.</strong> صِف المشكلة بالكامل: متى بدأت، ماذا كنت تفعل، ما رسائل الخطأ التي ظهرت، ما الذي جربته بالفعل، وكم شخصاً يتأثر. كلما زادت التفاصيل، كان الإصلاح أسرع.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <span class="en"><strong>Set the Priority.</strong> Choose Low, Medium, High, or Critical. See the priority guide in the next section to choose correctly. Most issues are Medium.</span>
+        <span class="ar"><strong>حدّد الأولوية.</strong> اختر منخفضة أو متوسطة أو عالية أو حرجة. راجع دليل الأولوية في القسم التالي للاختيار الصحيح. معظم المشكلات متوسطة.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <span class="en"><strong>Attach files or a link (optional).</strong> Click the attachment button to upload screenshots, documents, photos, or error logs. Alternatively paste a URL (e.g. a shared SharePoint file) into the link field. Attachments greatly speed up diagnosis.</span>
+        <span class="ar"><strong>أرفق ملفات أو رابطاً (اختياري).</strong> انقر زر المرفقات لتحميل لقطات الشاشة أو المستندات أو الصور أو سجلات الأخطاء. أو الصق رابطاً (مثلاً ملف SharePoint مشترك) في حقل الرابط. المرفقات تُسرّع التشخيص بشكل كبير.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">8</div>
+      <div class="step-body">
+        <span class="en"><strong>Click "Submit Ticket".</strong> The wizard shows a confirmation screen (Step 3) with your new ticket number. Your ticket is now in the system with status <strong>Backlog</strong>. You will be notified when a technician accepts it.</span>
+        <span class="ar"><strong>انقر "إرسال التذكرة".</strong> يعرض المعالج شاشة تأكيد (الخطوة 3) مع رقم تذكرتك الجديدة. تذكرتك الآن في النظام بحالة <strong>Backlog</strong>. ستتلقى إشعاراً عندما يقبلها تقني.</span>
+      </div>
+    </li>
+  </ol>
+
+  <!-- Writing tips -->
+  <h3 id="submit-writing">✏️
+    <span class="en">Tips for Writing a Good Ticket</span>
+    <span class="ar">نصائح لكتابة تذكرة جيدة</span>
+  </h3>
+
+  <div class="callout callout-tip">
+    <strong><span class="en">A good description answers these questions:</span><span class="ar">وصف جيد يجيب على هذه الأسئلة:</span></strong>
+    <span class="en">What exactly is the problem? → When did it start? → What error messages do you see? → What have you already tried? → How many users are affected? → Is the issue on one device or many?</span>
+    <span class="ar">ما المشكلة تحديداً؟ → متى بدأت؟ → ما رسائل الخطأ التي تراها؟ → ماذا جربت بالفعل؟ → كم عدد المستخدمين المتأثرين؟ → هل المشكلة في جهاز واحد أم أكثر؟</span>
+  </div>
+
+  <!-- Priority guide -->
+  <h3 id="submit-priority">🚦
+    <span class="en">Choosing the Right Priority</span>
+    <span class="ar">اختيار الأولوية الصحيحة</span>
+  </h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th><span class="en">Priority</span><span class="ar">الأولوية</span></th>
+        <th><span class="en">When to use it</span><span class="ar">متى تستخدمها</span></th>
+        <th><span class="en">Example</span><span class="ar">مثال</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:#94a3b8;font-weight:700">🔵 <span class="en">Low</span><span class="ar">منخفضة</span></td>
+        <td><span class="en">Minor inconvenience, work can continue</span><span class="ar">إزعاج بسيط، العمل يمكن الاستمرار</span></td>
+        <td><span class="en">Mouse scroll wheel is stiff</span><span class="ar">عجلة الفأرة متصلّبة</span></td>
+      </tr>
+      <tr>
+        <td style="color:#eab308;font-weight:700">🟡 <span class="en">Medium</span><span class="ar">متوسطة</span></td>
+        <td><span class="en">Issue slows work but does not stop it</span><span class="ar">المشكلة تُبطئ العمل لكن لا توقفه</span></td>
+        <td><span class="en">Printer jammed, I can print on floor above</span><span class="ar">انحشار في الطابعة، أستطيع الطباعة في الطابق الأعلى</span></td>
+      </tr>
+      <tr>
+        <td style="color:#f97316;font-weight:700">🟠 <span class="en">High</span><span class="ar">عالية</span></td>
+        <td><span class="en">Issue significantly impacts work for me or my team</span><span class="ar">المشكلة تؤثر بشكل كبير على عملي أو فريقي</span></td>
+        <td><span class="en">Our shared folder is inaccessible, all 5 of us are stuck</span><span class="ar">مجلدنا المشترك غير متاح، كلنا الخمسة عالقون</span></td>
+      </tr>
+      <tr>
+        <td style="color:#dc2626;font-weight:700">🔴 <span class="en">Critical</span><span class="ar">حرجة</span></td>
+        <td><span class="en">Complete outage — work is 100% stopped</span><span class="ar">انقطاع تام — العمل متوقف 100%</span></td>
+        <td><span class="en">Internet is down for the whole branch, no one can work</span><span class="ar">الإنترنت منقطع في الفرع بأكمله، لا أحد يستطيع العمل</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-warn">
+    <strong><span class="en">Do not overuse Critical</span><span class="ar">لا تُبالغ في استخدام "حرجة"</span></strong>
+    <span class="en">Marking everything Critical creates noise and slows down the real emergencies. Save Critical for true outages affecting multiple users. If in doubt, choose High instead.</span>
+    <span class="ar">تحديد كل شيء كـ"حرجة" يخلق فوضى ويُبطئ التعامل مع حالات الطوارئ الحقيقية. احتفظ بـ"حرجة" للانقطاعات الكاملة التي تؤثر على عدة مستخدمين. إذا كنت في شك، اختر "عالية" بدلاً من ذلك.</span>
+  </div>
+
+  <!-- Files & links -->
+  <h3 id="submit-files">📎
+    <span class="en">Attaching Files vs. Pasting Links</span>
+    <span class="ar">إرفاق الملفات مقابل لصق الروابط</span>
+  </h3>
+
+  <div class="card-grid">
+    <div class="guide-card">
+      <div class="gc-icon">📸</div>
+      <div class="gc-title"><span class="en">Screenshots</span><span class="ar">لقطات الشاشة</span></div>
+      <div class="gc-desc"><span class="en">Capture error dialogs or unusual screen behavior — attach as PNG or JPG</span><span class="ar">التقط نوافذ الأخطاء أو السلوك الغريب للشاشة — أرفقها كـ PNG أو JPG</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">📄</div>
+      <div class="gc-title"><span class="en">Documents</span><span class="ar">المستندات</span></div>
+      <div class="gc-desc"><span class="en">Attach relevant files (PDF, DOCX, XLSX) if the issue involves a specific file</span><span class="ar">أرفق الملفات ذات الصلة إذا تعلق الأمر بملف محدد</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🔗</div>
+      <div class="gc-title"><span class="en">Links</span><span class="ar">الروابط</span></div>
+      <div class="gc-desc"><span class="en">Paste a SharePoint or Teams link instead of uploading large files</span><span class="ar">الصق رابط SharePoint أو Teams بدلاً من تحميل ملفات كبيرة</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">📋</div>
+      <div class="gc-title"><span class="en">Error Logs</span><span class="ar">سجلات الأخطاء</span></div>
+      <div class="gc-desc"><span class="en">Copy-paste error text or attach log files — this is gold for technicians</span><span class="ar">انسخ نص الخطأ أو أرفق ملفات السجل — هذا كنز للتقنيين</span></div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 5. TRACK YOUR TICKETS -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="track">📋
+    <span class="en">Track Your Tickets</span>
+    <span class="ar">متابعة تذاكرك</span>
+  </h2>
+
+  <h3 id="track-status">🎨
+    <span class="en">What Each Status Means</span>
+    <span class="ar">معنى كل حالة</span>
+  </h3>
+
+  <div class="status-grid">
+    <div class="status-item">
+      <div class="st-dot" style="background:#475569"></div>
+      <div class="si-info">
+        <strong>Backlog</strong>
+        <span><span class="en">Submitted but no technician has claimed it yet. It is in the queue.</span><span class="ar">أُرسلت لكن لم يقبلها تقني بعد. هي في قائمة الانتظار.</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#6366f1"></div>
+      <div class="si-info">
+        <strong>To Do</strong>
+        <span><span class="en">Scheduled and assigned but work hasn't started yet.</span><span class="ar">مُجدولة ومُسندة لكن العمل لم يبدأ بعد.</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#2563eb"></div>
+      <div class="si-info">
+        <strong>In Progress</strong>
+        <span><span class="en">A technician has accepted and is actively working on it.</span><span class="ar">قبلها تقني وهو يعمل عليها بنشاط.</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#eab308"></div>
+      <div class="si-info">
+        <strong>In Review</strong>
+        <span><span class="en">Technician finished — waiting for manager to verify and close.</span><span class="ar">أنهى التقني العمل — في انتظار موافقة المدير للإغلاق.</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#dc2626"></div>
+      <div class="si-info">
+        <strong>Blocked</strong>
+        <span><span class="en">Work is paused — waiting for an external dependency (parts, vendor, approval).</span><span class="ar">توقف العمل — في انتظار تبعية خارجية (قطع، مورّد، موافقة).</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#16a34a"></div>
+      <div class="si-info">
+        <strong>Done ✓</strong>
+        <span><span class="en">Issue resolved and closed by the administrator. You will receive a notification.</span><span class="ar">المشكلة حُلّت وأغلقها المسؤول. ستتلقى إشعاراً.</span></span>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="st-dot" style="background:#94a3b8"></div>
+      <div class="si-info">
+        <strong>Cancelled</strong>
+        <span><span class="en">Ticket closed without resolution (e.g. duplicate, withdrawn by employee).</span><span class="ar">أُغلقت التذكرة بلا حل (مثلاً: مكررة، سُحبت من الموظف).</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Using the filter tabs -->
+  <p>
+    <span class="en">At the top of the <strong>My Tickets</strong> page you will see filter tabs: <strong>All · Not Started · Open · In Process · Complete</strong>. Click any tab to see only tickets in that group.</span>
+    <span class="ar">في أعلى صفحة <strong>تذاكري</strong> ستجد تبويبات التصفية: <strong>الكل · لم يبدأ · مفتوح · قيد المعالجة · مكتمل</strong>. انقر أي تبويب لرؤية التذاكر في تلك المجموعة فقط.</span>
+  </p>
+
+  <!-- Ticket detail page -->
+  <h3 id="track-detail">🔍
+    <span class="en">The Ticket Detail Page</span>
+    <span class="ar">صفحة تفاصيل التذكرة</span>
+  </h3>
+
+  <p>
+    <span class="en">Click any ticket in your list to open its detail page. Here you can see:</span>
+    <span class="ar">انقر أي تذكرة في قائمتك لفتح صفحة تفاصيلها. يمكنك هنا رؤية:</span>
+  </p>
+
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <span class="en"><strong>Current status badge</strong> — the coloured badge at the top shows the live status. It updates automatically every 15 seconds — no need to refresh the page.</span>
+        <span class="ar"><strong>شارة الحالة الحالية</strong> — الشارة الملوّنة في الأعلى تعرض الحالة الفورية. تتحدث تلقائياً كل 15 ثانية — لا حاجة لتحديث الصفحة.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <span class="en"><strong>Assigned technician</strong> — name and profile of the IT staff member handling your ticket.</span>
+        <span class="ar"><strong>التقني المُسند</strong> — اسم وصورة موظف تقنية المعلومات الذي يتعامل مع تذكرتك.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <span class="en"><strong>Progress bar</strong> — percentage completion as set by the technician. Gives you a rough idea of how far along the work is.</span>
+        <span class="ar"><strong>شريط التقدم</strong> — نسبة الإنجاز كما يحددها التقني. يمنحك فكرة تقريبية عن مدى تقدم العمل.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <span class="en"><strong>Timeline</strong> — a chronological log of every status change, comment, and attachment. Shows who did what and when.</span>
+        <span class="ar"><strong>الجدول الزمني</strong> — سجل زمني لكل تغيير في الحالة وتعليق ومرفق. يُظهر من فعل ماذا ومتى.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <span class="en"><strong>Attachments panel</strong> — all files and links added to the ticket (by you or the technician) in one place.</span>
+        <span class="ar"><strong>لوحة المرفقات</strong> — جميع الملفات والروابط المضافة للتذكرة (منك أو من التقني) في مكان واحد.</span>
+      </div>
+    </li>
+  </ol>
+
+  <!-- Adding comments -->
+  <h3 id="track-comments">💬
+    <span class="en">Adding Comments</span>
+    <span class="ar">إضافة تعليقات</span>
+  </h3>
+
+  <p>
+    <span class="en">You can add a comment to your ticket at any time. Use comments to:</span>
+    <span class="ar">يمكنك إضافة تعليق على تذكرتك في أي وقت. استخدم التعليقات لـ:</span>
+  </p>
+
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <span class="en">Provide additional information the technician might need (e.g. "I forgot to mention this also happens on my colleague's PC").</span>
+        <span class="ar">تقديم معلومات إضافية قد يحتاجها التقني (مثلاً: "نسيت أن أذكر أن هذا يحدث أيضاً على جهاز زميلي").</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <span class="en">Ask for a progress update if the ticket has been sitting in Backlog or In Progress for longer than expected.</span>
+        <span class="ar">طلب تحديث عن التقدم إذا كانت التذكرة في Backlog أو In Progress لفترة أطول من المتوقع.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <span class="en">Confirm that the issue is resolved (or reopen the conversation if it came back).</span>
+        <span class="ar">تأكيد حل المشكلة (أو إعادة فتح المحادثة إذا عادت المشكلة).</span>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong><span class="en">Technicians see your comments immediately</span><span class="ar">التقنيون يرون تعليقاتك فوراً</span></strong>
+    <span class="en">Comments are visible to the assigned technician and to all administrators. Keep them professional and factual — they are part of the permanent record.</span>
+    <span class="ar">التعليقات مرئية للتقني المُسند وجميع المديرين. احرص على أن تكون احترافية وموضوعية — فهي جزء من السجل الدائم.</span>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 6. MY REPORTS -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="reports">📈
+    <span class="en">My Reports</span>
+    <span class="ar">تقاريري</span>
+  </h2>
+
+  <p>
+    <span class="en">Click <strong>"My Reports"</strong> in the sidebar to access your personal reporting section. There are three views:</span>
+    <span class="ar">انقر <strong>"تقاريري"</strong> في الشريط الجانبي للوصول إلى قسم التقارير الشخصية الخاص بك. هناك ثلاثة عروض:</span>
+  </p>
+
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <span class="en"><strong>All Tickets (Overview).</strong> Shows your personal KPI summary: total tickets submitted, how many are open, how many are completed, and your overall completion rate percentage. Use this to see your overall support history at a glance.</span>
+        <span class="ar"><strong>جميع التذاكر (نظرة عامة).</strong> يعرض ملخص المؤشرات الشخصية: إجمالي التذاكر المُرسلة، عدد المفتوحة، عدد المكتملة، ونسبة الإنجاز الإجمالية. استخدمه لرؤية تاريخ الدعم الكامل دفعة واحدة.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <span class="en"><strong>By Period.</strong> Set a start date and end date then click <strong>"Filter"</strong>. You will see statistics only for tickets submitted within that date range. Useful for checking how many issues you reported last month or during a specific project.</span>
+        <span class="ar"><strong>حسب الفترة.</strong> حدّد تاريخ البداية والنهاية ثم انقر <strong>"تصفية"</strong>. ستجد إحصائيات التذاكر المُرسلة في ذلك النطاق الزمني فقط. مفيد للتحقق من عدد المشكلات التي أبلغت عنها الشهر الماضي أو خلال مشروع محدد.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <span class="en"><strong>Single Ticket View.</strong> Enter a specific ticket number (ID) and click <strong>"Search"</strong>. You will see the complete lifecycle of that one ticket: every status change, who changed it, when, and how long each stage took. This is the most detailed view available to employees.</span>
+        <span class="ar"><strong>عرض تذكرة واحدة.</strong> أدخل رقم تذكرة محدد (ID) وانقر <strong>"بحث"</strong>. ستجد دورة الحياة الكاملة لتلك التذكرة: كل تغيير في الحالة، من غيّره، متى، وكم استغرقت كل مرحلة. هذا هو العرض الأكثر تفصيلاً المتاح للموظفين.</span>
+        <div class="tip">💡 <span class="en">The ticket ID is shown on the ticket detail page and in your ticket list.</span><span class="ar">رقم التذكرة مُعروض في صفحة تفاصيل التذكرة وفي قائمة تذاكرك.</span></div>
+      </div>
+    </li>
+  </ol>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 7. CHAT WITH IT -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="chat">💬
+    <span class="en">Chat with IT</span>
+    <span class="ar">الدردشة مع تقنية المعلومات</span>
+  </h2>
+
+  <p>
+    <span class="en">The Chat feature lets you talk to IT support in real time — useful for quick questions, urgent issues, or when you want to follow up on an existing ticket.</span>
+    <span class="ar">ميزة الدردشة تتيح لك التحدث مع دعم تقنية المعلومات في الوقت الفعلي — مفيدة للأسئلة السريعة أو المشكلات العاجلة أو عندما تريد المتابعة على تذكرة موجودة.</span>
+  </p>
+
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <span class="en"><strong>Open Chat.</strong> Click the <strong>💬 Chat</strong> link in the left sidebar. A chat window or panel opens. You will see any existing conversations and a button to start a new one.</span>
+        <span class="ar"><strong>افتح الدردشة.</strong> انقر رابط <strong>💬 الدردشة</strong> في الشريط الجانبي الأيسر. تفتح نافذة أو لوحة دردشة. ستجد أي محادثات موجودة وزراً لبدء محادثة جديدة.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <span class="en"><strong>Start a new chat.</strong> Click <strong>"New Chat"</strong>, type your message, and press Enter or click Send. Your message goes to the IT support team.</span>
+        <span class="ar"><strong>ابدأ محادثة جديدة.</strong> انقر <strong>"دردشة جديدة"</strong>، اكتب رسالتك، ثم اضغط Enter أو انقر إرسال. تصل رسالتك إلى فريق دعم تقنية المعلومات.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <span class="en"><strong>Link a chat to a ticket.</strong> If your chat is about an existing ticket, you can link them. Look for a "Link Ticket" or ticket selector option in the chat panel. This gives the IT staff full context without you having to repeat yourself.</span>
+        <span class="ar"><strong>اربط الدردشة بتذكرة.</strong> إذا كانت دردشتك تتعلق بتذكرة موجودة، يمكنك ربطهما. ابحث عن خيار "ربط تذكرة" أو محدد التذكرة في لوحة الدردشة. هذا يمنح فريق تقنية المعلومات السياق الكامل دون أن تضطر لتكرار نفسك.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <span class="en"><strong>What happens after you send.</strong> An available IT technician will reply in the chat. You will receive a 🔔 notification in the top bar when there is a new reply. The chat thread is saved so you can scroll back through the history.</span>
+        <span class="ar"><strong>ما يحدث بعد الإرسال.</strong> سيرد تقني تقنية المعلومات المتاح في الدردشة. ستتلقى إشعاراً 🔔 في الشريط العلوي عند وصول رد جديد. يُحفظ خيط الدردشة حتى تتمكن من التمرير للخلف في السجل.</span>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong><span class="en">Chat vs. Ticket — when to use which</span><span class="ar">الدردشة مقابل التذكرة — متى تستخدم أيّهما</span></strong>
+    <span class="en"><strong>Use Chat</strong> for quick questions, urgent verbal follow-ups, or getting guidance before submitting a ticket. <strong>Use a Ticket</strong> for every actual IT problem that needs to be tracked, assigned, and resolved formally — tickets create an auditable record that chat messages do not.</span>
+    <span class="ar"><strong>استخدم الدردشة</strong> للأسئلة السريعة أو المتابعة العاجلة أو الحصول على إرشادات قبل إرسال تذكرة. <strong>استخدم التذكرة</strong> لكل مشكلة تقنية فعلية تحتاج تتبعاً وإسناداً وحلاً رسمياً — التذاكر تنشئ سجلاً يمكن مراجعته بخلاف رسائل الدردشة.</span>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 8. TIPS & BEST PRACTICES -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="tips">💡
+    <span class="en">Tips &amp; Best Practices</span>
+    <span class="ar">النصائح والممارسات الجيدة</span>
+  </h2>
+
+  <div class="bp-grid">
+    <div class="bp-card">
+      <div class="bp-head" style="color:var(--green)">✅ <span class="en">Do This</span><span class="ar">افعل هذا</span></div>
+      <ul>
+        <li><span class="en">Write a specific, descriptive title</span><span class="ar">اكتب عنواناً محدداً ووصفياً</span></li>
+        <li><span class="en">Include when the problem started</span><span class="ar">اذكر متى بدأت المشكلة</span></li>
+        <li><span class="en">Mention how many users are affected</span><span class="ar">اذكر عدد المستخدمين المتأثرين</span></li>
+        <li><span class="en">Attach a screenshot whenever possible</span><span class="ar">أرفق لقطة شاشة كلما أمكن</span></li>
+        <li><span class="en">List error messages word-for-word</span><span class="ar">اكتب رسائل الخطأ حرفاً بحرف</span></li>
+        <li><span class="en">Say what you already tried</span><span class="ar">اذكر ما جربته بالفعل</span></li>
+        <li><span class="en">Add comments to update your ticket</span><span class="ar">أضف تعليقات لتحديث تذكرتك</span></li>
+        <li><span class="en">Use Chat for quick questions</span><span class="ar">استخدم الدردشة للأسئلة السريعة</span></li>
+      </ul>
+    </div>
+    <div class="bp-card">
+      <div class="bp-head" style="color:var(--adm)">✗ <span class="en">Avoid This</span><span class="ar">تجنب هذا</span></div>
+      <ul>
+        <li><span class="en">Vague titles like "Not working"</span><span class="ar">عناوين مبهمة مثل "لا يعمل"</span></li>
+        <li><span class="en">Marking every ticket Critical</span><span class="ar">تحديد كل تذكرة كـ"حرجة"</span></li>
+        <li><span class="en">Submitting the same issue twice</span><span class="ar">إرسال نفس المشكلة مرتين</span></li>
+        <li><span class="en">Leaving the description empty</span><span class="ar">ترك الوصف فارغاً</span></li>
+        <li><span class="en">Chasing IT via WhatsApp instead of using the system</span><span class="ar">ملاحقة تقنية المعلومات عبر واتساب بدلاً من النظام</span></li>
+        <li><span class="en">Closing tickets in chat without formal tracking</span><span class="ar">إغلاق التذاكر في الدردشة بدون تتبع رسمي</span></li>
+        <li><span class="en">Submitting duplicate tickets for a resolved issue</span><span class="ar">إرسال تذاكر مكررة لمشكلة تم حلها</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong><span class="en">When IS Critical appropriate?</span><span class="ar">متى تكون "حرجة" مناسبة؟</span></strong>
+    <span class="en">Use Critical only when: <strong>an entire branch cannot work</strong> (internet down, server offline), or a <strong>security incident</strong> is underway (data breach, ransomware, unauthorised access). A single printer malfunction or a slow PC is never Critical.</span>
+    <span class="ar">استخدم "حرجة" فقط عندما: <strong>لا يستطيع فرع بأكمله العمل</strong> (انقطاع الإنترنت، توقف الخادم)، أو عندما يجري <strong>حادث أمني</strong> (اختراق بيانات، فيروس فدية، وصول غير مصرح). عطل طابعة واحدة أو جهاز بطيء ليس أبداً حرجاً.</span>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 9. FAQ -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <h2 id="faq">🙋
+    <span class="en">Frequently Asked Questions</span>
+    <span class="ar">الأسئلة الشائعة</span>
+  </h2>
+
+  <div class="faq">
+
+    <!-- Q1 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">I forgot my password. What do I do?</span>
+          <span class="ar">نسيت كلمة المرور. ماذا أفعل؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">There is no self-service password reset. Contact your <strong>IT Administrator</strong> and ask them to reset your password. They do this from the Admin panel: <em>Users → find your account → Reset PW</em>. They will give you a new temporary password and you can use it to log in immediately.</span>
+        <span class="ar">لا توجد إعادة تعيين ذاتية لكلمة المرور. تواصل مع <strong>مسؤول تقنية المعلومات</strong> واطلب منه إعادة تعيين كلمتك. يفعل ذلك من لوحة الإدارة: <em>المستخدمون ← ابحث عن حسابك ← إعادة تعيين كلمة المرور</em>. سيعطيك كلمة مرور مؤقتة جديدة يمكنك استخدامها لتسجيل الدخول فوراً.</span>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">My ticket has been Backlog for several days. What should I do?</span>
+          <span class="ar">تذكرتي في Backlog منذ عدة أيام. ماذا أفعل؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en"><strong>Backlog</strong> means no technician has accepted your ticket yet. This can happen when technicians are busy or a specialist for that category is unavailable. You have two options: (1) Add a <strong>comment</strong> on the ticket asking for an update — admins will see it. (2) Open <strong>Chat</strong> and mention your ticket number to get a direct response from IT support.</span>
+        <span class="ar"><strong>Backlog</strong> تعني أن لا تقني قبل تذكرتك بعد. قد يحدث هذا عندما يكون التقنيون مشغولين أو المتخصص في ذلك التصنيف غير متاح. لديك خياران: (1) أضف <strong>تعليقاً</strong> على التذكرة تطلب فيه تحديثاً — سيراه المديرون. (2) افتح <strong>الدردشة</strong> واذكر رقم تذكرتك للحصول على رد مباشر من دعم تقنية المعلومات.</span>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">Can I edit my ticket after submitting it?</span>
+          <span class="ar">هل يمكنني تعديل تذكرتي بعد إرسالها؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">Employees cannot directly edit the title, description, priority, or category of a submitted ticket — those fields are locked once submitted to preserve the record. However, you can <strong>add comments</strong> to provide corrections or extra information. If a field really needs changing (e.g. wrong category), ask the technician or administrator to update it for you.</span>
+        <span class="ar">لا يستطيع الموظفون تعديل العنوان أو الوصف أو الأولوية أو تصنيف تذكرة مُرسلة بشكل مباشر — تلك الحقول مقفلة بعد الإرسال للحفاظ على السجل. لكن يمكنك <strong>إضافة تعليقات</strong> لتقديم تصحيحات أو معلومات إضافية. إذا احتاج حقل ما إلى تغيير فعلاً (مثلاً تصنيف خاطئ)، اطلب من التقني أو المسؤول تحديثه لك.</span>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">Does the page update automatically when my ticket is resolved?</span>
+          <span class="ar">هل تتحدث الصفحة تلقائياً عندما تُحلّ تذكرتي؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">Yes. The ticket detail page polls for updates every <strong>15 seconds</strong>. When a technician changes the status to "In Review" or an administrator marks it "Done", you will see the change reflected on the page within 15 seconds — no manual refresh needed. You will also receive a 🔔 notification in the top bar.</span>
+        <span class="ar">نعم. صفحة تفاصيل التذكرة تتحقق من التحديثات كل <strong>15 ثانية</strong>. عندما يغيّر التقني الحالة إلى "In Review" أو يُحدد المسؤول "Done"، ستجد التغيير معكوساً على الصفحة في غضون 15 ثانية — دون الحاجة إلى تحديث يدوي. ستتلقى أيضاً إشعاراً 🔔 في الشريط العلوي.</span>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">Can I delete a ticket I submitted by mistake?</span>
+          <span class="ar">هل يمكنني حذف تذكرة أرسلتها بالخطأ؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">No. Employees cannot delete tickets — only administrators can. This is by design to maintain a complete audit trail. If you submitted a ticket by mistake, do one of the following: (1) Add a comment saying "Submitted in error, please cancel." (2) Use Chat to ask IT to cancel it. The administrator will then set its status to <strong>Cancelled</strong>.</span>
+        <span class="ar">لا. لا يستطيع الموظفون حذف التذاكر — فقط المديرون يمكنهم ذلك. هذا تصميم مقصود للحفاظ على سجل مراجعة كامل. إذا أرسلت تذكرة بالخطأ، افعل أحد الآتيين: (1) أضف تعليقاً يقول "أُرسلت بالخطأ، أرجو الإلغاء." (2) استخدم الدردشة لطلب الإلغاء من تقنية المعلومات. سيقوم المسؤول بتحديد حالتها إلى <strong>Cancelled</strong>.</span>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">I submitted a duplicate ticket by accident. What do I do?</span>
+          <span class="ar">أرسلت تذكرة مكررة بالخطأ. ماذا أفعل؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">Open the duplicate ticket and add a comment: <em>"Duplicate of ticket #[number]. Please cancel this one."</em> Then use the Chat to let IT know so they can cancel the duplicate promptly. Do not submit a third ticket about the duplicate — that just adds more noise.</span>
+        <span class="ar">افتح التذكرة المكررة وأضف تعليقاً: <em>"مكررة من التذكرة رقم #[الرقم]. أرجو إلغاء هذه."</em> ثم استخدم الدردشة لإعلام تقنية المعلومات حتى يتمكنوا من إلغاء المكررة بسرعة. لا ترسل تذكرة ثالثة عن المكررة — هذا يضيف فوضى أكثر.</span>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">Why can't I see the Board or Tasks menu in the sidebar?</span>
+          <span class="ar">لماذا لا أرى قائمة "اللوحة" أو "المهام" في الشريط الجانبي؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en"><strong>Board</strong> and <strong>Tasks</strong> are only available to Technicians and Administrators. Employees use <strong>"My Tickets"</strong> instead — it shows only the tickets you submitted, which is all you need. If you believe your role has been set incorrectly, contact your IT Administrator and ask them to review your account under Users.</span>
+        <span class="ar"><strong>اللوحة</strong> و<strong>المهام</strong> متاحتان للتقنيين والمديرين فقط. يستخدم الموظفون <strong>"تذاكري"</strong> بدلاً من ذلك — تعرض فقط التذاكر التي أرسلتها، وهو كل ما تحتاجه. إذا كنت تعتقد أن دورك حُدّد بشكل خاطئ، تواصل مع مسؤول تقنية المعلومات واطلب منه مراجعة حسابك في قسم المستخدمين.</span>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>
+          <span class="en">I attached the wrong file. Can I remove it?</span>
+          <span class="ar">أرفقت ملفاً خاطئاً. هل يمكنني إزالته؟</span>
+        </span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">Employees cannot remove attachments from a submitted ticket. Add a <strong>comment</strong> to the ticket noting which attachment is incorrect and explaining what the correct file should be. You can also attach the correct file in a follow-up comment. If the incorrect file contains sensitive information, use Chat to alert IT immediately so an administrator can remove it.</span>
+        <span class="ar">لا يستطيع الموظفون إزالة المرفقات من تذكرة مُرسلة. أضف <strong>تعليقاً</strong> على التذكرة تشير فيه إلى أي مرفق خاطئ وتشرح ما يجب أن يكون الملف الصحيح. يمكنك أيضاً إرفاق الملف الصحيح في تعليق متابعة. إذا كان الملف الخاطئ يحتوي على معلومات حساسة، استخدم الدردشة لتنبيه تقنية المعلومات فوراً حتى يتمكن مسؤول من إزالته.</span>
+      </div>
+    </div>
+
+  </div><!-- /faq -->
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:3rem 0 1rem">
+  <p style="color:var(--muted);font-size:.8rem;text-align:center">
+    Altuwijri Ticket System ·
+    <span class="en">Employee Guide · v1.0 · For the full multi-role guide see <a href="user-guide.html">user-guide.html</a></span>
+    <span class="ar">دليل الموظف · v1.0 · للدليل الشامل لجميع الأدوار راجع <a href="user-guide.html">user-guide.html</a></span>
+  </p>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+/* ── Language toggle ─────────────────────────────── */
+function setLang(lang) {
+  const isAr = lang === 'ar';
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = isAr ? 'rtl' : 'ltr';
+  document.getElementById('btn-en').classList.toggle('on', !isAr);
+  document.getElementById('btn-ar').classList.toggle('on',  isAr);
+  localStorage.setItem('emp-guide-lang', lang);
+}
+
+/* ── FAQ accordion ──────────────────────────────── */
+function toggleFaq(btn) {
+  btn.classList.toggle('open');
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('open');
+}
+
+/* ── Scroll-spy: active TOC highlight ──────────── */
+const sections = document.querySelectorAll('[id]');
+const tocLinks  = document.querySelectorAll('.toc a[href^="#"]');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l =>
+        l.classList.toggle('on', l.getAttribute('href') === '#' + e.target.id)
+      );
+    }
+  });
+}, { rootMargin: '-5% 0px -80% 0px' });
+sections.forEach(s => io.observe(s));
+
+/* ── Restore saved language ─────────────────────── */
+const saved = localStorage.getItem('emp-guide-lang');
+if (saved) setLang(saved);
+</script>
+</body>
+</html>

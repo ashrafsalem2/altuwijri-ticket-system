@@ -29,7 +29,7 @@ export const routes: Routes = [
         canActivate: [roleGuard], data: { roles: ['Admin'] }
       },
       { path: 'my-tickets', loadComponent: () => import('./features/my-tickets/my-tickets').then(m => m.MyTickets) },
-      { path: 'my-reports', loadComponent: () => import('./features/my-reports/my-reports').then(m => m.MyReports) },
+      { path: 'my-reports', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'new-ticket', loadComponent: () => import('./features/ticket-picker/ticket-picker').then(m => m.TicketPicker) },
       {
         path: 'ticket-categories',

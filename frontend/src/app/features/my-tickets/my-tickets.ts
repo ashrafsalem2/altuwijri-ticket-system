@@ -1,417 +1,315 @@
-import { Component, HostListener, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { TicketCategoryService, AttachmentService } from '../../core/services/data.services';
 import { TaskService } from '../../core/services/task.service';
-import { AttachmentService, ChatService } from '../../core/services/data.services';
+import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
-import {
-  TaskListItem, WorkTaskStatus, TaskPriority, STATUS_LABELS, AvailableTechnician, Attachment
-} from '../../core/models/models';
-import { initials } from '../../shared/util';
+import { TicketCategory, TaskPriority, TaskType, WorkTaskStatus } from '../../core/models/models';
 
-type EmpFilter = 'all' | 'notYet' | 'open' | 'inProcess' | 'complete';
-
-const PRIO_COLORS: Record<TaskPriority, string> = {
-  Low: '#22c55e', Medium: '#f59e0b', High: '#f97316', Critical: '#ef4444'
-};
-
-const TICKET_TEMPLATES = [
-  'Computer not turning on',
-  'Cannot access the internet',
-  'Password reset needed',
-  'Printer not working',
-  'Application crashing',
-  'VPN connection issue',
-  'Email not receiving',
-  'Screen / display problem',
-  'Slow computer performance',
-  'Keyboard / mouse not working',
-  'Cannot log in to system',
-  'File access denied',
-];
-
-const FILTER_STATUSES: Record<EmpFilter, WorkTaskStatus[] | null> = {
-  all: null,
-  notYet: ['Backlog', 'ToDo'],
-  open: ['InProgress', 'Blocked'],
-  inProcess: ['InReview'],
-  complete: ['Done']
-};
+type ViewMode = 'list' | 'grid';
 
 @Component({
   selector: 'app-my-tickets',
-  imports: [RouterLink, FormsModule, DatePipe, TranslatePipe],
+  imports: [FormsModule, TranslatePipe],
   styleUrl: './my-tickets.scss',
   template: `
-  <div class="page" [attr.dir]="i18n.dir()">
-    <div class="page-header">
-      <h2>{{ 'myt.title' | t }}</h2>
-      <button class="btn btn-primary" (click)="newTicket()">{{ 'myt.new' | t }}</button>
-    </div>
+  <div class="picker-page" [attr.dir]="i18n.dir()">
 
-    <!-- Search + filter chips -->
-    <div class="card card-pad filters">
-      <input class="input" style="flex:1;min-width:180px" [placeholder]="'myt.search' | t"
-             [(ngModel)]="search" (keyup)="applySearch()" />
-      <div class="filter-chips">
-        @for (f of filterOptions; track f.value) {
-          <button class="chip" [class.active]="activeFilter() === f.value" (click)="setFilter(f.value)">
-            {{ f.labelKey | t }}
-            <span class="chip-count">{{ countFor(f.value) }}</span>
+    <!-- ══ STEP 1: Category picker ══ -->
+    @if (step() === 1) {
+      <div class="pick-header">
+        <div class="pick-titles">
+          <h2>🎫 {{ 'myt.title' | t }}</h2>
+          <p class="pick-sub">{{ i18n.lang() === 'ar' ? 'اختر نوع الطلب لفتح تذكرة جديدة' : 'Select a category to submit a new support ticket' }}</p>
+        </div>
+        <div class="view-toggle">
+          <button class="vt-btn" [class.on]="viewMode() === 'list'" (click)="setView('list')" [title]="'List view'">
+            ☰
           </button>
-        }
+          <button class="vt-btn" [class.on]="viewMode() === 'grid'" (click)="setView('grid')" [title]="'Grid view'">
+            ⊞
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Ticket list -->
-    <div class="card mt-2">
-      @if (loading()) {
+      @if (loadingCats()) {
         <div class="spin"></div>
-      } @else {
-        @for (t of displayedTickets(); track t.id) {
-          <a [routerLink]="['/tasks', t.id]" class="ticket-row">
-            <div class="tr-left">
-              <span class="prio-dot" [style.background]="prioBg(t.priority)"></span>
-              <div class="tr-info">
-                <span class="tr-title">{{ t.title }}</span>
-                <span class="tr-meta text-sm muted">
-                  #{{ t.id }}
-                  @if (t.startDate) { · {{ t.startDate | date:'mediumDate' }} }
-                  @if (t.assigneeName) { · {{ t.assigneeName }} }
+      } @else if (activeCategories() === 0) {
+        <div class="empty-cats">{{ 'tc.empty' | t }}</div>
+      } @else if (viewMode() === 'list') {
+        <!-- List view -->
+        <div class="myt-cat-list">
+          @for (cat of categories(); track cat.id) {
+            @if (cat.isActive) {
+              <button class="myt-cat-row" (click)="selectCategory(cat)" [style.--cat-color]="cat.color">
+                <div class="myt-cat-accent" [style.background]="cat.color"></div>
+                <div class="myt-cat-icon" [style.background]="cat.color + '18'">{{ cat.icon }}</div>
+                <div class="myt-cat-body">
+                  <span class="myt-cat-name">{{ (i18n.lang() === 'ar' && cat.nameAr) ? cat.nameAr : cat.name }}</span>
+                  @if (cat.description) {
+                    <span class="myt-cat-desc">{{ cat.description }}</span>
+                  }
+                </div>
+                <span class="myt-cat-arrow" [style.color]="cat.color">
+                  {{ i18n.lang() === 'ar' ? '‹' : '›' }}
                 </span>
-              </div>
-            </div>
-            <div class="tr-right">
-              <span class="badge" [class]="'st-' + t.status">{{ lbl(t.status) }}</span>
-              <div class="prog-wrap">
-                <div class="prog-bar" [style.width.%]="t.progress"></div>
-              </div>
-              <span class="prog-pct text-xs muted">{{ t.progress }}%</span>
-            </div>
-          </a>
-        } @empty {
-          <div class="empty">{{ 'myt.empty' | t }}</div>
-        }
-
-        @if (totalPages() > 1) {
-          <div class="pager">
-            <button class="btn btn-sm btn-ghost" [disabled]="currentPage() === 1" (click)="goPage(currentPage() - 1)">{{ 'c.prev' | t }}</button>
-            <span class="text-sm muted">{{ 'c.page' | t }} {{ currentPage() }} / {{ totalPages() }}</span>
-            <button class="btn btn-sm btn-ghost" [disabled]="currentPage() === totalPages()" (click)="goPage(currentPage() + 1)">{{ 'c.next' | t }}</button>
-          </div>
-        }
+              </button>
+            }
+          }
+        </div>
+      } @else {
+        <!-- Grid view -->
+        <div class="myt-cat-grid">
+          @for (cat of categories(); track cat.id) {
+            @if (cat.isActive) {
+              <button class="myt-cat-card" (click)="selectCategory(cat)">
+                <div class="myt-card-strip" [style.background]="cat.color"></div>
+                <div class="myt-card-body">
+                  <div class="myt-card-icon" [style.background]="cat.color + '20'">
+                    <span>{{ cat.icon }}</span>
+                  </div>
+                  <div class="myt-card-name">{{ (i18n.lang() === 'ar' && cat.nameAr) ? cat.nameAr : cat.name }}</div>
+                  @if (cat.description) {
+                    <div class="myt-card-desc">{{ cat.description }}</div>
+                  }
+                  <span class="myt-card-arrow" [style.color]="cat.color">{{ i18n.lang() === 'ar' ? '‹' : '›' }}</span>
+                </div>
+              </button>
+            }
+          }
+        </div>
       }
-    </div>
+    }
 
-    <div class="shortcut-hint text-xs muted">{{ 'myt.shortcutHint' | t }}</div>
-  </div>
+    <!-- ══ STEP 2: Ticket form ══ -->
+    @if (step() === 2 && selectedCat()) {
+      <div class="pick-header">
+        <button class="back-btn" (click)="step.set(1)">
+          <span>{{ i18n.lang() === 'ar' ? '›' : '‹' }}</span>
+          {{ 'pick.back' | t }}
+        </button>
+        <div class="pick-titles">
+          <span class="cat-pill"
+                [style.background]="selectedCat()!.color + '18'"
+                [style.border-color]="selectedCat()!.color + '55'"
+                [style.color]="selectedCat()!.color">
+            {{ selectedCat()!.icon }} {{ (i18n.lang() === 'ar' && selectedCat()!.nameAr) ? selectedCat()!.nameAr : selectedCat()!.name }}
+          </span>
+          <h2>{{ 'task.ticket' | t }}</h2>
+        </div>
+      </div>
 
-  <!-- New Ticket Modal -->
-  @if (showForm()) {
-    <div class="modal-overlay" (click)="closeForm()">
-      <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-head">
-          <h3>{{ 'myt.newTitle' | t }}</h3>
-          <button class="btn btn-icon btn-ghost" (click)="closeForm()">✕</button>
+      <div class="form-card">
+        @if (error()) { <div class="form-err">{{ error() }}</div> }
+
+        <div class="form-group">
+          <label>{{ 'task.title' | t }} <span class="req">*</span></label>
+          <input class="input" [(ngModel)]="form.title" [placeholder]="'myt.titlePlaceholder' | t" />
         </div>
 
-        @if (!createdId()) {
-          @if (formError()) { <div class="err">{{ formError() }}</div> }
+        <div class="form-group">
+          <label>{{ 'task.description' | t }}</label>
+          <textarea class="input" rows="3" [(ngModel)]="form.description" [placeholder]="'myt.descPlaceholder' | t"></textarea>
+        </div>
 
-          <!-- Quick templates -->
-          <div class="form-group">
-            <label class="tpl-lbl">{{ 'tpl.title' | t }}</label>
-            <div class="tpl-chips">
-              @for (tpl of templates; track tpl) {
-                <button type="button" class="tpl-chip" [class.active]="form.title === tpl" (click)="form.title = tpl">{{ tpl }}</button>
+        <div class="form-group">
+          <label>{{ 'task.priority' | t }}</label>
+          <select class="input" [(ngModel)]="form.priority">
+            <option value="Low">{{ 'pr.Low' | t }}</option>
+            <option value="Medium">{{ 'pr.Medium' | t }}</option>
+            <option value="High">{{ 'pr.High' | t }}</option>
+            <option value="Critical">{{ 'pr.Critical' | t }}</option>
+          </select>
+        </div>
+
+        <!-- Divider -->
+        <div class="form-divider">
+          <span>{{ i18n.lang() === 'ar' ? 'الملفات والروابط (اختياري)' : 'Files & Links (optional)' }}</span>
+        </div>
+
+        <!-- File attachments -->
+        <div class="form-group">
+          <label>{{ 'task.attach' | t }}</label>
+          <div class="attach-zone" (click)="fileInput.click()"
+               (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
+            <span class="attach-icon">📎</span>
+            <span class="attach-text">{{ i18n.lang() === 'ar' ? 'انقر أو اسحب الملفات هنا' : 'Click or drag files here' }}</span>
+            <span class="attach-hint">{{ i18n.lang() === 'ar' ? 'يمكنك إرفاق أي نوع من الملفات' : 'Any file type supported' }}</span>
+          </div>
+          <input #fileInput type="file" multiple style="display:none" (change)="onFiles($event)" />
+          @if (pendingFiles.length > 0) {
+            <div class="attach-list">
+              @for (f of pendingFiles; track f.name) {
+                <div class="attach-item">
+                  <span class="attach-file-icon">{{ fileIcon(f.name) }}</span>
+                  <div class="attach-item-info">
+                    <span class="attach-name">{{ f.name }}</span>
+                    <span class="attach-size">{{ formatSize(f.size) }}</span>
+                  </div>
+                  <button class="attach-rm" (click)="removeFile(f)" type="button">✕</button>
+                </div>
               }
             </div>
-          </div>
+          }
+        </div>
 
-          <div class="form-group">
-            <label>{{ 'task.title' | t }} <span class="req">*</span></label>
-            <input class="input" [(ngModel)]="form.title" [placeholder]="'myt.titlePlaceholder' | t" />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ 'task.priority' | t }}</label>
-              <select class="input" [(ngModel)]="form.priority">
-                <option value="Low">{{ 'pr.Low' | t }}</option>
-                <option value="Medium">{{ 'pr.Medium' | t }}</option>
-                <option value="High">{{ 'pr.High' | t }}</option>
-                <option value="Critical">{{ 'pr.Critical' | t }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>{{ 'task.assignee' | t }} <span class="req">*</span></label>
-              <select class="input" [(ngModel)]="form.assigneeId">
-                <option [ngValue]="null">{{ 'myt.selectTech' | t }}</option>
-                @for (tech of technicians(); track tech.id) {
-                  <option [ngValue]="tech.id">{{ tech.fullName }}{{ tech.isAvailable ? ' ✓' : '' }}</option>
-                }
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>{{ 'task.description' | t }}</label>
-            <textarea class="input" rows="3" [(ngModel)]="form.description" [placeholder]="'myt.descPlaceholder' | t"></textarea>
-          </div>
-
-          <!-- Attachments collected BEFORE submit -->
-          <div class="form-group">
-            <label>{{ 'task.attachments' | t }}</label>
-            <div class="att-row">
-              <label class="btn btn-ghost btn-sm att-file-btn">
-                📎 {{ 'task.upload' | t }}
-                <input type="file" multiple hidden (change)="pickFiles($event)" />
-              </label>
-              <button class="btn btn-ghost btn-sm" (click)="showLinkInput.set(!showLinkInput())">
-                🔗 {{ 'task.addUrl' | t }}
-              </button>
-            </div>
-            @if (showLinkInput()) {
-              <div class="link-row mt-1">
-                <input class="input" [(ngModel)]="linkTitle" [placeholder]="'task.urlTitle' | t" />
-                <input class="input" [(ngModel)]="linkUrl" placeholder="https://…" />
-                <button class="btn btn-ghost btn-sm" (click)="addPendingLink()">{{ 'c.add' | t }}</button>
-              </div>
-            }
-            @for (f of pendingFiles; track $index) {
-              <div class="att-chip">📎 {{ f.name }}
-                <button class="att-rm" (click)="removeFile($index)">✕</button>
-              </div>
-            }
-            @for (l of pendingLinks; track $index) {
-              <div class="att-chip">🔗 {{ l.title || l.url }}
-                <button class="att-rm" (click)="removeLink($index)">✕</button>
-              </div>
-            }
-          </div>
-
-          <div class="modal-foot">
-            <button class="btn btn-ghost" (click)="closeForm()">{{ 'c.cancel' | t }}</button>
-            <button class="btn btn-primary" [disabled]="submitting()" (click)="submit()">
-              {{ submitting() ? ('myt.submitting' | t) : ('myt.submit' | t) }}
+        <!-- URL links -->
+        <div class="form-group">
+          <div class="link-header">
+            <label style="margin:0">{{ 'task.addUrl' | t }}</label>
+            <button class="link-add-btn" (click)="addLink()" type="button">
+              ＋ {{ i18n.lang() === 'ar' ? 'رابط جديد' : 'Add link' }}
             </button>
           </div>
+          @for (lnk of pendingLinks; track $index; let i = $index) {
+            <div class="link-row">
+              <input class="input link-title-in" [(ngModel)]="lnk.title"
+                     [placeholder]="i18n.lang() === 'ar' ? 'عنوان الرابط' : 'Link title'" />
+              <input class="input link-url-in" [(ngModel)]="lnk.url" placeholder="https://…" dir="ltr" />
+              <button class="attach-rm" (click)="removeLink(i)" type="button">✕</button>
+            </div>
+          }
+        </div>
 
-        } @else {
-          <div class="success-box">
-            <div class="success-icon">✅</div>
-            <p>{{ 'myt.submitted' | t }}</p>
-            @if (uploadingCount() > 0) {
-              <p class="text-sm muted">{{ 'myt.uploading' | t }} {{ uploadingCount() }} {{ 'myt.files' | t }}</p>
-            }
-            @for (a of attachments(); track a.id) {
-              <div class="att-chip">
-                @if (a.kind === 'Link') { 🔗 } @else if (a.kind === 'Image') { 🖼 } @else { 📎 }
-                {{ a.fileName }}
-              </div>
-            }
-          </div>
-          <div class="modal-foot">
-            <button class="btn btn-primary" [disabled]="uploadingCount() > 0" (click)="closeForm()">
-              {{ 'myt.done' | t }}
-            </button>
+        @if (uploading()) {
+          <div class="upload-progress">
+            <div class="upload-spin"></div>
+            <span>{{ 'myt.uploading' | t }} {{ pendingFiles.length + pendingLinks.length }} {{ 'myt.files' | t }}</span>
           </div>
         }
+
+        <div class="form-actions">
+          <button class="btn-ghost" (click)="step.set(1)">{{ 'c.cancel' | t }}</button>
+          <button class="btn-submit" [disabled]="submitting() || uploading()" (click)="submit()"
+                  [style.background]="selectedCat()!.color">
+            @if (submitting() || uploading()) { <span class="btn-spin"></span> }
+            {{ (submitting() || uploading()) ? ('c.saving' | t) : ('myt.submit' | t) }}
+          </button>
+        </div>
       </div>
-    </div>
-  }
+    }
+  </div>
   `
 })
-export class MyTickets implements OnInit, OnDestroy {
-  private taskSvc = inject(TaskService);
-  private chatSvc = inject(ChatService);
-  private attSvc = inject(AttachmentService);
-  private router = inject(Router);
-  i18n = inject(I18nService);
+export class MyTickets implements OnInit {
+  private catSvc    = inject(TicketCategoryService);
+  private taskSvc   = inject(TaskService);
+  private attachSvc = inject(AttachmentService);
+  private router    = inject(Router);
+  private auth      = inject(AuthService);
+  i18n              = inject(I18nService);
 
-  allTickets = signal<TaskListItem[]>([]);
-  loading = signal(true);
-  showForm = signal(false);
-  technicians = signal<AvailableTechnician[]>([]);
-  attachments = signal<Attachment[]>([]);
-  submitting = signal(false);
-  formError = signal('');
-  createdId = signal<number | null>(null);
-  showLinkInput = signal(false);
-  uploadingCount = signal(0);
-  activeFilter = signal<EmpFilter>('all');
-  private _page = signal(1);
-  currentPage = this._page.asReadonly();
-  private listPoll?: any;
-  ngOnDestroy() { clearInterval(this.listPoll); }
+  step        = signal<1 | 2>(1);
+  categories  = signal<TicketCategory[]>([]);
+  selectedCat = signal<TicketCategory | null>(null);
+  loadingCats = signal(true);
+  submitting  = signal(false);
+  uploading   = signal(false);
+  error       = signal('');
+  viewMode    = signal<ViewMode>('list');
 
-  search = '';
-  linkTitle = '';
-  linkUrl = '';
   pendingFiles: File[] = [];
   pendingLinks: { title: string; url: string }[] = [];
 
-  readonly PAGE_SIZE = 15;
+  activeCategories = () => this.categories().filter(c => c.isActive).length;
 
-  form = { title: '', description: '', priority: 'Medium' as TaskPriority, assigneeId: null as number | null };
-
-  filterOptions: { value: EmpFilter; labelKey: string }[] = [
-    { value: 'all',       labelKey: 'myt.all' },
-    { value: 'notYet',    labelKey: 'myt.notYet' },
-    { value: 'open',      labelKey: 'myt.open' },
-    { value: 'inProcess', labelKey: 'myt.inProcess' },
-    { value: 'complete',  labelKey: 'myt.complete' },
-  ];
-
-  readonly templates = TICKET_TEMPLATES;
-  ini = initials;
-  lbl = (s: WorkTaskStatus) => STATUS_LABELS[s];
-  prioBg = (p: TaskPriority) => PRIO_COLORS[p];
-
-  filteredTickets = computed(() => {
-    const q = this.search.toLowerCase().trim();
-    const statuses = FILTER_STATUSES[this.activeFilter()];
-    return this.allTickets().filter(t =>
-      (!q || t.title.toLowerCase().includes(q)) &&
-      (!statuses || statuses.includes(t.status))
-    );
-  });
-
-  displayedTickets = computed(() => {
-    const p = this._page();
-    return this.filteredTickets().slice((p - 1) * this.PAGE_SIZE, p * this.PAGE_SIZE);
-  });
-
-  totalPages = computed(() => Math.max(1, Math.ceil(this.filteredTickets().length / this.PAGE_SIZE)));
-
-  countFor(f: EmpFilter): number {
-    const statuses = FILTER_STATUSES[f];
-    if (!statuses) return this.allTickets().length;
-    return this.allTickets().filter(t => statuses.includes(t.status)).length;
-  }
-
-  @HostListener('document:keydown', ['$event'])
-  onKey(e: KeyboardEvent) {
-    const tag = (e.target as HTMLElement).tagName;
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
-    if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      e.preventDefault();
-      if (!this.showForm()) this.newTicket();
-    }
-    if (e.key === 'Escape' && this.showForm()) this.closeForm();
-  }
+  form: { title: string; description: string; priority: TaskPriority } =
+    { title: '', description: '', priority: 'Medium' };
 
   ngOnInit() {
-    this.load();
-    this.chatSvc.technicians(false).subscribe(t => this.technicians.set(t));
-    this.listPoll = setInterval(() => this.silentRefresh(), 20000);
-  }
-
-  load() {
-    this.loading.set(true);
-    this.taskSvc.query({ sortBy: 'createdAt', sortDescending: true, pageSize: 1000 }).subscribe({
-      next: r => { this.allTickets.set(r.items); this.loading.set(false); },
-      error: () => this.loading.set(false)
+    const saved = localStorage.getItem('myt-view') as ViewMode | null;
+    if (saved === 'grid' || saved === 'list') this.viewMode.set(saved);
+    this.catSvc.getAll().subscribe({
+      next: c => { this.categories.set(c); this.loadingCats.set(false); },
+      error: () => this.loadingCats.set(false)
     });
   }
 
-  private silentRefresh() {
-    this.taskSvc.query({ sortBy: 'createdAt', sortDescending: true, pageSize: 1000 }).subscribe({
-      next: r => this.allTickets.set(r.items)
-    });
-  }
-
-  setFilter(f: EmpFilter) { this.activeFilter.set(f); this._page.set(1); }
-  applySearch() { this._page.set(1); }
-  goPage(p: number) { this._page.set(Math.max(1, Math.min(p, this.totalPages()))); }
-
-  newTicket() { this.router.navigate(['/new-ticket']); }
-
-  openForm() {
-    this.form = { title: '', description: '', priority: 'Medium', assigneeId: null };
-    this.formError.set('');
-    this.createdId.set(null);
-    this.attachments.set([]);
-    this.showLinkInput.set(false);
+  selectCategory(cat: TicketCategory) {
+    this.selectedCat.set(cat);
+    this.form = { title: '', description: '', priority: 'Medium' };
     this.pendingFiles = [];
     this.pendingLinks = [];
-    this.showForm.set(true);
+    this.error.set('');
+    this.step.set(2);
   }
 
-  closeForm() {
-    this.showForm.set(false);
-    if (this.createdId()) this.load();
+  setView(m: ViewMode) {
+    this.viewMode.set(m);
+    localStorage.setItem('myt-view', m);
+  }
+
+  onFiles(e: Event) {
+    const files = (e.target as HTMLInputElement).files;
+    if (files) this.pendingFiles.push(...Array.from(files));
+    (e.target as HTMLInputElement).value = '';
+  }
+  onDrop(e: DragEvent) {
+    e.preventDefault();
+    if (e.dataTransfer?.files) this.pendingFiles.push(...Array.from(e.dataTransfer.files));
+  }
+  removeFile(f: File) { this.pendingFiles = this.pendingFiles.filter(x => x !== f); }
+  addLink()           { this.pendingLinks.push({ title: '', url: '' }); }
+  removeLink(i: number) { this.pendingLinks.splice(i, 1); }
+
+  formatSize(bytes: number) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+  fileIcon(name: string) {
+    const ext = name.split('.').pop()?.toLowerCase() ?? '';
+    if (['jpg','jpeg','png','gif','webp','svg'].includes(ext)) return '🖼';
+    if (ext === 'pdf') return '📄';
+    if (['doc','docx'].includes(ext)) return '📝';
+    if (['xls','xlsx'].includes(ext)) return '📊';
+    if (['zip','rar','7z'].includes(ext)) return '🗜';
+    return '📎';
   }
 
   submit() {
-    if (!this.form.title.trim()) { this.formError.set('Title is required.'); return; }
-    if (!this.form.assigneeId) { this.formError.set('Please select a technician.'); return; }
-    this.formError.set('');
+    const ar = this.i18n.lang() === 'ar';
+    if (!this.form.title.trim()) {
+      this.error.set(ar ? 'العنوان مطلوب.' : 'Title is required.');
+      return;
+    }
     this.submitting.set(true);
+    this.error.set('');
+    const cat = this.selectedCat()!;
 
     this.taskSvc.create({
-      title: this.form.title,
+      title:       this.form.title.trim(),
       description: this.form.description || undefined,
-      status: 'ToDo',
-      priority: this.form.priority,
-      type: 'ServiceRequest',
-      projectId: 0,
-      branchId: null,
-      assigneeId: this.form.assigneeId,
-      tagIds: []
+      status:      'ToDo' as WorkTaskStatus,
+      priority:    this.form.priority,
+      type:        (cat.defaultType as TaskType) ?? 'ServiceRequest',
+      projectId:   0,
+      branchId:    null,
+      categoryId:  cat.id,
+      assigneeId:  null,
+      tagIds:      []
     }).subscribe({
       next: task => {
         this.submitting.set(false);
-        this.createdId.set(task.id);
-        this.uploadPending(task.id);
+        const uploads = [
+          ...this.pendingFiles.map(f => this.attachSvc.upload(task.id, f)),
+          ...this.pendingLinks.filter(l => l.url.trim()).map(l => this.attachSvc.addLink(task.id, l.title || l.url, l.url))
+        ];
+        if (!uploads.length) { this.router.navigate(['/tasks', task.id]); return; }
+        this.uploading.set(true);
+        forkJoin(uploads).subscribe({
+          next:  () => { this.uploading.set(false); this.router.navigate(['/tasks', task.id]); },
+          error: () => { this.uploading.set(false); this.router.navigate(['/tasks', task.id]); }
+        });
       },
-      error: err => {
+      error: e => {
         this.submitting.set(false);
-        this.formError.set(err?.error?.title ?? 'Failed to submit ticket. Please try again.');
+        const ar2 = this.i18n.lang() === 'ar';
+        this.error.set(e?.error?.title ?? (ar2 ? 'فشل في إرسال التذكرة.' : 'Failed to submit ticket.'));
       }
     });
-  }
-
-  pickFiles(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.pendingFiles = [...this.pendingFiles, ...Array.from(input.files ?? [])];
-    input.value = '';
-  }
-
-  removeFile(i: number) { this.pendingFiles = this.pendingFiles.filter((_, idx) => idx !== i); }
-
-  addPendingLink() {
-    if (!this.linkUrl.startsWith('http')) return;
-    this.pendingLinks = [...this.pendingLinks, { title: this.linkTitle || this.linkUrl, url: this.linkUrl }];
-    this.linkTitle = ''; this.linkUrl = ''; this.showLinkInput.set(false);
-  }
-
-  removeLink(i: number) { this.pendingLinks = this.pendingLinks.filter((_, idx) => idx !== i); }
-
-  private uploadPending(id: number) {
-    const total = this.pendingFiles.length + this.pendingLinks.length;
-    if (total === 0) return;
-    this.uploadingCount.set(total);
-
-    for (const f of this.pendingFiles) {
-      this.attSvc.upload(id, f).subscribe({
-        next: a => {
-          this.attachments.update(l => [...l, a]);
-          this.uploadingCount.update(n => n - 1);
-        },
-        error: () => this.uploadingCount.update(n => n - 1)
-      });
-    }
-    for (const l of this.pendingLinks) {
-      this.attSvc.addLink(id, l.title, l.url).subscribe({
-        next: a => {
-          this.attachments.update(l => [...l, a]);
-          this.uploadingCount.update(n => n - 1);
-        },
-        error: () => this.uploadingCount.update(n => n - 1)
-      });
-    }
   }
 }

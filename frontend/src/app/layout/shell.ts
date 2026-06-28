@@ -51,9 +51,6 @@ import { initials, timeAgo } from '../shared/util';
           <span class="ic">💬</span> {{ 'nav.chat' | t }}
           @if (chatUnread() > 0) { <span class="side-badge">{{ chatUnread() }}</span> }
         </a>
-        @if (auth.hasRole('Branch-Employee', 'HO-Employee', 'Cam-Employee')) {
-          <a routerLink="/my-reports" routerLinkActive="active"><span class="ic">📊</span> {{ 'nav.myReports' | t }}</a>
-        }
         @if (auth.hasRole('Admin')) {
           <a routerLink="/reports" routerLinkActive="active"><span class="ic">📊</span> {{ 'nav.reports' | t }}</a>
         }
@@ -153,7 +150,7 @@ import { initials, timeAgo } from '../shared/util';
         }
 
         <div class="notif">
-          <button class="btn btn-icon btn-ghost" (click)="toggleNotif()" title="Notifications">
+          <button class="btn btn-icon btn-ghost bell-btn" [class.bell-ringing]="hasNewNotif()" (click)="toggleNotif()" title="Notifications">
             🔔 @if (unread() > 0) { <span class="nbadge">{{ unread() }}</span> }
           </button>
           @if (notifOpen()) {
@@ -480,6 +477,8 @@ export class Shell implements OnInit, OnDestroy {
   private router      = inject(Router);
 
   unread        = signal(0);
+  hasNewNotif   = signal(false);
+  private lastKnownUnread = -1;
   chatUnread    = this.chatSvc.chatUnread; // shared signal from ChatService
   notifications = signal<Notification[]>([]);
   notifOpen     = signal(false);
@@ -618,7 +617,11 @@ export class Shell implements OnInit, OnDestroy {
   }
 
   refreshCounts() {
-    this.notifSvc.unreadCount().subscribe(c => this.unread.set(c));
+    this.notifSvc.unreadCount().subscribe(c => {
+      if (c > 0 && c > this.lastKnownUnread) this.hasNewNotif.set(true);
+      this.lastKnownUnread = c;
+      this.unread.set(c);
+    });
     this.chatSvc.refreshUnread();
   }
 
@@ -634,7 +637,11 @@ export class Shell implements OnInit, OnDestroy {
   toggleNotif() {
     const o = !this.notifOpen(); setTimeout(() => this.notifOpen.set(o));
     this.userOpen.set(false);
-    if (o) this.notifSvc.getMine().subscribe(n => this.notifications.set(n));
+    if (o) {
+      this.hasNewNotif.set(false);
+      this.lastKnownUnread = this.unread();
+      this.notifSvc.getMine().subscribe(n => this.notifications.set(n));
+    }
   }
   toggleUser() { const o = !this.userOpen(); setTimeout(() => this.userOpen.set(o)); this.notifOpen.set(false); }
   markAll() {

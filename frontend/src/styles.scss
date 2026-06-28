@@ -1,25 +1,24 @@
-/* ===== Altuwijri Ticket System — global theme ===== */
-/* Primary accent derived from logo color #6b1a1a (deep maroon) */
+/* ===== Altuwijri Ticket System — Business Central theme ===== */
 :root {
-  --bg: #fdf8f8;
-  --surface: #ffffff;
-  --surface-2: #fdf5f5;
-  --border: #e8dede;
-  --text: #1a0808;
-  --text-muted: #7a5858;
-  --primary: #6b1a1a;
-  --primary-dark: #521212;
-  --primary-soft: #fdeaea;
-  --primary-rgb: 107, 26, 26;
+  --bg: #FAF9F8;
+  --surface: #FFFFFF;
+  --surface-2: #F3F2F1;
+  --border: #D2D0CE;
+  --text: #323130;
+  --text-muted: #605E5C;
+  --primary: #008272;
+  --primary-dark: #006B6B;
+  --primary-soft: #E0F2F0;
+  --primary-rgb: 0, 130, 114;
   --danger: #dc2626;
   --warning: #d97706;
   --success: #16a34a;
-  --radius: 10px;
-  --radius-sm: 7px;
-  --shadow: 0 1px 3px rgba(107,26,26,.08), 0 1px 2px rgba(15,23,42,.05);
-  --shadow-lg: 0 10px 25px rgba(107,26,26,.14);
-  --sidebar: #1e0606;
-  --sidebar-muted: #c9a0a0;
+  --radius: 4px;
+  --radius-sm: 2px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+  --sidebar: #1F1F1F;
+  --sidebar-muted: #A0A0A0;
 }
 
 * { box-sizing: border-box; }
@@ -137,7 +136,7 @@ textarea { resize: vertical; min-height: 90px; }
   border-radius: 50%; animation: spin 0.8s linear infinite; margin: 2rem auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Custom scrollbar — adapts via --primary-rgb (light: 107,26,26 / dark: 192,85,85) ── */
+/* ── Custom scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), .22); border-radius: 10px; }
@@ -154,34 +153,34 @@ textarea { resize: vertical; min-height: 90px; }
 
 /* ===== DARK MODE ===== */
 [data-theme="dark"] {
-  --bg: #180808;
-  --surface: #2a1010;
-  --surface-2: #341515;
-  --border: #4a2020;
-  --text: #f0e8e8;
-  --text-muted: #c9a0a0;
-  --primary: #c05555;
-  --primary-dark: #a03838;
-  --primary-soft: #3d1010;
-  --primary-rgb: 192, 85, 85;
-  --sidebar: #180808;            /* overridden with gradient in shell.scss dark block */
-  --sidebar-muted: #a87878;
-  --shadow: 0 1px 3px rgba(0,0,0,.5);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,.65);
+  --bg: #252423;
+  --surface: #2D2C2B;
+  --surface-2: #323130;
+  --border: #484644;
+  --text: #F3F2F1;
+  --text-muted: #C8C6C4;
+  --primary: #00B294;
+  --primary-dark: #008272;
+  --primary-soft: #0D2B29;
+  --primary-rgb: 0, 178, 148;
+  --sidebar: #1B1A19;
+  --sidebar-muted: #A0A0A0;
+  --shadow: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.6);
 }
 [data-theme="dark"] body { background: var(--bg); color: var(--text); }
 [data-theme="dark"] .input,
 [data-theme="dark"] select,
 [data-theme="dark"] textarea { background: var(--surface-2); color: var(--text); border-color: var(--border); }
 [data-theme="dark"] .card { background: var(--surface); border-color: var(--border); }
-[data-theme="dark"] .st-Backlog   { background: #1e0a0a; color: #c9a0a0; }
+[data-theme="dark"] .st-Backlog   { background: #3B3A39; color: #C8C6C4; }
 [data-theme="dark"] .st-ToDo      { background: #312e81; color: #a5b4fc; }
 [data-theme="dark"] .st-InProgress{ background: #1e3a8a; color: #93c5fd; }
 [data-theme="dark"] .st-InReview  { background: #78350f; color: #fcd34d; }
 [data-theme="dark"] .st-Blocked   { background: #7f1d1d; color: #fca5a5; }
 [data-theme="dark"] .st-Done      { background: #14532d; color: #86efac; }
-[data-theme="dark"] .st-Cancelled { background: #1e0a0a; color: #7a5858; }
-[data-theme="dark"] .prio-Low     { background: #1e0a0a; color: #c9a0a0; }
+[data-theme="dark"] .st-Cancelled { background: #3B3A39; color: #605E5C; }
+[data-theme="dark"] .prio-Low     { background: #3B3A39; color: #C8C6C4; }
 [data-theme="dark"] .prio-Medium  { background: #0c4a6e; color: #7dd3fc; }
 [data-theme="dark"] .prio-High    { background: #431407; color: #fdba74; }
 [data-theme="dark"] .prio-Critical{ background: #7f1d1d; color: #fca5a5; }

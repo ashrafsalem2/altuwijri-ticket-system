@@ -1,4 +1,4 @@
-import { Component, Input, computed } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { elapsed } from './util';
 
@@ -8,7 +8,7 @@ import { elapsed } from './util';
   imports: [DatePipe],
   styleUrl: './ticket-lifetime.scss',
   template: `
-  @if (card) {
+  @if (card()) {
     <!-- Card mode: full-width informative elapsed card -->
     <div class="lt-card" [class]="'lt-card-' + info().kind">
       @if (info().kind === 'done') {
@@ -36,14 +36,14 @@ import { elapsed } from './util';
             <span class="lt-sub">Since work started</span>
           </div>
         </div>
-        @if (startDate) {
+        @if (startDate()) {
           <div class="lt-dates">
-            <span class="lt-date-item">🚀 Started {{ startDate | date:'mediumDate' }}</span>
+            <span class="lt-date-item">🚀 Started {{ startDate() | date:'mediumDate' }}</span>
           </div>
         }
       } @else {
         <!-- pending: not started yet -->
-        @if (showEmpty) {
+        @if (showEmpty()) {
           <div class="lt-card-done">
             <span class="lt-big-icon">⏳</span>
             <span class="lt-big-label">Not yet started</span>
@@ -63,18 +63,18 @@ import { elapsed } from './util';
         <span class="lt-icon">✓</span>
         <span class="lt-text">{{ info().label }}</span>
       </div>
-    } @else if (info().kind === 'pending' && showEmpty) {
+    } @else if (info().kind === 'pending' && showEmpty()) {
       <span class="lt-none">—</span>
     }
   }
   `
 })
 export class TicketLifetime {
-  @Input() startDate?: string | null;
-  @Input() completedAt?: string | null;
-  @Input() status?: string | null;
-  @Input() showEmpty = false;
-  @Input() card = false;
+  startDate = input<string | null | undefined>();
+  completedAt = input<string | null | undefined>();
+  status = input<string | null | undefined>();
+  showEmpty = input(false);
+  card = input(false);
 
-  info = computed(() => elapsed(this.startDate, this.status, this.completedAt));
+  info = computed(() => elapsed(this.startDate(), this.status(), this.completedAt()));
 }

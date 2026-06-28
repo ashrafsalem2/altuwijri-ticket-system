@@ -253,13 +253,23 @@ const CARDS: HelpCard[] = [
       </div>
     </div>
 
-    <!-- ── Tab bar ── -->
-    <div class="tab-bar no-print">
-      <button class="tab-btn" [class.on]="tab() === 'all'"        (click)="tab.set('all')">{{ 'help.tabAll' | t }}</button>
-      <button class="tab-btn tab-emp"  [class.on]="tab() === 'employee'"   (click)="tab.set('employee')">👷 {{ 'help.tabEmp' | t }}</button>
-      <button class="tab-btn tab-tech" [class.on]="tab() === 'technician'" (click)="tab.set('technician')">🔧 {{ 'help.tabTech' | t }}</button>
-      <button class="tab-btn tab-adm"  [class.on]="tab() === 'admin'"      (click)="tab.set('admin')">👑 {{ 'help.tabAdmin' | t }}</button>
-    </div>
+    <!-- ── Admin tab bar ── -->
+    @if (isAdmin()) {
+      <div class="tab-bar">
+        <button class="tab-btn"           [class.on]="adminTab() === 'all'"        (click)="adminTab.set('all')">
+          {{ i18n.lang() === 'ar' ? '🌐 الجميع' : '🌐 All' }}
+        </button>
+        <button class="tab-btn tab-emp"   [class.on]="adminTab() === 'employee'"   (click)="adminTab.set('employee')">
+          👷 {{ i18n.lang() === 'ar' ? 'الموظف' : 'Employee' }}
+        </button>
+        <button class="tab-btn tab-tech"  [class.on]="adminTab() === 'technician'" (click)="adminTab.set('technician')">
+          🔧 {{ i18n.lang() === 'ar' ? 'التقني' : 'Technician' }}
+        </button>
+        <button class="tab-btn tab-adm"   [class.on]="adminTab() === 'admin'"      (click)="adminTab.set('admin')">
+          👑 {{ i18n.lang() === 'ar' ? 'المدير' : 'Admin' }}
+        </button>
+      </div>
+    }
 
     <!-- ── Cards grid ── -->
     @if (filtered().length === 0) {
@@ -272,7 +282,9 @@ const CARDS: HelpCard[] = [
           <div class="hcard-head">
             <span class="hcard-icon">{{ card.icon }}</span>
             <h3>{{ i18n.lang() === 'ar' ? card.titleAr : card.titleEn }}</h3>
-            <span class="role-chip" [class]="'rc-' + card.role">{{ roleLabel(card.role) }}</span>
+            @if (isAdmin()) {
+              <span class="role-chip" [class]="'rc-' + card.role">{{ roleLabel(card.role) }}</span>
+            }
           </div>
           <ol class="steps">
             @for (step of card.steps; track $index) {
@@ -320,8 +332,15 @@ export class Help {
   i18n = inject(I18nService);
   private auth = inject(AuthService);
 
-  tab    = signal<Tab>('all');
   search = '';
+  adminTab = signal<Tab>('all');
+
+  private currentRole = computed<Tab>(() => {
+    const r = this.auth.role();
+    if (r === 'Admin') return 'admin';
+    if (r === 'Technician') return 'technician';
+    return 'employee';
+  });
 
   readonly statuses = [
     { key: 'Backlog',    color: '#94a3b8', en: 'Waiting to be picked up',          ar: 'في قائمة الانتظار' },
@@ -333,12 +352,21 @@ export class Help {
     { key: 'Cancelled',  color: '#cbd5e1', en: 'Cancelled — will not be resolved',  ar: 'ملغاة — لن تُعالج' },
   ];
 
+  isAdmin = computed(() => this.auth.role() === 'Admin');
+
   filtered = computed(() => {
     const q = this.search.toLowerCase().trim();
-    const t = this.tab();
+    const admin = this.isAdmin();
+    const role = this.currentRole();
+    const tab = this.adminTab();
     return CARDS.filter(c => {
-      const matchTab = t === 'all' || c.role === t || c.role === 'all';
-      if (!matchTab) return false;
+      if (admin) {
+        // Admin: filter by selected tab (all = show everything)
+        if (tab !== 'all' && c.role !== tab && c.role !== 'all') return false;
+      } else {
+        // Other roles: only their own cards + universal 'all' cards
+        if (c.role !== role && c.role !== 'all') return false;
+      }
       if (!q) return true;
       const haystack = (c.titleEn + c.titleAr + c.steps.map(s => s.en + s.ar).join(' ')).toLowerCase();
       return haystack.includes(q);
@@ -347,9 +375,10 @@ export class Help {
 
   roleLabel(role: string): string {
     const ar = this.i18n.lang() === 'ar';
-    if (role === 'employee')   return ar ? 'موظف' : 'Employee';
-    if (role === 'technician') return ar ? 'تقني' : 'Technician';
-    if (role === 'admin')      return ar ? 'مدير' : 'Admin';
-    return ar ? 'الجميع' : 'All';
+    if (role === 'employee')   return ar ? '👷 موظف' : '👷 Employee';
+    if (role === 'technician') return ar ? '🔧 تقني' : '🔧 Technician';
+    if (role === 'admin')      return ar ? '👑 مدير' : '👑 Admin';
+    return ar ? '🌐 الجميع' : '🌐 All';
   }
+
 }

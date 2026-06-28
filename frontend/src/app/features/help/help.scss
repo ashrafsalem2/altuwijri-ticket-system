@@ -34,6 +34,7 @@
 .guide-scene {
   position: relative;
   width: 140px;
+  padding-top: 52px;
 }
 
 .guide-char {
@@ -66,30 +67,33 @@
 
 .speech-bubble {
   position: absolute;
-  top: 0; right: -100px;
+  top: 0;
+  right: 0;
+  width: 175px;
   background: #fff;
   color: #1e293b;
   border-radius: .75rem;
-  padding: .45rem .75rem;
-  font-size: .8rem;
+  padding: .5rem .85rem;
+  font-size: .82rem;
   font-weight: 600;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,.22);
   animation: bubble-pop .5s cubic-bezier(.175,.885,.32,1.275) both;
 
-  &::before {
+  &::after {
     content: '';
     position: absolute;
-    left: -8px; top: 50%;
-    transform: translateY(-50%);
-    border: 6px solid transparent;
-    border-right-color: #fff;
+    top: 100%; right: 24px;
+    border: 7px solid transparent;
+    border-top-color: #fff;
   }
 }
 
 [dir='rtl'] .speech-bubble {
-  right: auto; left: -110px;
-  &::before { left: auto; right: -8px; border-right-color: transparent; border-left-color: #fff; }
+  right: auto;
+  left: 0;
+  &::after { right: auto; left: 24px; }
 }
 
 @keyframes bubble-pop {

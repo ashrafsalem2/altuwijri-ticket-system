@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Altuwijri Ticket System — Admin Guide</title>
+<style>
+  /* ── Reset & Variables ─────────────────────────────────── */
+  :root {
+    --bg:       #0f172a;
+    --surface:  #1e293b;
+    --surface2: #273449;
+    --border:   #334155;
+    --text:     #e2e8f0;
+    --muted:    #94a3b8;
+    --primary:  #3b82f6;
+    --emp:      #059669;
+    --tech:     #7c3aed;
+    --adm:      #dc2626;
+    --yellow:   #eab308;
+    --green:    #22c55e;
+    --orange:   #f97316;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+  }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── TOC sidebar ── */
+  .toc {
+    width: 235px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 1rem;
+  }
+  .toc-brand {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1.25rem;
+    font-weight: 800;
+    font-size: .9rem;
+  }
+  .toc-brand .char-mini { font-size: 1.6rem; }
+  .toc a {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted);
+    padding: .28rem .6rem;
+    border-radius: .35rem;
+    transition: all .15s;
+  }
+  .toc a:hover, .toc a.on { color: var(--text); background: var(--surface2); text-decoration: none; }
+  .toc .indent { padding-left: 1.3rem; font-size: .76rem; }
+  .toc hr { border: none; border-top: 1px solid var(--border); margin: .6rem 0; }
+  .toc a.adm-link.on { background: rgba(220,38,38,.18); color: #fca5a5; }
+
+  /* ── Main content ── */
+  .content {
+    flex: 1;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2.5rem 2.5rem 4rem;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 60%, #ef4444 100%);
+    border-radius: 1.25rem;
+    padding: 2.25rem 2.5rem;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-text { flex: 1; }
+  .hero h1 { font-size: 2.1rem; font-weight: 800; color: #fff; margin-bottom: .4rem; }
+  .hero p  { color: rgba(255,255,255,.85); font-size: 1rem; max-width: 500px; }
+  .hero-badge {
+    display: inline-block;
+    margin-top: .75rem;
+    background: rgba(255,255,255,.2);
+    border-radius: 2rem;
+    padding: .25rem .9rem;
+    font-size: .8rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .05em;
+  }
+  .hero-char { flex-shrink: 0; }
+
+  /* ── Animated cartoon character ── */
+  .guide-char {
+    width: 110px;
+    height: 185px;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,.4));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  .arm-l { transform-origin: 19px 94px; animation: wave 2s ease-in-out infinite; }
+  @keyframes wave {
+    0%,100% { transform: rotate(0deg); }
+    30%     { transform: rotate(28deg); }
+    70%     { transform: rotate(-10deg); }
+  }
+  .eye  { animation: blink 5s ease-in-out infinite; transform-origin: center; }
+  .eye2 { animation: blink 5s ease-in-out infinite .12s; transform-origin: center; }
+  @keyframes blink {
+    0%,93%,100% { transform: scaleY(1); }
+    96%,98%     { transform: scaleY(.08); }
+  }
+
+  /* ── Language toggle ── */
+  .lang-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+    gap: .5rem;
+  }
+  .lang-btn {
+    padding: .4rem 1rem;
+    border-radius: 2rem;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .lang-btn.on { background: var(--adm); border-color: var(--adm); color: #fff; }
+  .lang-btn:hover:not(.on) { border-color: var(--adm); color: var(--text); }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: .45rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 1.75rem 0 .75rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  p { margin-bottom: .8rem; }
+
+  /* ── Role section wrapper (red for admin) ── */
+  .role-section {
+    border-radius: 1rem;
+    border: 2px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .role-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    background: linear-gradient(90deg, #7f1d1d, #dc2626);
+  }
+  .role-header h2 { border: none; margin: 0; padding: 0; font-size: 1.3rem; color: #fff; }
+  .role-header .role-icon { font-size: 1.8rem; }
+  .role-header .role-badge {
+    margin-left: auto;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: .2rem .7rem;
+    border-radius: 2rem;
+    background: rgba(255,255,255,.2);
+    color: #fff;
+  }
+  [dir='rtl'] .role-header .role-badge { margin-left: 0; margin-right: auto; }
+  .role-body { padding: 1.25rem 1.5rem; }
+
+  /* ── Steps ── */
+  .steps { list-style: none; padding: 0; }
+  .steps li {
+    display: flex;
+    gap: .85rem;
+    align-items: flex-start;
+    padding: .7rem .85rem;
+    border-radius: .6rem;
+    margin-bottom: .5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: .88rem;
+    line-height: 1.6;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .73rem;
+    font-weight: 800;
+    color: #fff;
+    background: var(--adm);
+    margin-top: .05rem;
+  }
+  .step-body { flex: 1; }
+
+  /* ── Tip inline ── */
+  .tip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    background: rgba(234,179,8,.1);
+    border: 1px solid rgba(234,179,8,.3);
+    border-radius: .4rem;
+    padding: .25rem .6rem;
+    font-size: .79rem;
+    color: var(--yellow);
+    margin-top: .4rem;
+  }
+
+  /* ── Guide cards ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    gap: .85rem;
+    margin-bottom: 1.25rem;
+  }
+  .guide-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1rem;
+    text-align: center;
+  }
+  .guide-card .gc-icon  { font-size: 2rem; margin-bottom: .5rem; }
+  .guide-card .gc-title { font-size: .85rem; font-weight: 700; margin-bottom: .3rem; }
+  .guide-card .gc-desc  { font-size: .78rem; color: var(--muted); }
+
+  /* ── Status legend ── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: .65rem;
+    margin-bottom: 1.5rem;
+  }
+  .status-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    padding: .65rem .85rem;
+    background: var(--surface2);
+    border-radius: .55rem;
+    border: 1px solid var(--border);
+    font-size: .83rem;
+  }
+  .st-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: .25rem;
+  }
+  .status-item .si-info strong { display: block; font-size: .83rem; }
+  .status-item .si-info span   { color: var(--muted); font-size: .77rem; }
+
+  /* ── Diagram ── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-left: 4px solid;
+    border-radius: 0 .6rem .6rem 0;
+    padding: .85rem 1rem;
+    margin: .75rem 0 1rem;
+    font-size: .87rem;
+  }
+  .callout-tip   { border-color: var(--green);   background: rgba(34,197,94,.07); }
+  .callout-info  { border-color: var(--primary);  background: rgba(59,130,246,.07); }
+  .callout-warn  { border-color: var(--yellow);   background: rgba(234,179,8,.07); }
+  .callout-adm   { border-color: var(--adm);      background: rgba(220,38,38,.07); }
+  .callout strong { display: block; margin-bottom: .25rem; }
+  [dir='rtl'] .callout { border-left: none; border-right: 4px solid; border-radius: .6rem 0 0 .6rem; }
+
+  /* ── Priority table ── */
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; margin-bottom: 1.25rem; }
+  th { background: var(--surface2); text-align: left; padding: .55rem .75rem; font-weight: 700; border-bottom: 2px solid var(--border); }
+  [dir='rtl'] th { text-align: right; }
+  td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Report cards ── */
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .85rem;
+    margin-bottom: 1.5rem;
+  }
+  .report-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .8rem;
+    padding: 1rem 1.1rem;
+  }
+  .report-card .rc-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 700;
+    font-size: .9rem;
+    margin-bottom: .45rem;
+  }
+  .report-card .rc-icon { font-size: 1.4rem; }
+  .report-card p { font-size: .8rem; color: var(--muted); margin: 0; }
+  .report-tag {
+    display: inline-block;
+    font-size: .68rem;
+    font-weight: 700;
+    padding: .1rem .5rem;
+    border-radius: 2rem;
+    background: rgba(220,38,38,.18);
+    color: #fca5a5;
+    margin-bottom: .35rem;
+  }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .55rem .8rem;
+    border-radius: .5rem;
+    margin-bottom: .4rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: .86rem;
+  }
+  .check-icon { font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+
+  /* ── FAQ ── */
+  .faq { margin-bottom: 2rem; }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: .65rem;
+    margin-bottom: .6rem;
+    overflow: hidden;
+  }
+  .faq-q {
+    width: 100%;
+    background: var(--surface2);
+    border: none;
+    color: var(--text);
+    text-align: left;
+    padding: .85rem 1rem;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+  }
+  [dir='rtl'] .faq-q { text-align: right; }
+  .faq-q .arr { flex-shrink: 0; transition: transform .2s; color: var(--muted); }
+  .faq-q.open .arr { transform: rotate(180deg); }
+  .faq-a {
+    display: none;
+    padding: .8rem 1rem;
+    font-size: .85rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    line-height: 1.65;
+  }
+  .faq-a.open { display: block; }
+
+  /* ── Best-practices grid ── */
+  .bp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .85rem;
+    margin-bottom: 1.25rem;
+  }
+  .bp-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .7rem;
+    padding: .9rem 1rem;
+    font-size: .84rem;
+  }
+  .bp-card .bp-head {
+    font-weight: 700;
+    margin-bottom: .45rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .9rem;
+  }
+  .bp-card ul { padding-left: 1.2rem; color: var(--muted); }
+  .bp-card ul li { margin-bottom: .25rem; }
+  [dir='rtl'] .bp-card ul { padding-left: 0; padding-right: 1.2rem; }
+
+  /* ── Links banner cards ── */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+  }
+  .link-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: .9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+    text-align: center;
+  }
+  .link-card .lc-icon { font-size: 1.8rem; }
+  .link-card .lc-name { font-size: .82rem; font-weight: 700; }
+  .link-card .lc-desc { font-size: .76rem; color: var(--muted); }
+
+  /* ── Print ── */
+  @media print {
+    .toc, .lang-bar, .no-print { display: none !important; }
+    .content { padding: 0; max-width: 100%; }
+    .hero { background: none !important; color: inherit !important; }
+    .role-header { background: none !important; color: inherit !important; border-bottom: 2px solid #ccc; }
+    .faq-a { display: block !important; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .toc { display: none; }
+    .content { padding: 1.25rem; }
+    .hero { flex-direction: column; }
+    .hero-char { display: none; }
+    .bp-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Bilingual ── */
+  [dir='ltr'] .ar { display: none; }
+  [dir='rtl'] .en { display: none; }
+  [dir='rtl'] {
+    font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+  }
+  [dir='rtl'] .toc { border-right: none; border-left: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- ═══════════════════ TOC SIDEBAR ═══════════════════ -->
+  <nav class="toc" id="toc">
+    <div class="toc-brand">
+      <span class="char-mini">🛡️</span>
+      <span class="en">Admin Guide</span>
+      <span class="ar">دليل المسؤول</span>
+    </div>
+    <a href="#overview" class="adm-link"><span class="en">⚡ Admin Powers</span><span class="ar">⚡ صلاحيات المسؤول</span></a>
+    <a href="#users" class="adm-link indent"><span class="en">👥 User Management</span><span class="ar">👥 إدارة المستخدمين</span></a>
+    <a href="#categories" class="adm-link indent"><span class="en">📂 Ticket Categories</span><span class="ar">📂 فئات التذاكر</span></a>
+    <a href="#tickets" class="adm-link indent"><span class="en">🎫 Managing Tickets</span><span class="ar">🎫 إدارة التذاكر</span></a>
+    <a href="#reports" class="adm-link"><span class="en">📊 Reports</span><span class="ar">📊 التقارير</span></a>
+    <a href="#organization" class="adm-link indent"><span class="en">🏢 Organization</span><span class="ar">🏢 الهيكل التنظيمي</span></a>
+    <a href="#links" class="adm-link indent"><span class="en">🔗 App Links</span><span class="ar">🔗 روابط التطبيق</span></a>
+    <a href="#guidelines" class="adm-link indent"><span class="en">📋 Guidelines</span><span class="ar">📋 الإرشادات</span></a>
+    <a href="#health" class="adm-link"><span class="en">💚 System Health</span><span class="ar">💚 صحة النظام</span></a>
+    <a href="#faq" class="adm-link"><span class="en">❓ FAQ</span><span class="ar">❓ أسئلة شائعة</span></a>
+    <hr />
+    <a href="guide-employee.html"><span class="en">👤 Employee Guide</span><span class="ar">👤 دليل الموظف</span></a>
+    <a href="guide-technician.html"><span class="en">🔧 Technician Guide</span><span class="ar">🔧 دليل الفني</span></a>
+    <a href="user-guide.html"><span class="en">📖 Full Guide</span><span class="ar">📖 الدليل الكامل</span></a>
+  </nav>
+
+  <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+  <main class="content">
+
+    <!-- Lang toggle -->
+    <div class="lang-bar no-print">
+      <button class="lang-btn on" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn"    id="btn-ar" onclick="setLang('ar')">عربي</button>
+    </div>
+
+    <!-- ── HERO ── -->
+    <div class="hero">
+      <div class="hero-text">
+        <h1><span class="en">Admin Control Center</span><span class="ar">مركز تحكم المسؤول</span></h1>
+        <p class="en">Full system control — users, tickets, reports, and organization structure all in one place.</p>
+        <p class="ar">تحكم كامل بالنظام — المستخدمون، التذاكر، التقارير، والهيكل التنظيمي في مكان واحد.</p>
+        <span class="hero-badge"><span class="en">🛡️ ADMINISTRATOR</span><span class="ar">🛡️ مسؤول النظام</span></span>
+      </div>
+      <div class="hero-char">
+        <!-- Animated admin character with shield -->
+        <svg class="guide-char" viewBox="0 0 110 185" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body -->
+          <rect x="28" y="80" width="54" height="65" rx="14" fill="#1e293b" stroke="#dc2626" stroke-width="2"/>
+          <!-- Red tie/badge -->
+          <rect x="47" y="85" width="16" height="30" rx="4" fill="#dc2626" opacity=".8"/>
+          <polygon points="47,110 63,110 55,122" fill="#dc2626" opacity=".8"/>
+          <!-- Shield icon on badge -->
+          <path d="M51 90 l4-3 4 3 v5 c0 2-4 5-4 5s-4-3-4-5z" fill="#fff" opacity=".9"/>
+          <!-- Head -->
+          <ellipse cx="55" cy="55" rx="26" ry="28" fill="#fde68a"/>
+          <!-- Eyes -->
+          <ellipse class="eye"  cx="44" cy="50" rx="4.5" ry="5" fill="#1e293b"/>
+          <ellipse class="eye2" cx="66" cy="50" rx="4.5" ry="5" fill="#1e293b"/>
+          <!-- Eye shine -->
+          <circle cx="46" cy="48" r="1.5" fill="#fff"/>
+          <circle cx="68" cy="48" r="1.5" fill="#fff"/>
+          <!-- Smile -->
+          <path d="M44 65 q11 8 22 0" stroke="#92400e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <!-- Hair -->
+          <ellipse cx="55" cy="28" rx="26" ry="11" fill="#92400e"/>
+          <rect x="29" y="28" width="52" height="10" rx="0" fill="#92400e"/>
+          <!-- Left arm waving -->
+          <g class="arm-l">
+            <rect x="5" y="88" width="23" height="11" rx="5.5" fill="#fde68a"/>
+            <!-- Hand holding clipboard -->
+            <circle cx="7" cy="93" r="7" fill="#fde68a"/>
+            <rect x="2" y="86" width="12" height="15" rx="2" fill="#e2e8f0" opacity=".9"/>
+            <line x1="4" y1="90" x2="12" y2="90" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="4" y1="93" x2="12" y2="93" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="4" y1="96" x2="9" y2="96" stroke="#dc2626" stroke-width="1.2"/>
+          </g>
+          <!-- Right arm -->
+          <rect x="82" y="88" width="23" height="11" rx="5.5" fill="#fde68a"/>
+          <circle cx="103" cy="93" r="7" fill="#fde68a"/>
+          <!-- Legs -->
+          <rect x="34" y="140" width="18" height="38" rx="8" fill="#1e293b"/>
+          <rect x="58" y="140" width="18" height="38" rx="8" fill="#1e293b"/>
+          <!-- Shoes -->
+          <ellipse cx="43" cy="178" rx="12" ry="6" fill="#0f172a"/>
+          <ellipse cx="67" cy="178" rx="12" ry="6" fill="#0f172a"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ═══════════════ §1 ADMIN POWERS OVERVIEW ═══════════════ -->
+    <section id="overview">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">⚡</span>
+          <h2><span class="en">Admin Powers Overview</span><span class="ar">نظرة عامة على صلاحيات المسؤول</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">As an administrator you have unrestricted access to every part of the Altuwijri Ticket System. You control users, configure the system, manage tickets from any team, and generate comprehensive reports.</p>
+          <p class="ar">بصفتك مسؤولاً، لديك وصول غير مقيد إلى كل جزء من نظام تذاكر العتيجي. تتحكم في المستخدمين، وتضبط إعدادات النظام، وتدير التذاكر من أي فريق، وتنشئ تقارير شاملة.</p>
+
+          <div class="card-grid">
+            <div class="guide-card">
+              <div class="gc-icon">👥</div>
+              <div class="gc-title en">User Management</div>
+              <div class="gc-title ar">إدارة المستخدمين</div>
+              <div class="gc-desc en">Create accounts, assign roles and categories</div>
+              <div class="gc-desc ar">إنشاء حسابات وتعيين الأدوار والفئات</div>
+            </div>
+            <div class="guide-card">
+              <div class="gc-icon">🎫</div>
+              <div class="gc-title en">All Tickets</div>
+              <div class="gc-title ar">جميع التذاكر</div>
+              <div class="gc-desc en">View, reassign, or close any ticket</div>
+              <div class="gc-desc ar">عرض أو إعادة تعيين أو إغلاق أي تذكرة</div>
+            </div>
+            <div class="guide-card">
+              <div class="gc-icon">📊</div>
+              <div class="gc-title en">8 Report Modes</div>
+              <div class="gc-title ar">8 أنماط تقارير</div>
+              <div class="gc-desc en">Performance, workload, trends and more</div>
+              <div class="gc-desc ar">الأداء والعبء والاتجاهات والمزيد</div>
+            </div>
+            <div class="guide-card">
+              <div class="gc-icon">🏢</div>
+              <div class="gc-title en">Organization</div>
+              <div class="gc-title ar">الهيكل التنظيمي</div>
+              <div class="gc-desc en">Areas, branches, devices</div>
+              <div class="gc-desc ar">المناطق والفروع والأجهزة</div>
+            </div>
+            <div class="guide-card">
+              <div class="gc-icon">📂</div>
+              <div class="gc-title en">Categories</div>
+              <div class="gc-title ar">الفئات</div>
+              <div class="gc-desc en">Create and manage ticket types</div>
+              <div class="gc-desc ar">إنشاء وإدارة أنواع التذاكر</div>
+            </div>
+            <div class="guide-card">
+              <div class="gc-icon">📋</div>
+              <div class="gc-title en">Guidelines & Links</div>
+              <div class="gc-title ar">الإرشادات والروابط</div>
+              <div class="gc-desc en">Broadcast policies to all users</div>
+              <div class="gc-desc ar">نشر السياسات لجميع المستخدمين</div>
+            </div>
+          </div>
+
+          <div class="callout callout-adm">
+            <strong>⚠️ <span class="en">Responsibility</span><span class="ar">المسؤولية</span></strong>
+            <span class="en">Admin actions affect the entire system. Changes to user roles, ticket categories, or organization structure are immediately visible to all users — act carefully.</span>
+            <span class="ar">إجراءات المسؤول تؤثر على النظام بأكمله. التغييرات في أدوار المستخدمين أو فئات التذاكر أو الهيكل التنظيمي تظهر فوراً لجميع المستخدمين — تصرف بحذر.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §2 USER MANAGEMENT ═══════════════ -->
+    <section id="users">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">👥</span>
+          <h2><span class="en">User Management</span><span class="ar">إدارة المستخدمين</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">Navigate to <strong>Settings → Users</strong> to manage all accounts in the system. You can view every user's role, status, and assigned categories.</p>
+          <p class="ar">انتقل إلى <strong>الإعدادات ← المستخدمون</strong> لإدارة جميع الحسابات في النظام. يمكنك عرض دور وحالة وفئات كل مستخدم.</p>
+
+          <h3>🔑 <span class="en">Assigning Roles</span><span class="ar">تعيين الأدوار</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Go to <strong>Settings → Users</strong> from the sidebar.</span><span class="ar">اذهب إلى <strong>الإعدادات ← المستخدمون</strong> من الشريط الجانبي.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Find the user by searching their name or scrolling the list.</span><span class="ar">ابحث عن المستخدم باسمه أو بالتمرير في القائمة.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Click the <strong>Edit</strong> (pencil) icon next to their name.</span><span class="ar">انقر على أيقونة <strong>تعديل</strong> (القلم) بجانب اسمه.</span></div></li>
+            <li><span class="step-num">4</span><div class="step-body"><span class="en">Use the <strong>Role</strong> dropdown to set: <em>Employee</em>, <em>Technician</em>, or <em>Admin</em>.</span><span class="ar">استخدم قائمة <strong>الدور</strong> لتعيين: <em>موظف</em> أو <em>فني</em> أو <em>مسؤول</em>.</span></div></li>
+            <li><span class="step-num">5</span><div class="step-body"><span class="en">Click <strong>Save</strong>. The user's access updates immediately on their next page load.</span><span class="ar">انقر <strong>حفظ</strong>. يتحدث وصول المستخدم فوراً عند تحميله للصفحة التالية.</span></div></li>
+          </ol>
+
+          <h3>🔧 <span class="en">Assigning Technician Categories</span><span class="ar">تعيين فئات الفنيين</span></h3>
+          <p class="en">Each technician must be assigned one or more ticket categories. They will only receive tickets from those categories.</p>
+          <p class="ar">يجب تعيين فئة تذاكر واحدة أو أكثر لكل فني. سيتلقى الفنيون التذاكر من تلك الفئات فقط.</p>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Edit the technician user (same steps as role assignment above).</span><span class="ar">قم بتعديل المستخدم الفني (نفس خطوات تعيين الدور أعلاه).</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">In the <strong>Categories</strong> field, select all categories this technician handles (e.g. Hardware, Software, Network).</span><span class="ar">في حقل <strong>الفئات</strong>، اختر جميع الفئات التي يتعامل معها الفني (مثل: الأجهزة، البرمجيات، الشبكات).</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Save. The technician now appears in assignment dropdowns for those categories.</span><span class="ar">احفظ. سيظهر الفني الآن في قوائم التعيين لتلك الفئات.</span></div></li>
+          </ol>
+
+          <div class="callout callout-info">
+            <strong>ℹ️ <span class="en">Roles at a Glance</span><span class="ar">الأدوار في لمحة</span></strong>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th><span class="en">Role</span><span class="ar">الدور</span></th>
+                <th><span class="en">Can Submit Tickets</span><span class="ar">يقدم تذاكر</span></th>
+                <th><span class="en">Can Work on Tickets</span><span class="ar">يعمل على تذاكر</span></th>
+                <th><span class="en">Full Admin</span><span class="ar">صلاحيات كاملة</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>👤 <span class="en">Employee</span><span class="ar">موظف</span></td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>🔧 <span class="en">Technician</span><span class="ar">فني</span></td><td>❌</td><td>✅</td><td>❌</td></tr>
+              <tr><td>🛡️ <span class="en">Admin</span><span class="ar">مسؤول</span></td><td>✅</td><td>✅</td><td>✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §3 TICKET CATEGORIES ═══════════════ -->
+    <section id="categories">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">📂</span>
+          <h2><span class="en">Ticket Categories</span><span class="ar">فئات التذاكر</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">Categories define the type of issue employees can submit. Navigate to <strong>Settings → Categories</strong> to manage them.</p>
+          <p class="ar">الفئات تحدد نوع المشكلة التي يمكن للموظفين تقديمها. انتقل إلى <strong>الإعدادات ← الفئات</strong> لإدارتها.</p>
+
+          <h3>➕ <span class="en">Creating a Category</span><span class="ar">إنشاء فئة</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Click <strong>+ New Category</strong> button at the top of the page.</span><span class="ar">انقر على زر <strong>+ فئة جديدة</strong> في أعلى الصفحة.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Enter the category <strong>Name</strong> (visible to employees when submitting).</span><span class="ar">أدخل <strong>اسم</strong> الفئة (يظهر للموظفين عند تقديم التذكرة).</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Optionally add a <strong>Description</strong> and choose an icon color.</span><span class="ar">أضف اختيارياً <strong>وصفاً</strong> واختر لون أيقونة.</span></div></li>
+            <li><span class="step-num">4</span><div class="step-body"><span class="en">Click <strong>Save</strong>. The category is now available in the ticket submission form.</span><span class="ar">انقر <strong>حفظ</strong>. ستكون الفئة متاحة الآن في نموذج تقديم التذكرة.</span></div></li>
+          </ol>
+
+          <div class="callout callout-warn">
+            <strong>⚠️ <span class="en">Deleting Categories</span><span class="ar">حذف الفئات</span></strong>
+            <span class="en">Do not delete a category that has existing tickets. Archive or rename it instead to preserve historical data.</span>
+            <span class="ar">لا تحذف فئة تحتوي على تذاكر موجودة. أرشفها أو أعد تسميتها بدلاً من ذلك للحفاظ على البيانات التاريخية.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §4 MANAGING ALL TICKETS ═══════════════ -->
+    <section id="tickets">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">🎫</span>
+          <h2><span class="en">Managing All Tickets</span><span class="ar">إدارة جميع التذاكر</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">The admin sees every ticket from every employee in the system. Go to <strong>Tasks</strong> in the sidebar to access the full ticket list with advanced filters.</p>
+          <p class="ar">يرى المسؤول جميع التذاكر من كل موظف في النظام. اذهب إلى <strong>المهام</strong> في الشريط الجانبي للوصول إلى قائمة التذاكر الكاملة مع فلاتر متقدمة.</p>
+
+          <h3>🔄 <span class="en">Reassigning a Ticket</span><span class="ar">إعادة تعيين تذكرة</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Open the ticket from the task list or search by title.</span><span class="ar">افتح التذكرة من قائمة المهام أو ابحث بالعنوان.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Click the <strong>Assignee</strong> field at the top of the ticket detail page.</span><span class="ar">انقر على حقل <strong>المعيَّن إليه</strong> في أعلى صفحة تفاصيل التذكرة.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Select a different technician from the dropdown.</span><span class="ar">اختر فنياً مختلفاً من القائمة المنسدلة.</span></div></li>
+            <li><span class="step-num">4</span><div class="step-body"><span class="en">The new technician is notified and the ticket appears in their task list.</span><span class="ar">يتم إخطار الفني الجديد وتظهر التذكرة في قائمة مهامه.</span></div></li>
+          </ol>
+
+          <h3>✅ <span class="en">Marking a Ticket Done</span><span class="ar">وضع علامة إنجاز على التذكرة</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Open the ticket detail page.</span><span class="ar">افتح صفحة تفاصيل التذكرة.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Click the <strong>Status</strong> dropdown and select <strong>Done</strong>.</span><span class="ar">انقر على قائمة <strong>الحالة</strong> واختر <strong>منجز</strong>.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">The ticket is closed. All parties (employee + technician) see the update within 15–20 seconds.</span><span class="ar">تُغلق التذكرة. يرى جميع الأطراف (الموظف + الفني) التحديث خلال 15–20 ثانية.</span></div></li>
+          </ol>
+
+          <h3>📊 <span class="en">Ticket Status Flow</span><span class="ar">تدفق حالات التذاكر</span></h3>
+          <div class="status-grid">
+            <div class="status-item"><div class="st-dot" style="background:#64748b"></div><div class="si-info"><strong><span class="en">Open</span><span class="ar">مفتوحة</span></strong><span><span class="en">Awaiting assignment</span><span class="ar">تنتظر التعيين</span></span></div></div>
+            <div class="status-item"><div class="st-dot" style="background:#2563eb"></div><div class="si-info"><strong><span class="en">In Progress</span><span class="ar">قيد التنفيذ</span></strong><span><span class="en">Technician working</span><span class="ar">الفني يعمل عليها</span></span></div></div>
+            <div class="status-item"><div class="st-dot" style="background:#7c3aed"></div><div class="si-info"><strong><span class="en">In Review</span><span class="ar">قيد المراجعة</span></strong><span><span class="en">Pending admin approval</span><span class="ar">تنتظر موافقة المسؤول</span></span></div></div>
+            <div class="status-item"><div class="st-dot" style="background:#22c55e"></div><div class="si-info"><strong><span class="en">Done</span><span class="ar">منجزة</span></strong><span><span class="en">Fully resolved</span><span class="ar">تم حلها كاملاً</span></span></div></div>
+            <div class="status-item"><div class="st-dot" style="background:#dc2626"></div><div class="si-info"><strong><span class="en">Cancelled</span><span class="ar">ملغاة</span></strong><span><span class="en">Closed without resolution</span><span class="ar">مغلقة دون حل</span></span></div></div>
+            <div class="status-item"><div class="st-dot" style="background:#f97316"></div><div class="si-info"><strong><span class="en">On Hold</span><span class="ar">معلقة</span></strong><span><span class="en">Waiting on external factor</span><span class="ar">تنتظر عاملاً خارجياً</span></span></div></div>
+          </div>
+
+          <div class="callout callout-tip">
+            <strong>💡 <span class="en">Bulk Filter Tip</span><span class="ar">نصيحة الفلتر الجماعي</span></strong>
+            <span class="en">Use the <strong>Status</strong> and <strong>Assignee</strong> filters together to quickly find overdue tickets assigned to a specific technician.</span>
+            <span class="ar">استخدم فلتري <strong>الحالة</strong> و<strong>المعيَّن إليه</strong> معاً للعثور بسرعة على التذاكر المتأخرة المعيَّنة لفني معين.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §5 REPORTS ═══════════════ -->
+    <section id="reports">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">📊</span>
+          <h2><span class="en">Reports — All 8 Modes</span><span class="ar">التقارير — جميع الأنماط الثمانية</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">Go to <strong>Reports</strong> in the sidebar. Use the date range picker and report-type selector to explore all 8 analytics modes.</p>
+          <p class="ar">اذهب إلى <strong>التقارير</strong> في الشريط الجانبي. استخدم منتقي النطاق الزمني ومحدد نوع التقرير لاستكشاف جميع أنماط التحليلات الثمانية.</p>
+
+          <div class="report-grid">
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">📈</span><span class="en">Overview</span><span class="ar">نظرة عامة</span></div>
+              <span class="report-tag">Mode 1</span>
+              <p class="en">Total tickets, resolution rate, avg. resolution time, open vs closed summary cards. Best for daily health checks.</p>
+              <p class="ar">إجمالي التذاكر، معدل الحل، متوسط وقت الحل، بطاقات ملخص المفتوحة مقابل المغلقة. الأفضل للفحص اليومي.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">🏆</span><span class="en">Technician Performance</span><span class="ar">أداء الفنيين</span></div>
+              <span class="report-tag">Mode 2</span>
+              <p class="en">Per-technician: assigned count, resolved count, avg. time. Identify top performers and bottlenecks.</p>
+              <p class="ar">لكل فني: عدد المعيَّنة، عدد المحلولة، المتوسط الزمني. تحديد أصحاب الأداء الأعلى والعوائق.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">📂</span><span class="en">Category Breakdown</span><span class="ar">تفصيل الفئات</span></div>
+              <span class="report-tag">Mode 3</span>
+              <p class="en">Ticket volume and resolution stats grouped by category. Know which issue types dominate.</p>
+              <p class="ar">حجم التذاكر وإحصاءات الحل مجمّعة حسب الفئة. اعرف أنواع المشكلات السائدة.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">📅</span><span class="en">Trend Over Time</span><span class="ar">الاتجاه عبر الزمن</span></div>
+              <span class="report-tag">Mode 4</span>
+              <p class="en">Line chart of ticket submissions and closures over the selected date range. Spot seasonal patterns.</p>
+              <p class="ar">مخطط خطي لتقديمات وإغلاقات التذاكر خلال النطاق الزمني المحدد. اكتشف الأنماط الموسمية.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">🏢</span><span class="en">Branch / Area</span><span class="ar">الفرع / المنطقة</span></div>
+              <span class="report-tag">Mode 5</span>
+              <p class="en">Compare ticket volumes across branches and geographic areas. Find which offices need more support.</p>
+              <p class="ar">قارن أحجام التذاكر عبر الفروع والمناطق الجغرافية. اكتشف أي المكاتب تحتاج دعماً أكثر.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">⏱️</span><span class="en">SLA / Response Time</span><span class="ar">اتفاقية الخدمة / وقت الاستجابة</span></div>
+              <span class="report-tag">Mode 6</span>
+              <p class="en">Average first-response and resolution times broken down by priority. Check if SLA targets are met.</p>
+              <p class="ar">متوسطات أوقات الاستجابة الأولى والحل مقسَّمة حسب الأولوية. تحقق من تحقيق أهداف اتفاقيات الخدمة.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">🔥</span><span class="en">Backlog & Aging</span><span class="ar">التراكم والتقادم</span></div>
+              <span class="report-tag">Mode 7</span>
+              <p class="en">Open tickets grouped by age (1–7d, 8–30d, 30d+). Identify tickets at risk of breaching SLA.</p>
+              <p class="ar">التذاكر المفتوحة مجمّعة حسب العمر (1–7 أيام، 8–30 يوماً، +30 يوماً). تحديد التذاكر المعرضة لخرق اتفاقية الخدمة.</p>
+            </div>
+            <div class="report-card">
+              <div class="rc-head"><span class="rc-icon">😊</span><span class="en">Employee Workload</span><span class="ar">عبء عمل الموظفين</span></div>
+              <span class="report-tag">Mode 8</span>
+              <p class="en">Submission frequency by employee. Identify heavy users or departments that frequently raise tickets.</p>
+              <p class="ar">تكرار التقديم لكل موظف. تحديد المستخدمين الأكثر نشاطاً أو الأقسام التي ترفع تذاكر بكثرة.</p>
+            </div>
+          </div>
+
+          <h3>📥 <span class="en">Exporting Reports</span><span class="ar">تصدير التقارير</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Select the report mode and set the date range.</span><span class="ar">اختر نمط التقرير وحدد النطاق الزمني.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Click the <strong>Export CSV</strong> or <strong>Export PDF</strong> button in the top-right corner.</span><span class="ar">انقر على زر <strong>تصدير CSV</strong> أو <strong>تصدير PDF</strong> في الزاوية العلوية اليمنى.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">The file downloads to your browser's default download folder.</span><span class="ar">يتم تنزيل الملف في مجلد التنزيل الافتراضي للمتصفح.</span></div></li>
+          </ol>
+
+          <div class="callout callout-tip">
+            <strong>💡 <span class="en">Pro Tip</span><span class="ar">نصيحة</span></strong>
+            <span class="en">Run the <em>Trend Over Time</em> and <em>Backlog &amp; Aging</em> reports together in your Monday morning review — trend tells you direction, backlog tells you where to act now.</span>
+            <span class="ar">شغِّل تقريرَي <em>الاتجاه عبر الزمن</em> و<em>التراكم والتقادم</em> معاً في مراجعة صباح الإثنين — الاتجاه يخبرك بالوجهة، والتراكم يخبرك أين يجب التحرك الآن.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §6 ORGANIZATION ═══════════════ -->
+    <section id="organization">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">🏢</span>
+          <h2><span class="en">Organization Structure</span><span class="ar">الهيكل التنظيمي</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">Navigate to <strong>Settings → Organization</strong> to manage the three-level structure: Areas → Branches → Devices.</p>
+          <p class="ar">انتقل إلى <strong>الإعدادات ← التنظيم</strong> لإدارة الهيكل ثلاثي المستويات: المناطق ← الفروع ← الأجهزة.</p>
+
+          <div class="diagram">
+            <svg viewBox="0 0 600 140" xmlns="http://www.w3.org/2000/svg">
+              <!-- Level boxes -->
+              <rect x="230" y="10" width="140" height="38" rx="8" fill="#7f1d1d" stroke="#dc2626" stroke-width="1.5"/>
+              <text x="300" y="34" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Segoe UI,Arial">🌍 Areas</text>
+              <!-- Connector -->
+              <line x1="150" y1="48" x2="150" y2="62" stroke="#475569" stroke-width="1.5"/>
+              <line x1="300" y1="48" x2="300" y2="62" stroke="#475569" stroke-width="1.5"/>
+              <line x1="450" y1="48" x2="450" y2="62" stroke="#475569" stroke-width="1.5"/>
+              <line x1="150" y1="62" x2="450" y2="62" stroke="#475569" stroke-width="1.5"/>
+              <!-- Branch boxes -->
+              <rect x="60" y="68" width="130" height="38" rx="8" fill="#991b1b" stroke="#dc2626" stroke-width="1.5"/>
+              <text x="125" y="92" text-anchor="middle" fill="#fff" font-size="12" font-family="Segoe UI,Arial">🏢 Branch A</text>
+              <rect x="230" y="68" width="140" height="38" rx="8" fill="#991b1b" stroke="#dc2626" stroke-width="1.5"/>
+              <text x="300" y="92" text-anchor="middle" fill="#fff" font-size="12" font-family="Segoe UI,Arial">🏢 Branch B</text>
+              <rect x="410" y="68" width="130" height="38" rx="8" fill="#991b1b" stroke="#dc2626" stroke-width="1.5"/>
+              <text x="475" y="92" text-anchor="middle" fill="#fff" font-size="12" font-family="Segoe UI,Arial">🏢 Branch C</text>
+              <!-- Device connectors -->
+              <line x1="125" y1="106" x2="125" y2="118" stroke="#475569" stroke-width="1.5"/>
+              <line x1="300" y1="106" x2="300" y2="118" stroke="#475569" stroke-width="1.5"/>
+              <!-- Device boxes -->
+              <rect x="50" y="118" width="160" height="16" rx="4" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+              <text x="130" y="131" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Segoe UI,Arial">💻 Devices / PCs</text>
+              <rect x="220" y="118" width="160" height="16" rx="4" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+              <text x="300" y="131" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Segoe UI,Arial">💻 Devices / PCs</text>
+            </svg>
+          </div>
+
+          <h3>🌍 <span class="en">Managing Areas</span><span class="ar">إدارة المناطق</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Go to <strong>Settings → Organization → Areas</strong>.</span><span class="ar">اذهب إلى <strong>الإعدادات ← التنظيم ← المناطق</strong>.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Click <strong>+ Add Area</strong>, enter a name (e.g. "Riyadh Region"), and save.</span><span class="ar">انقر <strong>+ إضافة منطقة</strong>، أدخل اسماً (مثل: "منطقة الرياض")، واحفظ.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Areas group branches geographically for filtering and reporting.</span><span class="ar">المناطق تجمع الفروع جغرافياً للفلترة وإعداد التقارير.</span></div></li>
+          </ol>
+
+          <h3>🏢 <span class="en">Managing Branches</span><span class="ar">إدارة الفروع</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Go to <strong>Settings → Organization → Branches</strong>.</span><span class="ar">اذهب إلى <strong>الإعدادات ← التنظيم ← الفروع</strong>.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Click <strong>+ Add Branch</strong>, enter a name and select the parent Area.</span><span class="ar">انقر <strong>+ إضافة فرع</strong>، أدخل اسماً واختر المنطقة الرئيسية.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Employees select their branch when submitting a ticket — this helps route and report by location.</span><span class="ar">يختار الموظفون فرعهم عند تقديم التذكرة — يساعد ذلك على التوجيه وإعداد التقارير حسب الموقع.</span></div></li>
+          </ol>
+
+          <h3>💻 <span class="en">Managing Devices</span><span class="ar">إدارة الأجهزة</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Go to <strong>Settings → Organization → Devices</strong>.</span><span class="ar">اذهب إلى <strong>الإعدادات ← التنظيم ← الأجهزة</strong>.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Add devices (PCs, printers, servers) and link each to a branch.</span><span class="ar">أضف الأجهزة (الحواسيب، الطابعات، الخوادم) واربط كل منها بفرع.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Employees can reference a specific device when submitting a ticket for faster diagnosis.</span><span class="ar">يمكن للموظفين الإشارة إلى جهاز محدد عند تقديم التذكرة لتشخيص أسرع.</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §7 APP LINKS ═══════════════ -->
+    <section id="links">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">🔗</span>
+          <h2><span class="en">App Links Banner</span><span class="ar">لافتة روابط التطبيق</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">The App Links panel lets you pin important URLs (internal tools, portals, vendor sites) so all users see them on their dashboard. Navigate to <strong>Settings → App Links</strong>.</p>
+          <p class="ar">لوحة روابط التطبيق تتيح لك تثبيت روابط URL مهمة (الأدوات الداخلية، البوابات، مواقع الموردين) لتظهر لجميع المستخدمين في لوحة التحكم. انتقل إلى <strong>الإعدادات ← روابط التطبيق</strong>.</p>
+
+          <h3>➕ <span class="en">Adding an App Link</span><span class="ar">إضافة رابط تطبيق</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Click <strong>+ Add Link</strong>.</span><span class="ar">انقر <strong>+ إضافة رابط</strong>.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Enter a <strong>Title</strong> (shown on the card), a <strong>URL</strong>, and optionally an <strong>Icon</strong>.</span><span class="ar">أدخل <strong>عنواناً</strong> (يظهر على البطاقة)، و<strong>رابطاً URL</strong>، واختياراً <strong>أيقونة</strong>.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Click <strong>Save</strong>. The link appears on all users' dashboards immediately.</span><span class="ar">انقر <strong>حفظ</strong>. يظهر الرابط على لوحات تحكم جميع المستخدمين فوراً.</span></div></li>
+          </ol>
+
+          <div class="links-grid">
+            <div class="link-card">
+              <div class="lc-icon">🌐</div>
+              <div class="lc-name en">Internal Portal</div>
+              <div class="lc-name ar">البوابة الداخلية</div>
+              <div class="lc-desc en">Company intranet link</div>
+              <div class="lc-desc ar">رابط الشبكة الداخلية</div>
+            </div>
+            <div class="link-card">
+              <div class="lc-icon">📧</div>
+              <div class="lc-name en">Email</div>
+              <div class="lc-name ar">البريد الإلكتروني</div>
+              <div class="lc-desc en">Outlook / Gmail webmail</div>
+              <div class="lc-desc ar">بريد ويب Outlook / Gmail</div>
+            </div>
+            <div class="link-card">
+              <div class="lc-icon">📁</div>
+              <div class="lc-name en">File Server</div>
+              <div class="lc-name ar">خادم الملفات</div>
+              <div class="lc-desc en">Shared drives or SharePoint</div>
+              <div class="lc-desc ar">المحركات المشتركة أو SharePoint</div>
+            </div>
+            <div class="link-card">
+              <div class="lc-icon">🛒</div>
+              <div class="lc-name en">Vendor Portal</div>
+              <div class="lc-name ar">بوابة المورد</div>
+              <div class="lc-desc en">Supplier or licensing site</div>
+              <div class="lc-desc ar">موقع المورد أو الترخيص</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §8 GUIDELINES ═══════════════ -->
+    <section id="guidelines">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">📋</span>
+          <h2><span class="en">Guidelines Panel</span><span class="ar">لوحة الإرشادات</span></h2>
+          <span class="role-badge"><span class="en">ADMIN ONLY</span><span class="ar">مسؤول فقط</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">Post company IT policies and rules in the <strong>Guidelines</strong> panel so all users can access them from the dashboard. Navigate to <strong>Settings → Guidelines</strong>.</p>
+          <p class="ar">انشر سياسات وقواعد تقنية المعلومات للشركة في لوحة <strong>الإرشادات</strong> حتى يتمكن جميع المستخدمين من الوصول إليها من لوحة التحكم. انتقل إلى <strong>الإعدادات ← الإرشادات</strong>.</p>
+
+          <h3>✏️ <span class="en">Creating a Guideline</span><span class="ar">إنشاء إرشاد</span></h3>
+          <ol class="steps">
+            <li><span class="step-num">1</span><div class="step-body"><span class="en">Click <strong>+ Add Guideline</strong>.</span><span class="ar">انقر <strong>+ إضافة إرشاد</strong>.</span></div></li>
+            <li><span class="step-num">2</span><div class="step-body"><span class="en">Enter a <strong>Title</strong> and the full <strong>Content</strong> of the policy or rule.</span><span class="ar">أدخل <strong>عنواناً</strong> والمحتوى الكامل للسياسة أو القاعدة.</span></div></li>
+            <li><span class="step-num">3</span><div class="step-body"><span class="en">Click <strong>Save</strong>. The guideline is immediately visible to all users in the dashboard's Guidelines section.</span><span class="ar">انقر <strong>حفظ</strong>. يصبح الإرشاد مرئياً فوراً لجميع المستخدمين في قسم الإرشادات بلوحة التحكم.</span></div></li>
+          </ol>
+
+          <div class="callout callout-tip">
+            <strong>💡 <span class="en">Best Use</span><span class="ar">الاستخدام الأمثل</span></strong>
+            <span class="en">Use guidelines for: acceptable-use policy, escalation procedures, hardware request process, password policy, office hours for IT support. Keep each guideline focused on one topic.</span>
+            <span class="ar">استخدم الإرشادات لـ: سياسة الاستخدام المقبول، إجراءات التصعيد، عملية طلب الأجهزة، سياسة كلمات المرور، ساعات عمل دعم تقنية المعلومات. احرص على أن يتناول كل إرشاد موضوعاً واحداً.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §9 SYSTEM HEALTH ═══════════════ -->
+    <section id="health">
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-icon">💚</span>
+          <h2><span class="en">System Health Checklist</span><span class="ar">قائمة تحقق صحة النظام</span></h2>
+          <span class="role-badge"><span class="en">WEEKLY</span><span class="ar">أسبوعياً</span></span>
+        </div>
+        <div class="role-body">
+          <p class="en">Run through this checklist every week to keep the system healthy and the team productive.</p>
+          <p class="ar">نفّذ هذه القائمة كل أسبوع للحفاظ على صحة النظام وإنتاجية الفريق.</p>
+
+          <ul class="checklist">
+            <li><span class="check-icon">📊</span><div><strong class="en">Run Overview Report</strong><strong class="ar">تشغيل تقرير النظرة العامة</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Check total tickets, resolution rate, and any spike in Open tickets.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">تحقق من إجمالي التذاكر ومعدل الحل وأي ارتفاع في التذاكر المفتوحة.</span></div></li>
+            <li><span class="check-icon">🔥</span><div><strong class="en">Review Backlog &amp; Aging</strong><strong class="ar">مراجعة التراكم والتقادم</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Escalate any tickets older than 7 days. Reassign if blocked technician is overloaded.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">تصعيد أي تذاكر تجاوز عمرها 7 أيام. إعادة تعيين إذا كان الفني المكلَّف مثقلاً بالعمل.</span></div></li>
+            <li><span class="check-icon">👥</span><div><strong class="en">Check Technician Availability</strong><strong class="ar">التحقق من توفر الفنيين</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Ensure all active technicians have their status set to Available in their profile.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">تأكد من أن جميع الفنيين النشطين قد ضبطوا حالتهم على "متاح" في ملفاتهم الشخصية.</span></div></li>
+            <li><span class="check-icon">📂</span><div><strong class="en">Verify Category Coverage</strong><strong class="ar">التحقق من تغطية الفئات</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Make sure each active category has at least one assigned technician.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">تأكد من أن كل فئة نشطة لديها فني واحد على الأقل.</span></div></li>
+            <li><span class="check-icon">🔗</span><div><strong class="en">Audit App Links</strong><strong class="ar">مراجعة روابط التطبيق</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Click each pinned link to confirm they still resolve correctly (no broken URLs).</span><span class="ar" style="font-size:.8rem;color:var(--muted)">انقر على كل رابط مثبَّت للتأكد من أنه لا يزال يعمل بشكل صحيح (لا روابط مكسورة).</span></div></li>
+            <li><span class="check-icon">📋</span><div><strong class="en">Update Guidelines if Needed</strong><strong class="ar">تحديث الإرشادات عند الحاجة</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Review IT policies for any changes; update or archive outdated guidelines.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">راجع سياسات تقنية المعلومات للتغييرات؛ حدّث أو أرشف الإرشادات القديمة.</span></div></li>
+            <li><span class="check-icon">🏆</span><div><strong class="en">Technician Performance Review</strong><strong class="ar">مراجعة أداء الفنيين</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Monthly: run the Technician Performance report and share highlights with the team.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">شهرياً: شغّل تقرير أداء الفنيين وشارك أبرز النتائج مع الفريق.</span></div></li>
+            <li><span class="check-icon">🌍</span><div><strong class="en">Verify Organization Data</strong><strong class="ar">التحقق من بيانات التنظيم</strong><br><span class="en" style="font-size:.8rem;color:var(--muted)">Confirm areas, branches, and devices are up-to-date after any office moves or new equipment.</span><span class="ar" style="font-size:.8rem;color:var(--muted)">تأكد من أن المناطق والفروع والأجهزة محدَّثة بعد أي انتقال مكتبي أو معدات جديدة.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ §10 FAQ ═══════════════ -->
+    <section id="faq">
+      <h2 id="faq-h"><span class="en">❓ Frequently Asked Questions</span><span class="ar">❓ الأسئلة الشائعة</span></h2>
+      <div class="faq">
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">A technician's tickets are not showing. What do I check?</span>
+            <span class="ar">تذاكر الفني لا تظهر له. ماذا أتحقق؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Check two things: (1) The technician's user account has the <strong>Technician</strong> role. (2) The technician is assigned to the ticket's <strong>category</strong> in Settings → Users. Without a matching category, tickets in that category won't appear in their task list.</span>
+            <span class="ar">تحقق من أمرين: (1) حساب الفني يحمل دور <strong>فني</strong>. (2) الفني معيَّن لـ<strong>فئة</strong> التذكرة في الإعدادات ← المستخدمون. بدون فئة مطابقة، لن تظهر التذاكر في تلك الفئة في قائمة مهامه.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">Can I change a ticket's category after it's been submitted?</span>
+            <span class="ar">هل يمكنني تغيير فئة التذكرة بعد تقديمها؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Yes. Open the ticket detail page as an admin and use the <strong>Category</strong> field to reassign it. If the new category has different technicians, you may also need to update the <strong>Assignee</strong> field.</span>
+            <span class="ar">نعم. افتح صفحة تفاصيل التذكرة كمسؤول واستخدم حقل <strong>الفئة</strong> لإعادة تعيينها. إذا كانت الفئة الجديدة لها فنيون مختلفون، فقد تحتاج أيضاً إلى تحديث حقل <strong>المعيَّن إليه</strong>.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">How do I deactivate a user without deleting their ticket history?</span>
+            <span class="ar">كيف أوقّف مستخدماً دون حذف سجل تذاكره؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Go to Settings → Users, edit the user, and set their <strong>Status</strong> to <em>Inactive</em>. This prevents them from logging in while preserving all their historical tickets and comments.</span>
+            <span class="ar">اذهب إلى الإعدادات ← المستخدمون، عدِّل المستخدم، واضبط <strong>الحالة</strong> على <em>غير نشط</em>. يمنع هذا تسجيل دخوله مع الحفاظ على جميع تذاكره وتعليقاته التاريخية.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">The reports show zero data. What's wrong?</span>
+            <span class="ar">التقارير تُظهر بيانات صفرية. ما المشكلة؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Check the <strong>date range</strong> — the most common cause is a range with no tickets (e.g., set to last week when all tickets are from this month). Also confirm the correct report mode is selected. If the issue persists, refresh the page.</span>
+            <span class="ar">تحقق من <strong>النطاق الزمني</strong> — السبب الأكثر شيوعاً هو نطاق لا يحتوي على تذاكر (مثلاً مضبوط على الأسبوع الماضي بينما جميع التذاكر من هذا الشهر). تأكد أيضاً من اختيار نمط التقرير الصحيح. إذا استمرت المشكلة، أعد تحميل الصفحة.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">An employee says they can't see the ticket submission form. What do I check?</span>
+            <span class="ar">يقول موظف إنه لا يرى نموذج تقديم التذاكر. ماذا أتحقق؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Verify their account role is set to <strong>Employee</strong> (not Technician or Admin). Also check there is at least one active ticket category — without any category, the submission form cannot load.</span>
+            <span class="ar">تحقق من أن دور حسابهم مضبوط على <strong>موظف</strong> (وليس فنياً أو مسؤولاً). تحقق أيضاً من وجود فئة تذاكر نشطة واحدة على الأقل — بدون أي فئة، لا يمكن تحميل نموذج التقديم.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">How do I reset a user's password?</span>
+            <span class="ar">كيف أُعيد تعيين كلمة مرور مستخدم؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Go to Settings → Users, edit the user, and use the <strong>Reset Password</strong> option. A temporary password is generated; share it with the user and ask them to change it on first login.</span>
+            <span class="ar">اذهب إلى الإعدادات ← المستخدمون، عدِّل المستخدم، واستخدم خيار <strong>إعادة تعيين كلمة المرور</strong>. يتم إنشاء كلمة مرور مؤقتة؛ شاركها مع المستخدم واطلب منه تغييرها عند تسجيل الدخول الأول.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">Can I add a new branch to an existing area without disrupting current tickets?</span>
+            <span class="ar">هل يمكنني إضافة فرع جديد إلى منطقة موجودة دون التأثير على التذاكر الحالية؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Yes. Adding a branch is non-destructive — existing tickets keep their original branch assignment. New tickets submitted after the addition will include the new branch as an option.</span>
+            <span class="ar">نعم. إضافة فرع لا تُلحق ضرراً — تحتفظ التذاكر الموجودة بتعيين فرعها الأصلي. ستشمل التذاكر الجديدة المقدَّمة بعد الإضافة الفرع الجديد كخيار.</span>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span class="en">How do I promote an employee to admin?</span>
+            <span class="ar">كيف أُرقّي موظفاً إلى مسؤول؟</span>
+            <span class="arr">▼</span>
+          </button>
+          <div class="faq-a">
+            <span class="en">Go to Settings → Users, edit the user, change their <strong>Role</strong> from Employee to <strong>Admin</strong>, and save. They gain full admin access immediately on their next page load. Grant admin rights carefully — the role is unrestricted.</span>
+            <span class="ar">اذهب إلى الإعدادات ← المستخدمون، عدِّل المستخدم، غيِّر <strong>الدور</strong> من موظف إلى <strong>مسؤول</strong>، واحفظ. يحصل على صلاحيات المسؤول الكاملة فوراً عند تحميله الصفحة التالية. امنح صلاحيات المسؤول بحذر — الدور غير مقيد.</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div style="text-align:center;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem;">
+      <span class="en">Altuwijri Ticket System · Admin Guide · Version 1.0</span>
+      <span class="ar">نظام تذاكر العتيجي · دليل المسؤول · الإصدار 1.0</span>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* ── Language toggle ── */
+  function setLang(lang) {
+    const html = document.documentElement;
+    html.setAttribute('lang', lang);
+    html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.getElementById('btn-en').classList.toggle('on', lang === 'en');
+    document.getElementById('btn-ar').classList.toggle('on', lang === 'ar');
+    localStorage.setItem('adm-guide-lang', lang);
+  }
+
+  /* ── Restore saved lang ── */
+  (function() {
+    const saved = localStorage.getItem('adm-guide-lang');
+    if (saved === 'ar') setLang('ar');
+  })();
+
+  /* ── FAQ accordion ── */
+  function toggleFaq(btn) {
+    const ans = btn.nextElementSibling;
+    const isOpen = btn.classList.contains('open');
+    document.querySelectorAll('.faq-q.open').forEach(b => {
+      b.classList.remove('open');
+      b.nextElementSibling.classList.remove('open');
+    });
+    if (!isOpen) { btn.classList.add('open'); ans.classList.add('open'); }
+  }
+
+  /* ── Scroll-spy TOC ── */
+  const sections = document.querySelectorAll('section[id]');
+  const links    = document.querySelectorAll('.toc a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('on'));
+        const active = document.querySelector('.toc a[href="#' + e.target.id + '"]');
+        if (active) active.classList.add('on');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ATS — Technician Guide | دليل التقني</title>
+<style>
+  /* ── Reset & Variables ─────────────────────────────────── */
+  :root {
+    --bg:       #0f172a;
+    --surface:  #1e293b;
+    --surface2: #273449;
+    --border:   #334155;
+    --text:     #e2e8f0;
+    --muted:    #94a3b8;
+    --primary:  #7c3aed;
+    --primary2: #6d28d9;
+    --yellow:   #eab308;
+    --green:    #22c55e;
+    --orange:   #f97316;
+    --red:      #ef4444;
+    --blue:     #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+  }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── TOC sidebar ── */
+  .toc {
+    width: 230px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 1rem;
+  }
+  .toc-brand {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1.25rem;
+    font-weight: 800;
+    font-size: .9rem;
+  }
+  .toc-brand .char-mini { font-size: 1.6rem; }
+  .toc a {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted);
+    padding: .28rem .6rem;
+    border-radius: .35rem;
+    transition: all .15s;
+  }
+  .toc a:hover, .toc a.on { color: var(--text); background: var(--surface2); text-decoration: none; }
+  .toc a.on { color: #c4b5fd; background: rgba(124,58,237,.18); }
+  .toc .indent { padding-left: 1.3rem; font-size: .76rem; }
+  .toc hr { border: none; border-top: 1px solid var(--border); margin: .6rem 0; }
+
+  /* ── Main content ── */
+  .content {
+    flex: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 2.5rem 4rem;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 60%, #a855f7 100%);
+    border-radius: 1.25rem;
+    padding: 2.25rem 2.5rem;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-text { flex: 1; }
+  .hero h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: .4rem; }
+  .hero p  { color: rgba(255,255,255,.85); font-size: 1rem; max-width: 480px; }
+  .hero-char { flex-shrink: 0; }
+
+  /* ── Animated technician character ── */
+  .guide-char {
+    width: 110px;
+    height: 185px;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,.5));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  .arm-l { transform-origin: 19px 94px; animation: wave 2.5s ease-in-out infinite; }
+  @keyframes wave {
+    0%,100% { transform: rotate(0deg); }
+    30%     { transform: rotate(30deg); }
+    70%     { transform: rotate(-8deg); }
+  }
+  .eye  { animation: blink 5s ease-in-out infinite; transform-origin: center; }
+  .eye2 { animation: blink 5s ease-in-out infinite .12s; transform-origin: center; }
+  @keyframes blink {
+    0%,93%,100% { transform: scaleY(1); }
+    96%,98%     { transform: scaleY(.08); }
+  }
+
+  /* ── Language toggle ── */
+  .lang-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+    gap: .5rem;
+  }
+  .lang-btn {
+    padding: .4rem 1rem;
+    border-radius: 2rem;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .lang-btn.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .lang-btn:hover:not(.on) { border-color: var(--primary); color: var(--text); }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: .45rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  h2 .accent { color: #a78bfa; }
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 1.75rem 0 .75rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  p { margin-bottom: .8rem; }
+
+  /* ── Steps ── */
+  .steps { list-style: none; padding: 0; }
+  .steps li {
+    display: flex;
+    gap: .85rem;
+    align-items: flex-start;
+    padding: .65rem .75rem;
+    border-radius: .6rem;
+    margin-bottom: .4rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: .88rem;
+    line-height: 1.55;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .73rem;
+    font-weight: 800;
+    color: #fff;
+    background: var(--primary);
+    margin-top: .05rem;
+  }
+  .tip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    background: rgba(234,179,8,.1);
+    border: 1px solid rgba(234,179,8,.3);
+    border-radius: .4rem;
+    padding: .25rem .6rem;
+    font-size: .79rem;
+    color: var(--yellow);
+    margin-top: .35rem;
+  }
+
+  /* ── Guide cards ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .85rem;
+    margin-bottom: 1.25rem;
+  }
+  .guide-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1rem;
+    text-align: center;
+  }
+  .guide-card .gc-icon  { font-size: 2rem; margin-bottom: .5rem; }
+  .guide-card .gc-title { font-size: .85rem; font-weight: 700; margin-bottom: .3rem; }
+  .guide-card .gc-desc  { font-size: .78rem; color: var(--muted); }
+
+  /* ── KPI cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1rem 1.1rem;
+  }
+  .kpi-card .kpi-label { font-size: .75rem; color: var(--muted); margin-bottom: .3rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .kpi-card .kpi-val   { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+  .kpi-card .kpi-desc  { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+  .kpi-total   { border-top: 3px solid var(--primary); }
+  .kpi-todo    { border-top: 3px solid #6366f1; }
+  .kpi-prog    { border-top: 3px solid var(--blue); }
+  .kpi-done    { border-top: 3px solid var(--green); }
+  .kpi-total .kpi-val { color: #a78bfa; }
+  .kpi-todo   .kpi-val { color: #818cf8; }
+  .kpi-prog   .kpi-val { color: #60a5fa; }
+  .kpi-done   .kpi-val { color: #4ade80; }
+
+  /* ── Status legend ── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .65rem;
+    margin-bottom: 1.5rem;
+  }
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .6rem .85rem;
+    background: var(--surface2);
+    border-radius: .55rem;
+    border: 1px solid var(--border);
+    font-size: .83rem;
+  }
+  .st-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .status-item strong { min-width: 82px; font-size: .82rem; }
+  .status-item span   { color: var(--muted); font-size: .78rem; }
+
+  /* ── Diagram ── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+
+  /* ── Kanban columns preview ── */
+  .kanban-preview {
+    display: flex;
+    gap: .5rem;
+    overflow-x: auto;
+    padding-bottom: .5rem;
+    margin-bottom: 1.25rem;
+  }
+  .kb-col {
+    flex: 0 0 130px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: .6rem;
+    padding: .6rem .65rem;
+  }
+  .kb-col-title {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+  }
+  .kb-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .4rem;
+    padding: .4rem .5rem;
+    font-size: .72rem;
+    margin-bottom: .35rem;
+    color: var(--muted);
+    border-left: 3px solid var(--primary);
+  }
+  .kb-card.high { border-left-color: var(--orange); }
+  .kb-card.crit { border-left-color: var(--red); }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-left: 4px solid;
+    border-radius: 0 .6rem .6rem 0;
+    padding: .8rem 1rem;
+    margin: .75rem 0 1rem;
+    font-size: .87rem;
+  }
+  .callout-tip  { border-color: var(--green);   background: rgba(34,197,94,.07); }
+  .callout-info { border-color: var(--primary);  background: rgba(124,58,237,.07); }
+  .callout-warn { border-color: var(--yellow);   background: rgba(234,179,8,.07); }
+  .callout-red  { border-color: var(--red);      background: rgba(239,68,68,.07); }
+  .callout strong { display: block; margin-bottom: .2rem; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; margin-bottom: 1.25rem; }
+  th { background: var(--surface2); text-align: left; padding: .55rem .75rem; font-weight: 700; border-bottom: 2px solid var(--border); }
+  td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .check { color: var(--green); font-size: 1rem; }
+  .cross { color: var(--muted); font-size: 1rem; }
+
+  /* ── FAQ ── */
+  .faq { margin-bottom: 2rem; }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: .65rem;
+    margin-bottom: .6rem;
+    overflow: hidden;
+  }
+  .faq-q {
+    width: 100%;
+    background: var(--surface2);
+    border: none;
+    color: var(--text);
+    text-align: left;
+    padding: .8rem 1rem;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+  }
+  [dir='rtl'] .faq-q { text-align: right; }
+  .faq-q .arr { flex-shrink: 0; transition: transform .2s; color: var(--muted); }
+  .faq-q.open .arr { transform: rotate(180deg); }
+  .faq-a {
+    display: none;
+    padding: .75rem 1rem;
+    font-size: .85rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .faq-a.open { display: block; }
+
+  /* ── Best Practices list ── */
+  .bp-list { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+  .bp-list li {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+    padding: .6rem .8rem;
+    border-radius: .55rem;
+    margin-bottom: .4rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: .87rem;
+  }
+  .bp-ico { flex-shrink: 0; font-size: 1.1rem; margin-top: .05rem; }
+
+  /* ── Section divider accent ── */
+  .section-accent {
+    border-radius: 1rem;
+    border: 2px solid rgba(124,58,237,.35);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .section-accent-header {
+    background: linear-gradient(90deg, #4c1d95, #7c3aed);
+    padding: .9rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #fff;
+  }
+  .section-accent-body { padding: 1.25rem 1.5rem; }
+
+  /* ── Print ── */
+  @media print {
+    .toc, .lang-bar, .no-print { display: none !important; }
+    .content { padding: 0; max-width: 100%; }
+    .hero { background: none !important; border: 2px solid #ccc; }
+    .faq-a { display: block !important; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .toc { display: none; }
+    .content { padding: 1.25rem; }
+    .hero { flex-direction: column; }
+    .hero-char { display: none; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .kanban-preview { gap: .35rem; }
+    .kb-col { flex: 0 0 110px; }
+  }
+
+  /* ── RTL overrides ── */
+  [dir='rtl'] .toc    { border-right: none; border-left: 1px solid var(--border); }
+  [dir='rtl'] .callout { border-left: none; border-right: 4px solid; border-radius: .6rem 0 0 .6rem; }
+  [dir='rtl'] .toc .indent { padding-left: .6rem; padding-right: 1.3rem; }
+  [dir='rtl'] th { text-align: right; }
+
+  /* ── Bilingual display ── */
+  .en { display: block; }
+  .ar { display: none;  }
+  [dir='rtl'] .en { display: none;  }
+  [dir='rtl'] .ar { display: block; }
+  span.en { display: inline; }
+  span.ar { display: none;   }
+  [dir='rtl'] span.en { display: none;   }
+  [dir='rtl'] span.ar { display: inline; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ═══════════════════ SIDEBAR TOC ═══════════════════ -->
+<nav class="toc" id="toc">
+  <div class="toc-brand">
+    <span class="char-mini">🔧</span>
+    <div>
+      <div style="font-size:.75rem;color:var(--muted)">
+        <span class="en">Technician Guide</span>
+        <span class="ar">دليل التقني</span>
+      </div>
+      <div>ATS</div>
+    </div>
+  </div>
+
+  <a href="#welcome">
+    <span class="en">1. Your Role</span>
+    <span class="ar">1. دورك</span>
+  </a>
+  <a href="#signin">
+    <span class="en">2. Sign In & Availability</span>
+    <span class="ar">2. الدخول والإتاحة</span>
+  </a>
+  <a href="#dashboard">
+    <span class="en">3. Dashboard</span>
+    <span class="ar">3. لوحة التحكم</span>
+  </a>
+  <a href="#inbox">
+    <span class="en">4. Ticket Inbox</span>
+    <span class="ar">4. صندوق التذاكر</span>
+  </a>
+  <a href="#claim">
+    <span class="en">5. Claiming a Ticket</span>
+    <span class="ar">5. قبول تذكرة</span>
+  </a>
+  <a href="#working">
+    <span class="en">6. Working on a Ticket</span>
+    <span class="ar">6. العمل على تذكرة</span>
+  </a>
+  <a href="#kanban">
+    <span class="en">7. Kanban Board</span>
+    <span class="ar">7. لوحة كانبان</span>
+  </a>
+  <a href="#subtasks">
+    <span class="en">8. Subtasks</span>
+    <span class="ar">8. المهام الفرعية</span>
+  </a>
+  <a href="#comms">
+    <span class="en">9. Communicating</span>
+    <span class="ar">9. التواصل</span>
+  </a>
+  <a href="#kpis">
+    <span class="en">10. Performance KPIs</span>
+    <span class="ar">10. مؤشرات الأداء</span>
+  </a>
+  <a href="#tips">
+    <span class="en">11. Tips & Best Practices</span>
+    <span class="ar">11. النصائح والممارسات</span>
+  </a>
+  <a href="#faq">
+    <span class="en">12. FAQ</span>
+    <span class="ar">12. الأسئلة الشائعة</span>
+  </a>
+
+  <hr>
+  <a href="user-guide.html" style="font-size:.75rem; color:var(--muted)">
+    <span class="en">← Full User Guide</span>
+    <span class="ar">← دليل المستخدم الكامل</span>
+  </a>
+</nav>
+
+<!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+<div class="content">
+
+  <!-- Language toggle -->
+  <div class="lang-bar no-print">
+    <button class="lang-btn on" onclick="setLang('en')" id="btn-en">English</button>
+    <button class="lang-btn"    onclick="setLang('ar')" id="btn-ar">العربية</button>
+  </div>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-text">
+      <h1>
+        <span class="en">Technician Guide</span>
+        <span class="ar">دليل التقني</span>
+      </h1>
+      <p>
+        <span class="en">Your complete reference for claiming tickets, updating progress, using the Kanban Board, and tracking your performance in the Altuwijri Ticket System.</span>
+        <span class="ar">مرجعك الكامل لقبول التذاكر وتحديث التقدم واستخدام لوحة كانبان وتتبع أدائك في نظام تذاكر العويجري.</span>
+      </p>
+    </div>
+    <div class="hero-char">
+      <!-- Technician SVG character (purple uniform, wrench) -->
+      <svg class="guide-char" viewBox="0 0 110 185" xmlns="http://www.w3.org/2000/svg">
+        <!-- Body -->
+        <rect x="25" y="82" width="60" height="72" rx="18" fill="#7c3aed"/>
+        <!-- Shirt detail lines -->
+        <rect x="44" y="93"  width="22" height="3" rx="1.5" fill="rgba(255,255,255,.25)"/>
+        <rect x="44" y="100" width="22" height="3" rx="1.5" fill="rgba(255,255,255,.25)"/>
+        <!-- Left arm (waving) -->
+        <g class="arm-l">
+          <rect x="4" y="83" width="24" height="11" rx="7" fill="#7c3aed" transform="rotate(-25 16 88)"/>
+          <!-- wrench in hand -->
+          <text x="-2" y="72" font-size="13">🔧</text>
+        </g>
+        <!-- Right arm -->
+        <rect x="82" y="85" width="24" height="11" rx="7" fill="#7c3aed" transform="rotate(15 94 90)"/>
+        <circle cx="107" cy="99" r="8" fill="#fde68a"/>
+        <!-- Legs -->
+        <rect x="33" y="150" width="17" height="30" rx="8" fill="#4c1d95"/>
+        <rect x="60" y="150" width="17" height="30" rx="8" fill="#4c1d95"/>
+        <!-- Shoes -->
+        <ellipse cx="41"  cy="181" rx="14" ry="6" fill="#3b0764"/>
+        <ellipse cx="68"  cy="181" rx="14" ry="6" fill="#3b0764"/>
+        <!-- Head -->
+        <circle cx="55" cy="50" r="32" fill="#fde68a"/>
+        <!-- Hair -->
+        <path d="M 23 44 Q 55 8 87 44" fill="#1e293b"/>
+        <!-- Eyes -->
+        <circle cx="43" cy="50" r="6"   fill="white"/>
+        <circle cx="67" cy="50" r="6"   fill="white"/>
+        <circle cx="44" cy="51" r="3.5" fill="#1e293b" class="eye"/>
+        <circle cx="68" cy="51" r="3.5" fill="#1e293b" class="eye2"/>
+        <circle cx="45" cy="49" r="1"   fill="white"/>
+        <circle cx="69" cy="49" r="1"   fill="white"/>
+        <!-- Smile -->
+        <path d="M 40 63 Q 55 76 70 63" stroke="#e07b39" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Badge -->
+        <rect x="31" y="104" width="48" height="20" rx="5" fill="white" opacity=".9"/>
+        <text x="55" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#7c3aed" font-family="Segoe UI,sans-serif">TECHNICIAN</text>
+        <!-- Availability dot -->
+        <circle cx="87" cy="83" r="6" fill="#22c55e" stroke="#0f172a" stroke-width="1.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 1. WELCOME — THE TECHNICIAN'S ROLE -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="welcome">
+    <span class="accent">1.</span>
+    <span class="en">Welcome — The Technician's Role</span>
+    <span class="ar">مرحباً — دور التقني</span>
+  </h2>
+
+  <div class="callout callout-info">
+    <strong><span class="en">Who is this guide for?</span><span class="ar">لمن هذا الدليل؟</span></strong>
+    <span class="en">This guide is written exclusively for users with the <strong>Technician</strong> role in ATS. If you are an employee or admin, refer to the <a href="user-guide.html">full user guide</a>.</span>
+    <span class="ar">هذا الدليل مكتوب حصرياً للمستخدمين بدور <strong>التقني</strong> في النظام. إذا كنت موظفاً أو مديراً، راجع <a href="user-guide.html">دليل المستخدم الكامل</a>.</span>
+  </div>
+
+  <div class="card-grid">
+    <div class="guide-card">
+      <div class="gc-icon">📥</div>
+      <div class="gc-title"><span class="en">Receive Tickets</span><span class="ar">استلام التذاكر</span></div>
+      <div class="gc-desc"><span class="en">Tickets flow to you from employees in your categories</span><span class="ar">تصلك التذاكر من الموظفين في تصنيفاتك</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">✅</div>
+      <div class="gc-title"><span class="en">Claim & Accept</span><span class="ar">قبول والمطالبة</span></div>
+      <div class="gc-desc"><span class="en">Click Accept to own a ticket — ClaimedAt is recorded</span><span class="ar">انقر قبول لامتلاك تذكرة — يُسجَّل ClaimedAt</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🔄</div>
+      <div class="gc-title"><span class="en">Update Progress</span><span class="ar">تحديث التقدم</span></div>
+      <div class="gc-desc"><span class="en">Keep status and progress % current so employees stay informed</span><span class="ar">حافظ على تحديث الحالة والنسبة حتى يبقى الموظفون على علم</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">👀</div>
+      <div class="gc-title"><span class="en">Request Review</span><span class="ar">طلب مراجعة</span></div>
+      <div class="gc-desc"><span class="en">Set "In Review" when work is done — admin verifies and closes</span><span class="ar">اضبط "قيد المراجعة" عند الانتهاء — المدير يتحقق ويغلق</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">📊</div>
+      <div class="gc-title"><span class="en">Track KPIs</span><span class="ar">تتبع مؤشرات الأداء</span></div>
+      <div class="gc-desc"><span class="en">Response time & resolution time are measured automatically</span><span class="ar">وقت الاستجابة والحل يُقاسان تلقائياً</span></div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🚫</div>
+      <div class="gc-title"><span class="en">Cannot Close</span><span class="ar">لا يمكن الإغلاق</span></div>
+      <div class="gc-desc"><span class="en">Done / Cancelled are admin-only actions</span><span class="ar">منجزة / ملغاة صلاحيات المدير فقط</span></div>
+    </div>
+  </div>
+
+  <h3><span class="en">How tickets flow to you</span><span class="ar">كيف تصلك التذاكر</span></h3>
+  <p>
+    <span class="en">When an employee submits a ticket, the system places it in <strong>Backlog</strong> and notifies all technicians assigned to that ticket's category. You and your teammates can all see the unassigned ticket in the Task List. The first technician to click <strong>Accept</strong> claims it.</span>
+    <span class="ar">عندما يُرسل موظف تذكرة، يضعها النظام في <strong>Backlog</strong> ويُخطر جميع التقنيين المُعيَّنين لتصنيف تلك التذكرة. أنت وزملاؤك يمكنكم رؤية التذكرة غير المُسندة في قائمة المهام. أول تقني يضغط <strong>قبول</strong> يستلمها.</span>
+  </p>
+
+  <h3><span class="en">Why ClaimedAt matters</span><span class="ar">لماذا يهم ClaimedAt</span></h3>
+  <p>
+    <span class="en">The moment you click <strong>Accept</strong>, the system records the exact timestamp as <strong>ClaimedAt</strong>. The difference between <strong>CreatedAt</strong> (when the employee submitted) and <strong>ClaimedAt</strong> (when you accepted) is your <strong>response time KPI</strong>. This metric is visible to the admin in Reports → By User → User Profile. A shorter response time reflects positively on your performance record.</span>
+    <span class="ar">في اللحظة التي تنقر فيها <strong>قبول</strong>، يُسجّل النظام الطابع الزمني الدقيق باسم <strong>ClaimedAt</strong>. الفرق بين <strong>CreatedAt</strong> (وقت إرسال الموظف) و<strong>ClaimedAt</strong> (وقت قبولك) هو <strong>مقياس وقت الاستجابة</strong> الخاص بك. هذا المقياس مرئي للمدير في التقارير ← حسب المستخدم ← ملف المستخدم. وقت استجابة أقصر ينعكس إيجابياً على سجل أدائك.</span>
+  </p>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 2. SIGN IN & AVAILABILITY -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="signin">
+    <span class="accent">2.</span>
+    <span class="en">Sign In & Availability</span>
+    <span class="ar">تسجيل الدخول والإتاحة</span>
+  </h2>
+
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">Open the ATS URL in your browser. Your IT administrator will have given you the address (e.g. <code>http://192.168.100.68</code> on LAN).</span>
+      <span class="ar">افتح رابط النظام في متصفحك. سيكون مسؤول تقنية المعلومات قد أعطاك العنوان (مثل <code>http://192.168.100.68</code> على الشبكة المحلية).</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">Enter your <strong>username</strong> and <strong>password</strong>, then click <strong>Sign In</strong>. You land directly on your Dashboard.</span>
+      <span class="ar">أدخل <strong>اسم المستخدم</strong> و<strong>كلمة المرور</strong>، ثم انقر <strong>تسجيل الدخول</strong>. ستصل مباشرة إلى لوحة التحكم.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en">Look for the <strong>green circle / Availability toggle</strong> in the top navigation bar next to your name. By default it may be off (grey).</span>
+      <span class="ar">ابحث عن <strong>الدائرة الخضراء / مفتاح الإتاحة</strong> في شريط التنقل العلوي بجانب اسمك. قد يكون معطلاً (رمادياً) بشكل افتراضي.</span>
+    </div></li>
+    <li><div class="step-num">4</div><div>
+      <span class="en">Click the toggle to turn it <span style="color:var(--green);font-weight:700">green</span>. This marks you as <strong>Available</strong> — employees can see that a technician is online, and the admin's user list reflects your status in real time.</span>
+      <span class="ar">انقر المفتاح لتحويله <span style="color:var(--green);font-weight:700">أخضر</span>. هذا يضعك كـ<strong>متاح</strong> — يمكن للموظفين رؤية أن التقني متصل، وقائمة المستخدمين لدى المدير تعكس حالتك في الوقت الحقيقي.</span>
+    </div></li>
+    <li><div class="step-num">5</div><div>
+      <span class="en">When you leave for the day or go on break, toggle it back to grey (<strong>Unavailable</strong>). This prevents employees from expecting an immediate response.</span>
+      <span class="ar">عند مغادرتك اليومية أو أثناء الاستراحة، أعده إلى الرمادي (<strong>غير متاح</strong>). هذا يمنع الموظفين من توقع استجابة فورية.</span>
+    </div></li>
+  </ol>
+
+  <div class="callout callout-tip">
+    <strong><span class="en">Password forgotten?</span><span class="ar">نسيت كلمة المرور؟</span></strong>
+    <span class="en">Contact your IT Admin — they can reset it from the Users panel. There is no self-service password reset on the login page.</span>
+    <span class="ar">تواصل مع مسؤول تقنية المعلومات — يمكنه إعادة تعيينها من لوحة المستخدمين. لا توجد إعادة تعيين ذاتية من صفحة الدخول.</span>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 3. DASHBOARD -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="dashboard">
+    <span class="accent">3.</span>
+    <span class="en">Your Dashboard</span>
+    <span class="ar">لوحة التحكم</span>
+  </h2>
+
+  <p>
+    <span class="en">The Dashboard is the first screen you see after login. It gives you a personal snapshot — only your tickets, not the whole team's.</span>
+    <span class="ar">لوحة التحكم هي الشاشة الأولى التي تراها بعد تسجيل الدخول. تعطيك لمحة شخصية — تذاكرك فقط، وليس تذاكر الفريق بأكمله.</span>
+  </p>
+
+  <h3><span class="en">KPI Cards explained</span><span class="ar">شرح بطاقات KPI</span></h3>
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-total">
+      <div class="kpi-label"><span class="en">Total Assigned</span><span class="ar">إجمالي المُسندة</span></div>
+      <div class="kpi-val">–</div>
+      <div class="kpi-desc"><span class="en">All tickets ever assigned to you (all statuses)</span><span class="ar">جميع التذاكر المُسندة إليك (كل الحالات)</span></div>
+    </div>
+    <div class="kpi-card kpi-todo">
+      <div class="kpi-label"><span class="en">Not Started</span><span class="ar">لم تبدأ</span></div>
+      <div class="kpi-val">–</div>
+      <div class="kpi-desc"><span class="en">Tickets in Backlog or To Do — need your attention</span><span class="ar">تذاكر في Backlog أو To Do — تحتاج انتباهك</span></div>
+    </div>
+    <div class="kpi-card kpi-prog">
+      <div class="kpi-label"><span class="en">In Progress</span><span class="ar">قيد التنفيذ</span></div>
+      <div class="kpi-val">–</div>
+      <div class="kpi-desc"><span class="en">Tickets you are actively working on right now</span><span class="ar">التذاكر التي تعمل عليها حالياً</span></div>
+    </div>
+    <div class="kpi-card kpi-done">
+      <div class="kpi-label"><span class="en">Completed</span><span class="ar">مكتملة</span></div>
+      <div class="kpi-val">–</div>
+      <div class="kpi-desc"><span class="en">Tickets closed as Done by the admin after your work</span><span class="ar">تذاكر أُغلقت كـ Done من المدير بعد عملك</span></div>
+    </div>
+  </div>
+
+  <h3><span class="en">My Assigned Tickets list</span><span class="ar">قائمة تذاكري المُسندة</span></h3>
+  <p>
+    <span class="en">Below the KPI cards is the <strong>My Assigned Tickets</strong> table. It lists your most recent tickets sorted by creation date. Each row shows the ticket title, category, priority, current status, and a direct link to open it. This is your quick-access panel — no need to go to the Task List for your own tickets.</span>
+    <span class="ar">أسفل بطاقات KPI توجد جدول <strong>تذاكري المُسندة</strong>. يُدرج آخر تذاكرك مرتبةً حسب تاريخ الإنشاء. كل صف يعرض عنوان التذكرة والتصنيف والأولوية والحالة الحالية ورابطاً مباشراً لفتحها. هذه لوحة الوصول السريع — لست بحاجة للذهاب إلى قائمة المهام لتذاكرك الخاصة.</span>
+  </p>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 4. TICKET INBOX -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="inbox">
+    <span class="accent">4.</span>
+    <span class="en">Understanding Your Ticket Inbox</span>
+    <span class="ar">فهم صندوق التذاكر</span>
+  </h2>
+
+  <p>
+    <span class="en">The <strong>Task List</strong> page (click <strong>Tasks</strong> in the sidebar) is your main inbox. The visibility rules are:</span>
+    <span class="ar">صفحة <strong>قائمة المهام</strong> (انقر <strong>المهام</strong> في الشريط الجانبي) هي صندوق الوارد الرئيسي. قواعد الرؤية هي:</span>
+  </p>
+
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en"><strong>Tickets assigned directly to you</strong> — always visible, regardless of category.</span>
+      <span class="ar"><strong>التذاكر المُسندة مباشرة إليك</strong> — مرئية دائماً، بغض النظر عن التصنيف.</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en"><strong>Unassigned tickets in your categories</strong> — visible so you can claim them. Your categories are set by the admin in Users → your account.</span>
+      <span class="ar"><strong>التذاكر الغير مُسندة في تصنيفاتك</strong> — مرئية حتى تتمكن من قبولها. تصنيفاتك يضبطها المدير في المستخدمون ← حسابك.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en"><strong>Tickets in other categories</strong> — <em>not</em> visible to you unless they are assigned to you specifically by an admin.</span>
+      <span class="ar"><strong>تذاكر تصنيفات أخرى</strong> — <em>غير</em> مرئية لك إلا إذا أسندها المدير إليك تحديداً.</span>
+    </div></li>
+  </ol>
+
+  <div class="callout callout-warn">
+    <strong><span class="en">No categories assigned?</span><span class="ar">لا تصنيفات مُعيّنة؟</span></strong>
+    <span class="en">If your admin has not assigned you any categories, you will see <em>all</em> unassigned tickets from every category. Ask your admin to configure your category list to keep the inbox focused.</span>
+    <span class="ar">إذا لم يُعيّن لك المدير أي تصنيفات، ستجد <em>جميع</em> التذاكر الغير مُسندة من كل تصنيف. اطلب من مديرك ضبط قائمة تصنيفاتك لإبقاء البريد الوارد منظماً.</span>
+  </div>
+
+  <h3><span class="en">Filter bar usage</span><span class="ar">استخدام شريط التصفية</span></h3>
+  <p>
+    <span class="en">At the top of the Task List you will find a filter bar. You can filter by: <strong>Status</strong> (dropdown), <strong>Priority</strong> (Low / Medium / High / Critical), <strong>Category</strong>, <strong>Assignee</strong>, and a free-text <strong>search</strong> box that matches ticket title and description. Filters stack — you can combine them. The pagination at the bottom lets you navigate when there are many tickets.</span>
+    <span class="ar">في أعلى قائمة المهام ستجد شريط تصفية. يمكنك التصفية حسب: <strong>الحالة</strong> (قائمة منسدلة)، <strong>الأولوية</strong> (منخفضة / متوسطة / عالية / حرجة)، <strong>التصنيف</strong>، <strong>المُسند</strong>، وصندوق <strong>بحث</strong> نصي حر يطابق عنوان التذكرة والوصف. تتراكم المرشحات — يمكنك دمجها. الترقيم في الأسفل يتيح التنقل عند وجود تذاكر كثيرة.</span>
+  </p>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 5. CLAIMING A TICKET -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="claim">
+    <span class="accent">5.</span>
+    <span class="en">Claiming a Ticket</span>
+    <span class="ar">قبول تذكرة</span>
+  </h2>
+
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">Go to <strong>Tasks</strong> in the sidebar. Find an unassigned ticket in your categories (it will show no assignee name and status <em>Backlog</em> or <em>To Do</em>).</span>
+      <span class="ar">انتقل إلى <strong>المهام</strong> في الشريط الجانبي. ابحث عن تذكرة غير مُسندة في تصنيفاتك (ستظهر بدون اسم مُسند وحالة <em>Backlog</em> أو <em>To Do</em>).</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">Click the ticket to open its <strong>Detail page</strong>.</span>
+      <span class="ar">انقر التذكرة لفتح <strong>صفحة التفاصيل</strong>.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en">On the right side of the detail page, locate the <strong>Technician Panel</strong> (highlighted with a purple/green border). You will see the <strong>"Accept Ticket"</strong> button.</span>
+      <span class="ar">على الجانب الأيمن من صفحة التفاصيل، حدد <strong>لوحة التقني</strong> (مُبرزة بحد أرجواني/أخضر). ستجد زر <strong>"قبول التذكرة"</strong>.</span>
+    </div></li>
+    <li><div class="step-num">4</div><div>
+      <span class="en">Click <strong>Accept Ticket</strong>. A confirmation dialog appears asking you to confirm.</span>
+      <span class="ar">انقر <strong>قبول التذكرة</strong>. ستظهر نافذة تأكيد تطلب منك التأكيد.</span>
+    </div></li>
+    <li><div class="step-num">5</div><div>
+      <span class="en">Confirm. The system instantly: assigns the ticket to you, sets status to <strong>In Progress</strong>, records <strong>ClaimedAt</strong> timestamp, and notifies the employee that their ticket has been picked up.</span>
+      <span class="ar">أكّد. يقوم النظام فوراً بـ: إسناد التذكرة إليك، ضبط الحالة على <strong>In Progress</strong>، تسجيل طابع زمني <strong>ClaimedAt</strong>، وإخطار الموظف بأن تذكرته قُبلت.</span>
+      <div class="tip">⏱ <span class="en">ClaimedAt is now locked — your response time KPI starts from ticket creation and ends here.</span><span class="ar">ClaimedAt مُقفل الآن — مقياس وقت استجابتك يبدأ من إنشاء التذكرة وينتهي هنا.</span></div>
+    </div></li>
+  </ol>
+
+  <!-- Accept flow diagram -->
+  <h3><span class="en">Accept flow — visual</span><span class="ar">مسار القبول — مرئي</span></h3>
+  <div class="diagram">
+    <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,sans-serif" font-size="11">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L0,8 L8,4 Z" fill="#64748b"/>
+        </marker>
+      </defs>
+      <!-- Step 1: Task List -->
+      <rect x="10" y="50" width="120" height="60" rx="10" fill="#1e293b" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="70" y="76" text-anchor="middle" fill="#c4b5fd" font-weight="700">📋 Task List</text>
+      <text x="70" y="92" text-anchor="middle" fill="#94a3b8" font-size="10">find unassigned</text>
+      <text x="70" y="105" text-anchor="middle" fill="#94a3b8" font-size="10">ticket</text>
+      <!-- arrow -->
+      <line x1="131" y1="80" x2="158" y2="80" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Step 2: Detail page -->
+      <rect x="160" y="50" width="120" height="60" rx="10" fill="#1e293b" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="220" y="76" text-anchor="middle" fill="#c4b5fd" font-weight="700">📄 Detail Page</text>
+      <text x="220" y="92" text-anchor="middle" fill="#94a3b8" font-size="10">open ticket</text>
+      <text x="220" y="105" text-anchor="middle" fill="#94a3b8" font-size="10">detail view</text>
+      <!-- arrow -->
+      <line x1="281" y1="80" x2="308" y2="80" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Step 3: Technician panel -->
+      <rect x="310" y="50" width="130" height="60" rx="10" fill="#1e293b" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="375" y="72" text-anchor="middle" fill="#86efac" font-weight="700">🟢 Technician</text>
+      <text x="375" y="86" text-anchor="middle" fill="#86efac" font-weight="700">Panel</text>
+      <text x="375" y="101" text-anchor="middle" fill="#94a3b8" font-size="10">click Accept Ticket</text>
+      <!-- arrow -->
+      <line x1="441" y1="80" x2="468" y2="80" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Step 4: Dialog -->
+      <rect x="470" y="50" width="110" height="60" rx="10" fill="#1e293b" stroke="#eab308" stroke-width="1.5"/>
+      <text x="525" y="76" text-anchor="middle" fill="#fde68a" font-weight="700">💬 Confirm</text>
+      <text x="525" y="92" text-anchor="middle" fill="#94a3b8" font-size="10">dialog → OK</text>
+      <!-- arrow -->
+      <line x1="581" y1="80" x2="608" y2="80" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Step 5: Done -->
+      <rect x="610" y="50" width="80" height="60" rx="10" fill="#14532d" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="650" y="76" text-anchor="middle" fill="white" font-weight="700">✅ Claimed</text>
+      <text x="650" y="92" text-anchor="middle" fill="#86efac" font-size="10">ClaimedAt</text>
+      <text x="650" y="105" text-anchor="middle" fill="#86efac" font-size="10">recorded</text>
+      <!-- step labels -->
+      <text x="70"  y="35" text-anchor="middle" fill="#64748b" font-size="9.5">Step 1</text>
+      <text x="220" y="35" text-anchor="middle" fill="#64748b" font-size="9.5">Step 2</text>
+      <text x="375" y="35" text-anchor="middle" fill="#64748b" font-size="9.5">Step 3</text>
+      <text x="525" y="35" text-anchor="middle" fill="#64748b" font-size="9.5">Step 4</text>
+      <text x="650" y="35" text-anchor="middle" fill="#64748b" font-size="9.5">Step 5</text>
+    </svg>
+  </div>
+
+  <h3><span class="en">What if someone else claims it first?</span><span class="ar">ماذا لو قبله تقني آخر أولاً؟</span></h3>
+  <p>
+    <span class="en">If another technician accepts the ticket before you confirm the dialog, you will see an error message: the ticket has already been claimed. The ticket will disappear from your unassigned view and will appear under the other technician's assignments. Simply go back to the Task List and pick another ticket. No action is needed on your part.</span>
+    <span class="ar">إذا قبل تقني آخر التذكرة قبل أن تؤكد الحوار، ستجد رسالة خطأ تفيد بأن التذكرة قُبلت بالفعل. ستختفي التذكرة من عرضك للتذاكر غير المُسندة وستظهر ضمن إسنادات التقني الآخر. ارجع فقط إلى قائمة المهام واختر تذكرة أخرى. لا يلزمك اتخاذ أي إجراء.</span>
+  </p>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 6. WORKING ON A TICKET -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="working">
+    <span class="accent">6.</span>
+    <span class="en">Working on a Ticket</span>
+    <span class="ar">العمل على تذكرة</span>
+  </h2>
+
+  <h3><span class="en">Updating Status and Progress %</span><span class="ar">تحديث الحالة ونسبة التقدم</span></h3>
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">Open your assigned ticket from the Task List, Dashboard, or Kanban Board.</span>
+      <span class="ar">افتح تذكرتك المُسندة من قائمة المهام أو لوحة التحكم أو لوحة كانبان.</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">In the <strong>Technician Panel</strong> (right side of detail page), use the <strong>Status dropdown</strong> to change the current status. Statuses available to you: <em>Backlog, To Do, In Progress, In Review, Blocked</em>.</span>
+      <span class="ar">في <strong>لوحة التقني</strong> (الجانب الأيمن من صفحة التفاصيل)، استخدم <strong>القائمة المنسدلة للحالة</strong> لتغيير الحالة الحالية. الحالات المتاحة لك: <em>Backlog, To Do, In Progress, In Review, Blocked</em>.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en">Adjust the <strong>Progress % slider</strong> to reflect how much of the work is done (0 – 100). Keeping this updated helps the employee and admin see real-time progress.</span>
+      <span class="ar">اضبط <strong>شريط نسبة التقدم %</strong> ليعكس مقدار العمل المُنجز (0 – 100). إبقاؤه محدثاً يساعد الموظف والمدير على رؤية التقدم في الوقت الحقيقي.</span>
+    </div></li>
+    <li><div class="step-num">4</div><div>
+      <span class="en">Click <strong>Save</strong> (or the save icon) to apply your changes. The employee will see the updated status within 15 seconds without refreshing.</span>
+      <span class="ar">انقر <strong>حفظ</strong> (أو أيقونة الحفظ) لتطبيق تغييراتك. سيرى الموظف الحالة المحدثة في غضون 15 ثانية دون تحديث.</span>
+    </div></li>
+  </ol>
+
+  <h3><span class="en">Adding work comments</span><span class="ar">إضافة تعليقات العمل</span></h3>
+  <p>
+    <span class="en">The comments section at the bottom of the ticket detail page is shared with the employee who submitted the ticket. Use it to: explain what you found, request additional information, describe what you did to fix the issue, or note any follow-up needed. Always add a comment before changing status — this creates a clear audit trail.</span>
+    <span class="ar">قسم التعليقات في أسفل صفحة تفاصيل التذكرة مشترك مع الموظف الذي أرسلها. استخدمه لـ: شرح ما وجدت، طلب معلومات إضافية، وصف ما فعلته لإصلاح المشكلة، أو ملاحظة أي متابعة مطلوبة. دائماً أضف تعليقاً قبل تغيير الحالة — هذا يُنشئ سجلاً تدقيقياً واضحاً.</span>
+  </p>
+
+  <h3><span class="en">Attaching files and links</span><span class="ar">إرفاق الملفات والروابط</span></h3>
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">In the ticket detail page, look for the <strong>Attachments</strong> section (usually below the description).</span>
+      <span class="ar">في صفحة تفاصيل التذكرة، ابحث عن قسم <strong>المرفقات</strong> (عادةً أسفل الوصف).</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">Click <strong>Add File</strong> to upload a screenshot, log file, or document relevant to the work done.</span>
+      <span class="ar">انقر <strong>إضافة ملف</strong> لرفع لقطة شاشة أو ملف سجل أو مستند ذو صلة بالعمل المنجز.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en">Alternatively, click <strong>Add Link</strong> to paste a URL — useful for linking to a remote session log, documentation, or a related ticket.</span>
+      <span class="ar">بدلاً من ذلك، انقر <strong>إضافة رابط</strong> للصق رابط URL — مفيد للربط بسجل جلسة عن بُعد أو توثيق أو تذكرة ذات صلة.</span>
+    </div></li>
+  </ol>
+
+  <h3><span class="en">What "In Review" signals</span><span class="ar">ماذا يعني "In Review"</span></h3>
+  <p>
+    <span class="en">When you set a ticket's status to <strong>In Review</strong>, you are telling the admin: <em>"I believe this ticket is resolved — please verify and close it."</em> The admin receives a notification and can inspect your work, comments, and attachments. If satisfied, they mark it <strong>Done</strong>. If not satisfied, they can send it back (revert status) with a comment explaining what is missing.</span>
+    <span class="ar">عند ضبط حالة التذكرة على <strong>In Review</strong>، تُخبر المدير: <em>"أعتقد أن هذه التذكرة محلولة — يرجى التحقق وإغلاقها."</em> يتلقى المدير إشعاراً ويمكنه فحص عملك وتعليقاتك ومرفقاتك. إذا كان راضياً، يحدد التذكرة كـ<strong>Done</strong>. إذا لم يكن راضياً، يمكنه إعادة الحالة مع تعليق يشرح ما هو ناقص.</span>
+  </p>
+
+  <h3><span class="en">What you CANNOT do</span><span class="ar">ما لا تستطيع فعله</span></h3>
+  <div class="callout callout-red">
+    <strong><span class="en">Admin-only actions</span><span class="ar">إجراءات المدير فقط</span></strong>
+    <span class="en">As a technician you <strong>cannot</strong> set a ticket to <strong>Done</strong> or <strong>Cancelled</strong>. These final states require admin authority to ensure proper verification. If you try, the system will reject the change. Set to <em>In Review</em> instead and let the admin close it.</span>
+    <span class="ar">كتقني <strong>لا يمكنك</strong> ضبط تذكرة على <strong>Done</strong> أو <strong>Cancelled</strong>. هذه الحالات النهائية تتطلب صلاحية المدير لضمان التحقق السليم. إذا حاولت، سيرفض النظام التغيير. اضبط على <em>In Review</em> بدلاً من ذلك ودع المدير يغلقها.</span>
+  </div>
+
+  <!-- Status reference table -->
+  <h3><span class="en">Status reference — what you can set</span><span class="ar">مرجع الحالات — ما يمكنك ضبطه</span></h3>
+  <div class="status-grid">
+    <div class="status-item"><div class="st-dot" style="background:#475569"></div><strong>Backlog</strong><span><span class="en">Not yet started</span><span class="ar">لم تبدأ بعد</span></span></div>
+    <div class="status-item"><div class="st-dot" style="background:#6366f1"></div><strong>To Do</strong><span><span class="en">Scheduled, not started</span><span class="ar">مجدولة، لم تبدأ</span></span></div>
+    <div class="status-item"><div class="st-dot" style="background:#2563eb"></div><strong>In Progress</strong><span><span class="en">Actively working</span><span class="ar">تعمل عليها الآن</span></span></div>
+    <div class="status-item"><div class="st-dot" style="background:#eab308"></div><strong>In Review</strong><span><span class="en">Request admin approval</span><span class="ar">طلب موافقة المدير</span></span></div>
+    <div class="status-item"><div class="st-dot" style="background:#dc2626"></div><strong>Blocked</strong><span><span class="en">Waiting on external factor</span><span class="ar">في انتظار عامل خارجي</span></span></div>
+    <div class="status-item" style="opacity:.5"><div class="st-dot" style="background:#16a34a"></div><strong>Done ✓</strong><span><span class="en">Admin only</span><span class="ar">المدير فقط</span></span></div>
+    <div class="status-item" style="opacity:.5"><div class="st-dot" style="background:#94a3b8"></div><strong>Cancelled</strong><span><span class="en">Admin only</span><span class="ar">المدير فقط</span></span></div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 7. KANBAN BOARD -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="kanban">
+    <span class="accent">7.</span>
+    <span class="en">The Kanban Board</span>
+    <span class="ar">لوحة كانبان</span>
+  </h2>
+
+  <p>
+    <span class="en">Click <strong>Board</strong> in the sidebar (visible to Technicians and Admins only). The Board gives you a visual overview of all your tickets organised by status column.</span>
+    <span class="ar">انقر <strong>اللوحة</strong> في الشريط الجانبي (مرئي للتقنيين والمديرين فقط). اللوحة تُتيح لك نظرة مرئية شاملة على جميع تذاكرك مُنظَّمة حسب عمود الحالة.</span>
+  </p>
+
+  <h3><span class="en">Column layout</span><span class="ar">تخطيط الأعمدة</span></h3>
+  <div class="kanban-preview">
+    <div class="kb-col">
+      <div class="kb-col-title" style="color:#475569">◼ <span class="en">Backlog</span><span class="ar">Backlog</span></div>
+      <div class="kb-card"><span class="en">Printer offline</span><span class="ar">الطابعة لا تستجيب</span></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-col-title" style="color:#818cf8">◼ <span class="en">To Do</span><span class="ar">To Do</span></div>
+      <div class="kb-card"><span class="en">Email setup</span><span class="ar">ضبط البريد</span></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-col-title" style="color:#60a5fa">◼ <span class="en">In Progress</span><span class="ar">In Progress</span></div>
+      <div class="kb-card high"><span class="en">VPN issue</span><span class="ar">مشكلة VPN</span></div>
+      <div class="kb-card"><span class="en">PC slow</span><span class="ar">حاسوب بطيء</span></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-col-title" style="color:#fde68a">◼ <span class="en">In Review</span><span class="ar">In Review</span></div>
+      <div class="kb-card"><span class="en">WiFi drop</span><span class="ar">انقطاع WiFi</span></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-col-title" style="color:#f87171">◼ <span class="en">Blocked</span><span class="ar">Blocked</span></div>
+      <div class="kb-card crit"><span class="en">Server access</span><span class="ar">وصول للخادم</span></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-col-title" style="color:#4ade80">◼ <span class="en">Done</span><span class="ar">Done</span></div>
+      <div class="kb-card"><span class="en">New user setup</span><span class="ar">ضبط مستخدم جديد</span></div>
+      <div class="kb-card"><span class="en">Driver install</span><span class="ar">تثبيت تعريف</span></div>
+    </div>
+  </div>
+
+  <h3><span class="en">Drag-and-drop to change status</span><span class="ar">السحب والإفلات لتغيير الحالة</span></h3>
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">Click and hold a ticket card. You will see a drag handle appear.</span>
+      <span class="ar">انقر بطاقة تذكرة واضغط عليها. سترى مقبض السحب يظهر.</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">Drag it to the target column (e.g. from <em>In Progress</em> to <em>In Review</em>). The column will highlight as you hover over it.</span>
+      <span class="ar">اسحبها إلى العمود المستهدف (مثلاً من <em>In Progress</em> إلى <em>In Review</em>). سيتألق العمود عند تحويمك فوقه.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en">Release. The status updates instantly and the employee / admin are notified.</span>
+      <span class="ar">أفلت. تتحدث الحالة فوراً ويتلقى الموظف والمدير إشعاراً.</span>
+    </div></li>
+  </ol>
+
+  <div class="callout callout-tip">
+    <strong><span class="en">Fastest way to batch-update</span><span class="ar">أسرع طريقة للتحديث الجماعي</span></strong>
+    <span class="en">When you have finished several tickets at once, the Board drag-and-drop is much faster than opening each ticket individually and saving from the Technician Panel.</span>
+    <span class="ar">عندما تنتهي من عدة تذاكر مرة واحدة، السحب والإفلات على اللوحة أسرع بكثير من فتح كل تذكرة بشكل منفرد والحفظ من لوحة التقني.</span>
+  </div>
+
+  <h3><span class="en">Reading a card at a glance</span><span class="ar">قراءة البطاقة بنظرة واحدة</span></h3>
+  <p>
+    <span class="en">Each Kanban card displays: ticket title, category icon, priority color (left border: grey = Low, blue = Medium, orange = High, red = Critical), assignee avatar, and a progress bar at the bottom. A clock icon appears if the ticket has been open more than 3 days.</span>
+    <span class="ar">كل بطاقة كانبان تعرض: عنوان التذكرة، أيقونة التصنيف، لون الأولوية (حد أيسر: رمادي = منخفضة، أزرق = متوسطة، برتقالي = عالية، أحمر = حرجة)، صورة المُسند، وشريط تقدم في الأسفل. تظهر أيقونة ساعة إذا كانت التذكرة مفتوحة أكثر من 3 أيام.</span>
+  </p>
+
+  <h3><span class="en">Filter bar on the Board</span><span class="ar">شريط التصفية على اللوحة</span></h3>
+  <p>
+    <span class="en">The Board has the same filter bar as the Task List. Use it to narrow down which cards are shown — for example, filter by your name as Assignee to see only your tickets when the Board is shared with other technicians.</span>
+    <span class="ar">اللوحة تحتوي على نفس شريط التصفية الموجود في قائمة المهام. استخدمه لتضييق البطاقات المعروضة — على سبيل المثال، صفّ باسمك كمُسند لرؤية تذاكرك فقط عندما تكون اللوحة مشتركة مع تقنيين آخرين.</span>
+  </p>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 8. SUBTASKS -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="subtasks">
+    <span class="accent">8.</span>
+    <span class="en">Subtasks</span>
+    <span class="ar">المهام الفرعية</span>
+  </h2>
+
+  <p>
+    <span class="en">Subtasks are smaller action items nested inside a parent ticket. They help you break down a complex issue into trackable steps.</span>
+    <span class="ar">المهام الفرعية هي عناصر عمل أصغر متداخلة داخل التذكرة الأم. تساعدك على تقسيم مشكلة معقدة إلى خطوات قابلة للتتبع.</span>
+  </p>
+
+  <h3><span class="en">When to create subtasks</span><span class="ar">متى تنشئ مهام فرعية</span></h3>
+  <ul style="padding-right:1.5rem;padding-left:1.5rem;color:var(--muted);font-size:.88rem;margin-bottom:1rem;">
+    <li><span class="en">The ticket requires multiple independent steps (e.g. "Install software → configure settings → test with user").</span><span class="ar">التذكرة تتطلب خطوات مستقلة متعددة (مثلاً "تثبيت البرنامج ← ضبط الإعدادات ← الاختبار مع المستخدم").</span></li>
+    <li><span class="en">Different parts of the work will be done at different times.</span><span class="ar">أجزاء مختلفة من العمل ستُنجز في أوقات مختلفة.</span></li>
+    <li><span class="en">You want to track partial completion visibly in the ticket progress.</span><span class="ar">تريد تتبع الإنجاز الجزئي بشكل مرئي في تقدم التذكرة.</span></li>
+  </ul>
+
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">Open the ticket detail page. Scroll to the <strong>Subtasks</strong> section.</span>
+      <span class="ar">افتح صفحة تفاصيل التذكرة. انتقل إلى قسم <strong>المهام الفرعية</strong>.</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">Click <strong>"+ Add Subtask"</strong>. Enter a short title for the subtask and click Save.</span>
+      <span class="ar">انقر <strong>"+ إضافة مهمة فرعية"</strong>. أدخل عنواناً قصيراً للمهمة الفرعية وانقر حفظ.</span>
+    </div></li>
+    <li><div class="step-num">3</div><div>
+      <span class="en">Each subtask has its own <strong>status checkbox</strong>. Check it off when complete. The parent ticket's overall progress reflects completed subtasks automatically.</span>
+      <span class="ar">كل مهمة فرعية لها <strong>خانة اختيار الحالة</strong> الخاصة بها. ضع علامة عليها عند الانتهاء. يعكس التقدم الإجمالي للتذكرة الأم المهام الفرعية المكتملة تلقائياً.</span>
+    </div></li>
+    <li><div class="step-num">4</div><div>
+      <span class="en">You can reorder or delete subtasks at any time before the ticket is closed.</span>
+      <span class="ar">يمكنك إعادة ترتيب أو حذف المهام الفرعية في أي وقت قبل إغلاق التذكرة.</span>
+    </div></li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong><span class="en">Subtasks vs. Progress %</span><span class="ar">المهام الفرعية مقابل نسبة التقدم %</span></strong>
+    <span class="en">Subtasks give you granular step tracking. The Progress % slider is a separate manual indicator. If you use both, keep them in sync — a ticket with 3 of 4 subtasks complete should show roughly 75% progress.</span>
+    <span class="ar">المهام الفرعية تُتيح تتبعاً دقيقاً للخطوات. شريط نسبة التقدم % مؤشر يدوي منفصل. إذا استخدمت كليهما، أبقهما متزامنَين — تذكرة بـ3 من 4 مهام فرعية مكتملة ينبغي أن تُظهر نسبة تقدم تقريبية 75%.</span>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 9. COMMUNICATING WITH EMPLOYEES -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="comms">
+    <span class="accent">9.</span>
+    <span class="en">Communicating with Employees</span>
+    <span class="ar">التواصل مع الموظفين</span>
+  </h2>
+
+  <h3><span class="en">Comments on tickets</span><span class="ar">التعليقات على التذاكر</span></h3>
+  <p>
+    <span class="en">The comment thread on a ticket is the primary communication channel for work-related messages tied to that specific issue. Both you and the employee can post. Use comments when you need information from the employee, want to explain what was done, or need to document a decision. Comments are permanent and visible to the admin in the ticket history.</span>
+    <span class="ar">خيط التعليقات على التذكرة هو قناة الاتصال الأساسية للرسائل المتعلقة بتلك المشكلة تحديداً. أنت والموظف يمكنكما النشر. استخدم التعليقات عندما تحتاج معلومات من الموظف، أو تريد شرح ما تم، أو توثيق قرار. التعليقات دائمة ومرئية للمدير في تاريخ التذكرة.</span>
+  </p>
+
+  <h3><span class="en">Chat feature</span><span class="ar">ميزة الدردشة</span></h3>
+  <p>
+    <span class="en">The <strong>Chat</strong> (💬 in the sidebar) is a live conversation tool separate from the ticket comment thread. You can link a chat conversation to a specific ticket using the ticket link option inside the Chat panel. Use Chat when you need a quick real-time exchange, need to ask a short clarifying question, or want to coordinate remotely (e.g. "Can you restart your machine now?"). Chat messages are not part of the formal ticket record.</span>
+    <span class="ar"><strong>الدردشة</strong> (💬 في الشريط الجانبي) هي أداة محادثة مباشرة منفصلة عن خيط تعليق التذكرة. يمكنك ربط محادثة الدردشة بتذكرة محددة باستخدام خيار ربط التذكرة داخل لوحة الدردشة. استخدم الدردشة عندما تحتاج تبادلاً سريعاً في الوقت الحقيقي، أو طرح سؤال توضيحي قصير، أو التنسيق عن بُعد (مثلاً "هل يمكنك إعادة تشغيل جهازك الآن؟"). رسائل الدردشة ليست جزءاً من السجل الرسمي للتذكرة.</span>
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th><span class="en">Situation</span><span class="ar">الموقف</span></th>
+        <th><span class="en">Use Comments</span><span class="ar">استخدم التعليقات</span></th>
+        <th><span class="en">Use Chat</span><span class="ar">استخدم الدردشة</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="en">Document what you did</span><span class="ar">توثيق ما فعلت</span></td>
+        <td class="check">✔</td>
+        <td class="cross">—</td>
+      </tr>
+      <tr>
+        <td><span class="en">Ask for more details about the issue</span><span class="ar">طلب مزيد من التفاصيل</span></td>
+        <td class="check">✔</td>
+        <td class="cross">—</td>
+      </tr>
+      <tr>
+        <td><span class="en">Quick real-time coordination</span><span class="ar">تنسيق سريع في الوقت الحقيقي</span></td>
+        <td class="cross">—</td>
+        <td class="check">✔</td>
+      </tr>
+      <tr>
+        <td><span class="en">Inform employee of status change</span><span class="ar">إخبار الموظف بتغيير الحالة</span></td>
+        <td class="check">✔</td>
+        <td class="cross">—</td>
+      </tr>
+      <tr>
+        <td><span class="en">Remote session coordination (AnyDesk)</span><span class="ar">تنسيق جلسة AnyDesk</span></td>
+        <td class="cross">—</td>
+        <td class="check">✔</td>
+      </tr>
+      <tr>
+        <td><span class="en">Formal escalation note</span><span class="ar">ملاحظة تصعيد رسمية</span></td>
+        <td class="check">✔</td>
+        <td class="cross">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 10. PERFORMANCE KPIs -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="kpis">
+    <span class="accent">10.</span>
+    <span class="en">Your Performance KPIs</span>
+    <span class="ar">مؤشرات الأداء الخاصة بك</span>
+  </h2>
+
+  <p>
+    <span class="en">The system automatically calculates two key performance metrics for every technician. You cannot see these directly, but the admin can view them in <strong>Reports → By User</strong>.</span>
+    <span class="ar">يحسب النظام تلقائياً مقياسين رئيسيين للأداء لكل تقني. لا يمكنك رؤيتهما مباشرة، لكن يمكن للمدير عرضهما في <strong>التقارير ← حسب المستخدم</strong>.</span>
+  </p>
+
+  <div class="card-grid">
+    <div class="guide-card">
+      <div class="gc-icon">⚡</div>
+      <div class="gc-title"><span class="en">Response Time</span><span class="ar">وقت الاستجابة</span></div>
+      <div class="gc-desc">
+        <span class="en"><strong>ClaimedAt − CreatedAt</strong><br>How quickly you accept a ticket after it's submitted. Lower is better.</span>
+        <span class="ar"><strong>ClaimedAt − CreatedAt</strong><br>مدى سرعة قبولك للتذكرة بعد إرسالها. كلما كانت أقل كان أفضل.</span>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="gc-icon">🏁</div>
+      <div class="gc-title"><span class="en">Resolution Time</span><span class="ar">وقت الحل</span></div>
+      <div class="gc-desc">
+        <span class="en"><strong>Done date − CreatedAt</strong><br>Total time from ticket creation to closure. Measures overall efficiency.</span>
+        <span class="ar"><strong>تاريخ Done − CreatedAt</strong><br>الوقت الإجمالي من إنشاء التذكرة إلى إغلاقها. يقيس الكفاءة الإجمالية.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3><span class="en">Where the admin sees your stats</span><span class="ar">أين يرى المدير إحصائياتك</span></h3>
+  <ol class="steps">
+    <li><div class="step-num">1</div><div>
+      <span class="en">Admin goes to <strong>Reports → By User</strong>. A ranked performance card is shown for every technician, with your average, fastest, and slowest response times.</span>
+      <span class="ar">يذهب المدير إلى <strong>التقارير ← حسب المستخدم</strong>. يُعرض بطاقة أداء مُرتَّبة لكل تقني مع متوسط أوقات استجابتك وأسرعها وأبطأها.</span>
+    </div></li>
+    <li><div class="step-num">2</div><div>
+      <span class="en">Admin can click <strong>User Profile</strong> and select your name with a date range to see: total assigned, completed, completion rate, monthly trend chart, and individual ticket resolution times.</span>
+      <span class="ar">يمكن للمدير النقر على <strong>ملف المستخدم</strong> واختيار اسمك مع نطاق تاريخ لرؤية: إجمالي المُسندة، المكتملة، نسبة الإنجاز، مخطط الاتجاه الشهري، وأوقات حل التذاكر الفردية.</span>
+    </div></li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong><span class="en">How to improve your response time</span><span class="ar">كيف تحسّن وقت استجابتك</span></strong>
+    <span class="en">Keep your <strong>Availability</strong> toggle green when you are working so new tickets are visible immediately. Check the Task List at the start of each shift. Claim tickets quickly even if you cannot start the work immediately — you can update status to <em>To Do</em> after claiming.</span>
+    <span class="ar">أبقِ مفتاح <strong>الإتاحة</strong> أخضر عند عملك حتى تكون التذاكر الجديدة مرئية فوراً. تحقق من قائمة المهام في بداية كل وردية. اقبل التذاكر بسرعة حتى لو لم تستطع البدء فوراً — يمكنك تحديث الحالة إلى <em>To Do</em> بعد القبول.</span>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 11. TIPS & BEST PRACTICES -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="tips">
+    <span class="accent">11.</span>
+    <span class="en">Tips &amp; Best Practices</span>
+    <span class="ar">النصائح والممارسات المثلى</span>
+  </h2>
+
+  <ul class="bp-list">
+    <li>
+      <span class="bp-ico">💬</span>
+      <div>
+        <strong><span class="en">Always comment before changing status</span><span class="ar">دائماً علّق قبل تغيير الحالة</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">Before you move a ticket to In Review, add a comment describing what you did and how the issue was resolved. This creates a clear audit trail and helps the admin verify quickly.</span>
+          <span class="ar">قبل نقل تذكرة إلى In Review، أضف تعليقاً يصف ما فعلته وكيف حُلّت المشكلة. هذا يُنشئ سجل تدقيق واضح ويساعد المدير على التحقق بسرعة.</span>
+        </div>
+      </div>
+    </li>
+    <li>
+      <span class="bp-ico">📊</span>
+      <div>
+        <strong><span class="en">Keep Progress % updated throughout the work</span><span class="ar">أبقِ نسبة التقدم % محدّثة طوال العمل</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">Don't leave Progress at 0% then jump to 100%. Update it incrementally (25%, 50%, 75%) so the employee and manager have live visibility into your work.</span>
+          <span class="ar">لا تتركها عند 0% ثم تقفز إلى 100%. حدّثها تدريجياً (25%، 50%، 75%) حتى يتمكن الموظف والمدير من رؤية عملك في الوقت الحقيقي.</span>
+        </div>
+      </div>
+    </li>
+    <li>
+      <span class="bp-ico">🚧</span>
+      <div>
+        <strong><span class="en">Use Blocked correctly — explain why</span><span class="ar">استخدم Blocked بشكل صحيح — اشرح السبب</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">Only set Blocked if you are genuinely waiting on something outside your control (vendor response, awaiting hardware, waiting for user access). Always add a comment explaining what is blocking the ticket and what you are waiting for.</span>
+          <span class="ar">ضع Blocked فقط إذا كنت تنتظر شيئاً خارج نطاق سيطرتك (رد مورّد، انتظار قطع، انتظار وصول مستخدم). دائماً أضف تعليقاً يشرح ما يعيق التذكرة وما تنتظره.</span>
+        </div>
+      </div>
+    </li>
+    <li>
+      <span class="bp-ico">⚡</span>
+      <div>
+        <strong><span class="en">Respond quickly to "In Review" rejections</span><span class="ar">استجب بسرعة لرفض "In Review"</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">If the admin sends a ticket back from In Review, read their comment immediately, address the issue, and set it back to In Review as soon as possible. Delays add to the total resolution time in your KPIs.</span>
+          <span class="ar">إذا أعاد المدير تذكرة من In Review، اقرأ تعليقه فوراً، وعالج المشكلة، وأعد ضبطها على In Review في أقرب وقت. التأخيرات تُضاف إلى وقت الحل الإجمالي في مؤشرات أدائك.</span>
+        </div>
+      </div>
+    </li>
+    <li>
+      <span class="bp-ico">🟢</span>
+      <div>
+        <strong><span class="en">Toggle Availability honestly</span><span class="ar">استخدم مفتاح الإتاحة بصدق</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">Employees and admins rely on the green badge to know who is online. Set it to unavailable when you leave, even briefly. Employees waiting for help appreciate knowing whether to expect a quick response.</span>
+          <span class="ar">الموظفون والمديرون يعتمدون على الشارة الخضراء لمعرفة من هو متصل. اضبطها على غير متاح عند مغادرتك حتى لو لفترة قصيرة. الموظفون الذين ينتظرون المساعدة يقدّرون معرفة ما إذا كانوا يتوقعون استجابة سريعة.</span>
+        </div>
+      </div>
+    </li>
+    <li>
+      <span class="bp-ico">🎫</span>
+      <div>
+        <strong><span class="en">Claim early, even if you start later</span><span class="ar">اقبل مبكراً حتى لو بدأت لاحقاً</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">Claiming a ticket immediately reduces your response time KPI. After claiming, you can set the status to To Do if you're finishing another ticket first. The employee is notified that someone has picked up their request.</span>
+          <span class="ar">قبول التذكرة فوراً يقلل مقياس وقت استجابتك. بعد القبول، يمكنك ضبط الحالة على To Do إذا كنت تنهي تذكرة أخرى أولاً. يتلقى الموظف إشعاراً بأن شخصاً ما استلم طلبه.</span>
+        </div>
+      </div>
+    </li>
+    <li>
+      <span class="bp-ico">📎</span>
+      <div>
+        <strong><span class="en">Attach evidence of your work</span><span class="ar">أرفق دليلاً على عملك</span></strong>
+        <div style="font-size:.83rem;color:var(--muted);margin-top:.2rem">
+          <span class="en">A screenshot showing the issue resolved (before/after), a log file, or a link to a remote session summary is valuable evidence when the admin reviews your In Review ticket. It speeds up the verification step.</span>
+          <span class="ar">لقطة شاشة تُظهر حل المشكلة (قبل/بعد)، أو ملف سجل، أو رابط لملخص جلسة عن بُعد هو دليل قيّم عندما يراجع المدير تذكرتك في In Review. يُسرّع خطوة التحقق.</span>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- 12. FAQ -->
+  <!-- ════════════════════════════════════════ -->
+  <h2 id="faq">
+    <span class="accent">12.</span>
+    <span class="en">Frequently Asked Questions</span>
+    <span class="ar">الأسئلة الشائعة</span>
+  </h2>
+  <div class="faq">
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">I don't see a ticket I expect to see. Why?</span><span class="ar">لا أرى تذكرة أتوقع رؤيتها. لماذا؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">You only see: (1) tickets assigned directly to you, and (2) unassigned tickets in your configured categories. If a ticket is in a category not assigned to you, it is hidden. Ask your admin to check your category assignments in <strong>Users → your account → Categories</strong>. Also check your filters — an active status or priority filter may be hiding the ticket.</span>
+        <span class="ar">ترى فقط: (1) التذاكر المُسندة مباشرة إليك، و(2) التذاكر الغير مُسندة في تصنيفاتك المضبوطة. إذا كانت التذكرة في تصنيف غير مُعيَّن لك، فهي مخفية. اطلب من مديرك التحقق من تعيينات تصنيفاتك في <strong>المستخدمون ← حسابك ← التصنيفات</strong>. تحقق أيضاً من مرشحاتك — قد يُخفي مرشح حالة أو أولوية نشط التذكرة.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">Another technician claimed the ticket before me. What now?</span><span class="ar">تقني آخر قبل التذكرة قبلي. ماذا أفعل الآن؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">Nothing — this is expected behaviour. The system is first-come, first-served. You will see an error when you try to confirm, and the ticket will disappear from your unassigned list. Go back to the Task List and choose another ticket. If you feel a ticket was claimed unfairly or there is a dispute, contact your admin.</span>
+        <span class="ar">لا شيء — هذا سلوك متوقع. النظام يعمل على أساس الأسبقية. ستجد خطأ عندما تحاول التأكيد، وستختفي التذكرة من قائمتك غير المُسندة. ارجع إلى قائمة المهام واختر تذكرة أخرى. إذا شعرت أن تذكرة قُبلت بشكل غير عادل أو هناك نزاع، تواصل مع مديرك.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">Can I unclaim a ticket?</span><span class="ar">هل يمكنني التراجع عن قبول تذكرة؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">No — once you have accepted (claimed) a ticket, only an Admin can reassign it to another technician or remove the assignee. If you need to hand off a ticket, contact your admin and explain the reason. They can update the assignee from the ticket's edit panel.</span>
+        <span class="ar">لا — بمجرد قبولك لتذكرة، فقط المدير يمكنه إعادة إسنادها لتقني آخر أو إزالة المُسند. إذا احتجت إلى تحويل تذكرة، تواصل مع مديرك واشرح السبب. يمكنه تحديث المُسند من لوحة تحرير التذكرة.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">A ticket was assigned to me directly by the admin — do I still need to click "Accept"?</span><span class="ar">تذكرة أُسندت إليّ مباشرة من المدير — هل ما زلت بحاجة للنقر على "قبول"؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">No. When an admin assigns a ticket directly to you, you are automatically set as the assignee and ClaimedAt is recorded at the time of the admin's assignment action. You do not need to click Accept — you can open the ticket and start updating progress and status immediately.</span>
+        <span class="ar">لا. عندما يُسند المدير تذكرة مباشرة إليك، يتم ضبطك تلقائياً كمُسند ويُسجَّل ClaimedAt في وقت إجراء إسناد المدير. لا تحتاج النقر على قبول — يمكنك فتح التذكرة والبدء في تحديث التقدم والحالة فوراً.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">The ticket status doesn't update on the employee's side — how long until they see it?</span><span class="ar">حالة التذكرة لا تتحدث على جانب الموظف — كم من الوقت حتى يراها؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">The employee's ticket detail page automatically polls for updates every <strong>15 seconds</strong>. So they will see your status change within 15 seconds without needing to refresh. If they still don't see it after a minute, ask them to manually refresh the page once.</span>
+        <span class="ar">صفحة تفاصيل تذكرة الموظف تتحقق تلقائياً من التحديثات كل <strong>15 ثانية</strong>. لذا سيرى تغيير حالتك في غضون 15 ثانية دون الحاجة للتحديث. إذا لم يره بعد دقيقة، اطلب منه تحديث الصفحة يدوياً مرة واحدة.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">I set a ticket to In Review but the admin sent it back — what do I do?</span><span class="ar">وضعت تذكرة في In Review لكن المدير أعادها — ماذا أفعل؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">Read the admin's comment on the ticket — they will explain what is missing or needs correction. Address the issue (do additional work, add documentation, fix the problem they flagged). Add a comment describing what you did, then set the status back to <strong>In Review</strong>. Respond as quickly as possible to minimise resolution time impact.</span>
+        <span class="ar">اقرأ تعليق المدير على التذكرة — سيشرح ما هو ناقص أو يحتاج تصحيحاً. عالج المشكلة (قم بعمل إضافي، أضف توثيقاً، أصلح المشكلة التي أشار إليها). أضف تعليقاً يصف ما فعلت، ثم أعد ضبط الحالة على <strong>In Review</strong>. استجب بأسرع ما يمكن لتقليل تأثير وقت الحل.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">How do I know if my response time is good?</span><span class="ar">كيف أعرف إذا كان وقت استجابتي جيداً؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">You cannot see your own KPI stats directly — only the admin can view them in Reports → By User. However, as a rule of thumb: response times under <strong>30 minutes</strong> during working hours are considered excellent, under <strong>2 hours</strong> is acceptable, and over <strong>4 hours</strong> is typically flagged for review. Ask your admin to share your user profile report periodically so you can track your own progress.</span>
+        <span class="ar">لا يمكنك رؤية إحصائيات KPI الخاصة بك مباشرة — فقط المدير يمكنه رؤيتها في التقارير ← حسب المستخدم. ومع ذلك، كقاعدة عامة: أوقات الاستجابة أقل من <strong>30 دقيقة</strong> خلال ساعات العمل تُعدّ ممتازة، وأقل من <strong>ساعتين</strong> مقبولة، وأكثر من <strong>4 ساعات</strong> تُعلَّم عادةً للمراجعة. اطلب من مديرك مشاركة تقرير ملفك الشخصي دورياً حتى تتمكن من تتبع تقدمك.</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span><span class="en">Can I add files to a ticket that isn't assigned to me?</span><span class="ar">هل يمكنني إضافة ملفات إلى تذكرة غير مُسندة لي؟</span></span>
+        <span class="arr">▾</span>
+      </button>
+      <div class="faq-a">
+        <span class="en">No. You can only add attachments, links, and comments to tickets that are assigned to you. For unassigned tickets in your categories, you must first claim the ticket (Accept), after which you become the assignee and can add files. If you need to contribute to a ticket owned by another technician, ask your admin to reassign it or add the file on your behalf.</span>
+        <span class="ar">لا. يمكنك إضافة المرفقات والروابط والتعليقات فقط على التذاكر المُسندة إليك. للتذاكر الغير مُسندة في تصنيفاتك، يجب أولاً قبول التذكرة، وبعد ذلك تصبح المُسند وتستطيع إضافة الملفات. إذا احتجت المساهمة في تذكرة يملكها تقني آخر، اطلب من مديرك إعادة إسنادها أو إضافة الملف نيابةً عنك.</span>
+      </div>
+    </div>
+
+  </div><!-- /faq -->
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:3rem 0 1rem">
+  <p style="color:var(--muted);font-size:.8rem;text-align:center">
+    Altuwijri Ticket System · Technician Guide · v1.0 ·
+    <span class="en">For the full guide see <a href="user-guide.html">user-guide.html</a></span>
+    <span class="ar">للدليل الكامل راجع <a href="user-guide.html">user-guide.html</a></span>
+  </p>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+/* ── Language toggle ─────────────────────────────── */
+function setLang(lang) {
+  const isAr = lang === 'ar';
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = isAr ? 'rtl' : 'ltr';
+  document.getElementById('btn-en').classList.toggle('on', !isAr);
+  document.getElementById('btn-ar').classList.toggle('on',  isAr);
+  localStorage.setItem('tech-guide-lang', lang);
+}
+
+/* ── FAQ accordion ───────────────────────────────── */
+function toggleFaq(btn) {
+  btn.classList.toggle('open');
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('open');
+}
+
+/* ── Active TOC highlight on scroll ─────────────── */
+const sections = document.querySelectorAll('[id]');
+const tocLinks  = document.querySelectorAll('.toc a[href^="#"]');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => l.classList.toggle('on', l.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-5% 0px -80% 0px' });
+sections.forEach(s => io.observe(s));
+
+/* ── Restore saved language ──────────────────────── */
+const saved = localStorage.getItem('tech-guide-lang');
+if (saved) setLang(saved);
+</script>
+</body>
+</html>

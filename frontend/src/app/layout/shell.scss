@@ -18,7 +18,7 @@
 }
 .logo-img.hidden { display: none; }
 /* ── Dark mode: show real logo colors ── */
-[data-theme="dark"] .logo-img { filter: brightness(1.1) saturate(1.15) drop-shadow(0 1px 8px rgba(192,85,85,.3)); }
+[data-theme="dark"] .logo-img { filter: brightness(1.1) saturate(1.15) drop-shadow(0 1px 8px rgba(0,130,114,.25)); }
 
 .logo-txt {
   width: 40px; height: 40px; border-radius: 10px; background: var(--primary); color: #fff;
@@ -109,9 +109,19 @@
 
 /* ── Topbar ─────────────────────────────────────────── */
 .topbar {
-  height: 60px; background: var(--surface); border-bottom: 1px solid var(--border);
+  height: 60px; background: #1F1F1F; border-bottom: 1px solid rgba(0,0,0,.5);
   display: flex; align-items: center; gap: .75rem; padding: 0 1.25rem;
   position: sticky; top: 0; z-index: 150;
+
+  .btn-icon, .btn-ghost { color: rgba(255,255,255,.82); border-color: rgba(255,255,255,.14); &:hover { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.25); } }
+  .lang-btn { color: rgba(255,255,255,.82); background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); &:hover { background: rgba(255,255,255,.14); } }
+  .u-name { color: #fff; }
+  .text-xs { color: rgba(255,255,255,.6) !important; }
+  .avail-toggle {
+    background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); color: rgba(255,255,255,.75);
+    .avail-dot { background: rgba(255,255,255,.38); }
+    &.on { background: rgba(22,163,74,.28); border-color: rgba(34,197,94,.45); color: #86efac; .avail-dot { background: #22c55e; } }
+  }
 }
 .hamburger { display: none; font-size: 1.1rem; }
 .spacer { flex: 1; }
@@ -133,6 +143,20 @@
 }
 .notif, .user-menu { position: relative; }
 .nbadge { background: var(--danger); color: #fff; border-radius: 999px; font-size: .65rem; padding: 0 5px; position: absolute; top: 2px; right: 2px; font-weight: 700; }
+
+@keyframes bell-ring {
+  0%, 40%, 100% { transform: rotate(0); }
+  5%  { transform: rotate(18deg); }
+  10% { transform: rotate(-16deg); }
+  15% { transform: rotate(14deg); }
+  20% { transform: rotate(-12deg); }
+  25% { transform: rotate(9deg); }
+  30% { transform: rotate(-6deg); }
+  35% { transform: rotate(3deg); }
+}
+
+.bell-btn { transform-origin: center top; }
+.bell-ringing { animation: bell-ring 1.8s ease-in-out infinite; }
 .user-btn { display: flex; align-items: center; gap: .6rem; background: none; border: none; cursor: pointer; padding: .25rem; }
 .u-meta { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
 .u-name { font-weight: 600; font-size: .85rem; color: var(--text); }
@@ -196,103 +220,59 @@
 }
 
 /* ══════════════════════════════════════════════════════
-   CLOCK BAR — lacquered dark panel, office wall-clock feel
+   CLOCK BAR — BC dark teal panel
 ══════════════════════════════════════════════════════ */
 .clock-bar {
   position: sticky; top: 106px; z-index: 40;
   display: flex; align-items: center; justify-content: center;
-  min-height: 94px; padding: 0 2rem;
+  min-height: 80px; padding: 0 2rem;
   cursor: pointer; user-select: none; overflow: hidden;
-
-  /* Deep mahogany panel — always dark, like a physical object on the wall */
-  background:
-    /* top-edge sheen from overhead lighting */
-    linear-gradient(180deg,
-      rgba(255,255,255,.07) 0%,
-      rgba(255,255,255,.02) 22%,
-      transparent 45%,
-      rgba(0,0,0,.1) 100%
-    ),
-    /* subtle diagonal micro-grain for texture depth */
-    repeating-linear-gradient(
-      115deg,
-      transparent 0,
-      transparent 9px,
-      rgba(255,255,255,.010) 9px,
-      rgba(255,255,255,.010) 10px
-    ),
-    /* base dark mahogany */
-    linear-gradient(170deg,
-      #1f0c0c 0%,
-      #160808 35%,
-      #120606 60%,
-      #1a0a0a 85%,
-      #0e0505 100%
-    );
-
-  border-top: 2px solid rgba(165,72,42,.72);
-  border-bottom: 3px solid rgba(12,3,3,.88);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.055) inset,   /* top highlight */
-    0 -5px 14px rgba(0,0,0,.45) inset,      /* bottom inner shadow — depth */
-    0 8px 28px rgba(0,0,0,.22);             /* shadow cast on page below */
+  background: #0D2322;
+  border-top: 1px solid #091918;
+  border-bottom: 1px solid #091918;
+  box-shadow: 0 2px 10px rgba(0,0,0,.28);
 
   &::before { display: none; }
-
-  &:hover {
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.095) 0%, rgba(255,255,255,.025) 22%, transparent 45%, rgba(0,0,0,.1) 100%),
-      repeating-linear-gradient(115deg, transparent 0, transparent 9px, rgba(255,255,255,.010) 9px, rgba(255,255,255,.010) 10px),
-      linear-gradient(170deg, #230d0d 0%, #1a0909 35%, #150707 60%, #1e0c0c 85%, #110606 100%);
-  }
+  &:hover { background: #112B29; }
 }
 
-.clkb-hint { position: absolute; top: 8px; right: 13px; font-size: .68rem; color: rgba(240,200,185,.28); }
+.clkb-hint { position: absolute; top: 8px; right: 13px; font-size: .68rem; color: rgba(180,230,225,.22); }
 .clkb-inner { display: flex; align-items: center; gap: 2.2rem; }
 
-/* Backlit LCD digit display */
+/* Digital time display */
 .clkb-time {
   font-size: 3.2rem; font-weight: 800; letter-spacing: .08em;
   font-variant-numeric: tabular-nums;
-  color: #f7ece5;
-  text-shadow:
-    0 0 14px rgba(220,100,60,.6),
-    0 0 32px rgba(190,65,35,.28),
-    0 1px 4px rgba(0,0,0,.95);
+  color: #C8EBE8;
+  text-shadow: 0 0 12px rgba(0,178,148,.3), 0 1px 4px rgba(0,0,0,.9);
   line-height: 1;
   min-width: 9rem; white-space: nowrap; display: inline-block; text-align: center;
 }
 .clkb-time-full { font-size: 2.55rem; min-width: 12rem; }
 .clkb-time-sm   { font-size: 2rem;   min-width: 9rem;  }
 
-/* Blinking colon — slightly warmer than digit body */
-.clkb-blink { animation: clk-blink 1s step-end infinite; display: inline-block; color: #f0a882; }
+/* Blinking colon */
+.clkb-blink { animation: clk-blink 1s step-end infinite; display: inline-block; color: #00C4A4; }
 
-/* Seconds — dimmer, smaller */
-.clkb-sec { font-size: .56em; font-weight: 600; color: rgba(245,185,155,.5); }
+/* Seconds */
+.clkb-sec { font-size: .56em; font-weight: 600; color: rgba(0,196,164,.5); }
 
 /* Vertical divider */
 .clkb-sep {
   width: 1px; height: 54px; flex-shrink: 0;
-  background: linear-gradient(to bottom,
-    transparent,
-    rgba(230,180,155,.32) 20%,
-    rgba(230,180,155,.32) 80%,
-    transparent
-  );
+  background: linear-gradient(to bottom, transparent, rgba(0,178,148,.28) 20%, rgba(0,178,148,.28) 80%, transparent);
 }
 
 /* Date / day block */
 .clkb-date-block { display: flex; flex-direction: column; gap: .2rem; }
-.clkb-dayname  { font-size: 1.06rem; font-weight: 700; color: #f0e4de; line-height: 1; }
-.clkb-datestr  { font-size: .8rem; color: rgba(220,185,168,.72); font-weight: 500; letter-spacing: .02em; }
-.clkb-hijri    { font-size: .72rem; color: rgba(240,148,110,.82); font-weight: 600; }
+.clkb-dayname  { font-size: 1.06rem; font-weight: 700; color: #C8EBE8; line-height: 1; }
+.clkb-datestr  { font-size: .8rem; color: rgba(180,230,225,.62); font-weight: 500; letter-spacing: .02em; }
+.clkb-hijri    { font-size: .72rem; color: rgba(0,196,164,.88); font-weight: 600; }
 
-/* Analog SVG — drop-shadow on the dark panel */
+/* Analog SVG */
 .clkb-svg {
   width: 68px; height: 68px; display: block; flex-shrink: 0;
-  filter: drop-shadow(0 0 7px rgba(220,100,60,.35)) drop-shadow(0 2px 10px rgba(0,0,0,.6));
+  filter: drop-shadow(0 0 6px rgba(0,178,148,.3)) drop-shadow(0 2px 8px rgba(0,0,0,.55));
 }
 .clkb-dig-wrap { display: flex; flex-direction: column; gap: .1rem; }
 
@@ -594,70 +574,50 @@
 
 /* ── Dark mode ────────────────────────────────────── */
 [data-theme="dark"] {
-  /* ── Sidebar — same surface color as banner/topbar in dark mode ── */
   .sidebar {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
+    background: var(--sidebar);
+    border-right: 1px solid rgba(255,255,255,.06);
     box-shadow: none;
   }
-  .sidebar nav a:hover { background: rgba(192,85,85,.15); }
+  .sidebar nav a:hover { background: rgba(0,130,114,.18); }
   .sidebar nav a.active { background: var(--primary); }
 
-  /* ── Dropdowns — must be distinct from topbar (both use --surface) ── */
   .dropdown {
-    background: #3d1515;
-    border: 1px solid rgba(192,85,85,.35);
-    box-shadow: 0 12px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(192,85,85,.15);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 40px rgba(0,0,0,.65);
     color: var(--text);
   }
-  .dd-head  { border-bottom-color: rgba(192,85,85,.25); color: var(--text); }
-  .dd-item  { color: var(--text); &:hover { background: rgba(192,85,85,.2); } }
+  .dd-head  { border-bottom-color: var(--border); color: var(--text); }
+  .dd-item  { color: var(--text); &:hover { background: rgba(0,130,114,.15); } }
   .notif-item {
-    color: var(--text); border-bottom-color: rgba(192,85,85,.15);
+    color: var(--text); border-bottom-color: var(--border);
     .ni-title { color: var(--text); }
-    .muted { color: #b8a0a0; }
-    &:hover { background: rgba(192,85,85,.14); }
+    .muted { color: var(--text-muted); }
+    &:hover { background: rgba(0,130,114,.12); }
     &.un {
-      background: rgba(192,85,85,.22);
+      background: rgba(0,130,114,.2);
       border-left: 3px solid var(--primary);
       padding-left: calc(1rem - 3px);
-      .ni-title { color: #fce8e8; font-weight: 700; }
-      .muted { color: #d4b0b0; }
+      .ni-title { color: #E8F4F3; font-weight: 700; }
+      .muted { color: #C8C6C4; }
     }
   }
 
   .avail-toggle.on { background: rgba(21,128,61,.2); border-color: rgba(34,197,94,.3); }
   .smart-bar { background: var(--surface); border-bottom-color: var(--border); }
   .smart-bar.manage-mode { background: #1c1917; border-bottom-color: #57534e; }
-  /* Clock panel deepens further in dark mode — richer glow on digits */
   .clock-bar {
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 30%, rgba(0,0,0,.18) 100%),
-      repeating-linear-gradient(115deg, transparent 0, transparent 9px, rgba(255,255,255,.007) 9px, rgba(255,255,255,.007) 10px),
-      linear-gradient(170deg, #130707 0%, #0c0404 40%, #080303 60%, #100606 85%, #060202 100%);
-    border-top-color: rgba(205,95,58,.85);
-    border-bottom-color: rgba(0,0,0,.96);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.03) inset,
-      0 -6px 16px rgba(0,0,0,.6) inset,
-      0 8px 28px rgba(0,0,0,.4);
-    &:hover {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%, rgba(0,0,0,.18) 100%),
-        repeating-linear-gradient(115deg, transparent 0, transparent 9px, rgba(255,255,255,.007) 9px, rgba(255,255,255,.007) 10px),
-        linear-gradient(170deg, #170808 0%, #0f0505 40%, #0a0404 60%, #130707 85%, #080303 100%);
-    }
+    background: #091918;
+    border-top-color: #060F0E;
+    border-bottom-color: #060F0E;
+    box-shadow: 0 2px 10px rgba(0,0,0,.4);
+    &:hover { background: #0C2120; }
   }
-  .clkb-time {
-    text-shadow:
-      0 0 18px rgba(230,110,65,.75),
-      0 0 42px rgba(200,75,40,.38),
-      0 1px 4px rgba(0,0,0,1);
-  }
-  /* guide panel — in dark, sidebar also uses --surface, so match it */
+  .clkb-time { text-shadow: 0 0 16px rgba(0,178,148,.45), 0 1px 4px rgba(0,0,0,1); }
   .guide-panel { background: var(--surface); border-left-color: var(--border); box-shadow: -8px 0 32px rgba(0,0,0,.6); }
   .guide-strip.is-rtl .guide-panel { border-right-color: var(--border); }
-  .guide-panel-head { background: rgba(0,0,0,.3); border-bottom-color: var(--border); }
+  .guide-panel-head { background: rgba(0,0,0,.25); border-bottom-color: var(--border); }
   .guide-item { background: var(--surface-2); border-color: var(--border); }
   .disc-item  { background: var(--surface-2); border-color: var(--border); }
   .disc-form  { background: var(--surface); border-top-color: var(--border); }

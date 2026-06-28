@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,6 +28,7 @@
             padding: .25rem .5rem; border-radius: .35rem; transition: all .15s; }
   .toc a:hover, .toc a.on { color: var(--text); background: var(--surface2); }
   .toc .toc-h3 { padding-left: 1.25rem; font-size: .78rem; }
+  [dir='rtl'] .toc .toc-h3 { padding-left: 0; padding-right: 1.25rem; }
   .toc-sep { border: none; border-top: 1px solid var(--border); margin: .75rem 0; }
 
   /* ── Headings ── */
@@ -45,11 +46,13 @@
   /* ── Tables ── */
   table { width: 100%; border-collapse: collapse; font-size: .85rem; margin-bottom: 1.25rem; }
   th { background: var(--surface2); text-align: left; padding: .55rem .75rem; font-weight: 700; border-bottom: 2px solid var(--border); }
+  [dir='rtl'] th { text-align: right; }
   td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
   tr:last-child td { border-bottom: none; }
 
   /* ── Callouts ── */
   .callout { border-left: 4px solid; border-radius: 0 .6rem .6rem 0; padding: .75rem 1rem; margin-bottom: 1rem; font-size: .88rem; }
+  [dir='rtl'] .callout { border-left: none; border-right: 4px solid; border-radius: .6rem 0 0 .6rem; }
   .callout-info  { border-color: var(--primary); background: rgba(59,130,246,.08); }
   .callout-warn  { border-color: var(--yellow);  background: rgba(234,179,8,.08); }
   .callout-tip   { border-color: var(--green);   background: rgba(34,197,94,.08); }
@@ -89,6 +92,7 @@
   /* ── Layer box ── */
   .layer-stack { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1.5rem; }
   .layer { border-radius: .6rem; padding: .75rem 1.25rem; border-left: 4px solid; }
+  [dir='rtl'] .layer { border-left: none; border-right: 4px solid; }
   .l-api   { background: rgba(59,130,246,.1);  border-color: var(--primary); }
   .l-app   { background: rgba(168,85,247,.1);  border-color: var(--purple); }
   .l-infra { background: rgba(234,179,8,.1);   border-color: var(--yellow); }
@@ -102,6 +106,18 @@
   .steps li { counter-increment: step; display: flex; gap: .75rem; margin-bottom: .75rem; font-size: .88rem; }
   .steps li::before { content: counter(step); flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: .72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: .1rem; }
 
+  /* ── Lang toggle ── */
+  .lang-bar { display: flex; justify-content: flex-end; margin-bottom: 1.5rem; gap: .5rem; }
+  .lang-btn { padding: .4rem 1rem; border-radius: 2rem; border: 2px solid var(--border); background: var(--surface); color: var(--muted); font-size: .82rem; font-weight: 700; cursor: pointer; transition: all .15s; }
+  .lang-btn.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .lang-btn:hover:not(.on) { border-color: var(--primary); color: var(--text); }
+
+  /* ── Bilingual visibility ── */
+  [dir='ltr'] .ar { display: none; }
+  [dir='rtl'] .en { display: none; }
+  [dir='rtl'] { font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif; }
+  [dir='rtl'] .toc { border-right: none; border-left: 1px solid var(--border); }
+
   @media (max-width: 760px) {
     .toc { display: none; }
     .content { padding: 1.25rem; }
@@ -113,77 +129,91 @@
 
 <!-- ═══ TOC ═══ -->
 <nav class="toc">
-  <div class="toc-title">Developer Guide</div>
-  <a href="#overview">Overview</a>
-  <a href="#tech-stack">Tech Stack</a>
-  <a href="#clean-arch">Clean Architecture</a>
-  <a class="toc-h3" href="#domain">Domain Layer</a>
-  <a class="toc-h3" href="#application">Application Layer</a>
-  <a class="toc-h3" href="#infrastructure">Infrastructure Layer</a>
-  <a class="toc-h3" href="#api">API Layer</a>
+  <div class="toc-title"><span class="en">Developer Guide</span><span class="ar">دليل المطور</span></div>
+  <a href="#overview"><span class="en">Overview</span><span class="ar">نظرة عامة</span></a>
+  <a href="#tech-stack"><span class="en">Tech Stack</span><span class="ar">التقنيات</span></a>
+  <a href="#clean-arch"><span class="en">Clean Architecture</span><span class="ar">البنية النظيفة</span></a>
+  <a class="toc-h3" href="#domain"><span class="en">Domain Layer</span><span class="ar">طبقة المجال</span></a>
+  <a class="toc-h3" href="#application"><span class="en">Application Layer</span><span class="ar">طبقة التطبيق</span></a>
+  <a class="toc-h3" href="#infrastructure"><span class="en">Infrastructure Layer</span><span class="ar">طبقة البنية التحتية</span></a>
+  <a class="toc-h3" href="#api"><span class="en">API Layer</span><span class="ar">طبقة API</span></a>
   <hr class="toc-sep">
-  <a href="#entities">Key Entities</a>
-  <a href="#ticket-lifecycle">Ticket Lifecycle</a>
-  <a href="#roles">Roles & Auth</a>
+  <a href="#entities"><span class="en">Key Entities</span><span class="ar">الكيانات الرئيسية</span></a>
+  <a href="#ticket-lifecycle"><span class="en">Ticket Lifecycle</span><span class="ar">دورة حياة التذكرة</span></a>
+  <a href="#roles"><span class="en">Roles &amp; Auth</span><span class="ar">الأدوار والصلاحيات</span></a>
   <hr class="toc-sep">
-  <a href="#frontend">Frontend Architecture</a>
-  <a class="toc-h3" href="#components">Component Tree</a>
-  <a class="toc-h3" href="#services">Services</a>
+  <a href="#frontend"><span class="en">Frontend Architecture</span><span class="ar">بنية الواجهة</span></a>
+  <a class="toc-h3" href="#components"><span class="en">Component Tree</span><span class="ar">شجرة المكونات</span></a>
+  <a class="toc-h3" href="#services"><span class="en">Services</span><span class="ar">الخدمات</span></a>
   <hr class="toc-sep">
-  <a href="#api-ref">API Reference</a>
+  <a href="#api-ref"><span class="en">API Reference</span><span class="ar">مرجع API</span></a>
   <hr class="toc-sep">
-  <a href="#deploy">Deployment Guide</a>
-  <a class="toc-h3" href="#backend-deploy">Backend (IIS)</a>
-  <a class="toc-h3" href="#frontend-deploy">Frontend (IIS)</a>
-  <a class="toc-h3" href="#db">Database</a>
+  <a href="#deploy"><span class="en">Deployment Guide</span><span class="ar">دليل النشر</span></a>
+  <a class="toc-h3" href="#backend-deploy"><span class="en">Backend (IIS)</span><span class="ar">الخلفية (IIS)</span></a>
+  <a class="toc-h3" href="#frontend-deploy"><span class="en">Frontend (IIS)</span><span class="ar">الواجهة (IIS)</span></a>
+  <a class="toc-h3" href="#db"><span class="en">Database</span><span class="ar">قاعدة البيانات</span></a>
   <hr class="toc-sep">
-  <a href="#env">Environment Config</a>
-  <a href="#extending">Extending the App</a>
+  <a href="#env"><span class="en">Environment Config</span><span class="ar">إعدادات البيئة</span></a>
+  <a href="#extending"><span class="en">Extending the App</span><span class="ar">توسعة التطبيق</span></a>
 </nav>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="content">
 
+<!-- Lang toggle -->
+<div class="lang-bar">
+  <button class="lang-btn on" id="btn-en" onclick="setLang('en')">EN</button>
+  <button class="lang-btn"    id="btn-ar" onclick="setLang('ar')">عربي</button>
+</div>
+
 <h1>Altuwijri Ticket System</h1>
-<p style="color:var(--muted);margin-bottom:2rem">Developer Reference — v2.1 · Last updated 2026-06-28</p>
+<p style="color:var(--muted);margin-bottom:2rem">
+  <span class="en">Developer Reference — v2.1 · Last updated 2026-06-28</span>
+  <span class="ar">مرجع المطور — الإصدار 2.1 · آخر تحديث 2026-06-28</span>
+</p>
 
 <!-- ── Overview ── -->
-<h2 id="overview">Overview</h2>
+<h2 id="overview"><span class="en">Overview</span><span class="ar">نظرة عامة</span></h2>
 <p>
-  The Altuwijri Ticket System (ATS) is an internal IT help-desk platform for the Altuwijri organisation.
+  <span class="en">The Altuwijri Ticket System (ATS) is an internal IT help-desk platform for the Altuwijri organisation.
   Employees submit IT support requests; technicians claim, work, and resolve them; managers run reports.
-  It is a LAN-hosted full-stack web application accessible inside the corporate network.
+  It is a LAN-hosted full-stack web application accessible inside the corporate network.</span>
+  <span class="ar">نظام تذاكر العتيجي (ATS) هو منصة دعم تقنية معلومات داخلية لمنظمة العتيجي.
+  يقدم الموظفون طلبات دعم تقنية المعلومات؛ يطالب بها الفنيون ويعملون على حلها؛ يستخرج المسؤولون تقارير منها.
+  وهو تطبيق ويب متكامل مستضاف على الشبكة المحلية ويمكن الوصول إليه داخل شبكة الشركة.</span>
 </p>
 <table>
-  <tr><th>Property</th><th>Value</th></tr>
-  <tr><td>LAN address</td><td><code>http://192.168.100.68</code></td></tr>
-  <tr><td>Backend API</td><td><code>http://192.168.100.68/api</code></td></tr>
-  <tr><td>IIS web root</td><td><code>D:\Projetcs\Cloude\deploy\web</code></td></tr>
-  <tr><td>IIS API root</td><td><code>D:\Projetcs\Cloude\deploy\api</code></td></tr>
-  <tr><td>Database</td><td>SQL Server — <code>TaskFlowDb</code></td></tr>
-  <tr><td>Source</td><td><code>D:\Projetcs\Cloude</code></td></tr>
+  <tr><th><span class="en">Property</span><span class="ar">الخاصية</span></th><th><span class="en">Value</span><span class="ar">القيمة</span></th></tr>
+  <tr><td><span class="en">LAN address</span><span class="ar">عنوان الشبكة المحلية</span></td><td><code>http://192.168.100.68</code></td></tr>
+  <tr><td><span class="en">Backend API</span><span class="ar">API الخلفية</span></td><td><code>http://192.168.100.68/api</code></td></tr>
+  <tr><td><span class="en">IIS web root</span><span class="ar">مجلد IIS للواجهة</span></td><td><code>D:\Projetcs\Cloude\deploy\web</code></td></tr>
+  <tr><td><span class="en">IIS API root</span><span class="ar">مجلد IIS للـAPI</span></td><td><code>D:\Projetcs\Cloude\deploy\api</code></td></tr>
+  <tr><td><span class="en">Database</span><span class="ar">قاعدة البيانات</span></td><td>SQL Server — <code>TaskFlowDb</code></td></tr>
+  <tr><td><span class="en">Source</span><span class="ar">المصدر</span></td><td><code>D:\Projetcs\Cloude</code></td></tr>
 </table>
 
 <!-- ── Tech Stack ── -->
-<h2 id="tech-stack">Tech Stack</h2>
+<h2 id="tech-stack"><span class="en">Tech Stack</span><span class="ar">التقنيات المستخدمة</span></h2>
 <table>
-  <tr><th>Concern</th><th>Technology</th><th>Version</th></tr>
-  <tr><td>Backend runtime</td><td>.NET / ASP.NET Core Web API</td><td>10</td></tr>
-  <tr><td>ORM</td><td>Entity Framework Core</td><td>9.x</td></tr>
-  <tr><td>Database</td><td>SQL Server</td><td>2019+</td></tr>
-  <tr><td>Auth</td><td>JWT Bearer + ASP.NET Identity</td><td>—</td></tr>
-  <tr><td>Real-time</td><td>SignalR</td><td>—</td></tr>
-  <tr><td>Frontend framework</td><td>Angular (standalone components, signals)</td><td>18</td></tr>
-  <tr><td>Build</td><td>Angular CLI / esbuild</td><td>18</td></tr>
-  <tr><td>Hosting</td><td>IIS 10 (Windows Server)</td><td>—</td></tr>
-  <tr><td>Firewall</td><td>ESET Endpoint Security</td><td>—</td></tr>
+  <tr><th><span class="en">Concern</span><span class="ar">الجانب</span></th><th><span class="en">Technology</span><span class="ar">التقنية</span></th><th><span class="en">Version</span><span class="ar">الإصدار</span></th></tr>
+  <tr><td><span class="en">Backend runtime</span><span class="ar">بيئة تشغيل الخلفية</span></td><td>.NET / ASP.NET Core Web API</td><td>10</td></tr>
+  <tr><td><span class="en">ORM</span><span class="ar">ORM</span></td><td>Entity Framework Core</td><td>9.x</td></tr>
+  <tr><td><span class="en">Database</span><span class="ar">قاعدة البيانات</span></td><td>SQL Server</td><td>2019+</td></tr>
+  <tr><td><span class="en">Auth</span><span class="ar">المصادقة</span></td><td>JWT Bearer + ASP.NET Identity</td><td>—</td></tr>
+  <tr><td><span class="en">Real-time</span><span class="ar">الوقت الفعلي</span></td><td>SignalR</td><td>—</td></tr>
+  <tr><td><span class="en">Frontend framework</span><span class="ar">إطار الواجهة</span></td><td>Angular (standalone components, signals)</td><td>18</td></tr>
+  <tr><td><span class="en">Build</span><span class="ar">أداة البناء</span></td><td>Angular CLI / esbuild</td><td>18</td></tr>
+  <tr><td><span class="en">Hosting</span><span class="ar">الاستضافة</span></td><td>IIS 10 (Windows Server)</td><td>—</td></tr>
+  <tr><td><span class="en">Firewall</span><span class="ar">جدار الحماية</span></td><td>ESET Endpoint Security</td><td>—</td></tr>
 </table>
 
 <!-- ── Clean Architecture ── -->
-<h2 id="clean-arch">Clean Architecture</h2>
+<h2 id="clean-arch"><span class="en">Clean Architecture</span><span class="ar">البنية النظيفة</span></h2>
 <p>
-  The backend follows Clean Architecture (also known as Onion / Hexagonal).
-  Dependencies flow strictly inward: outer layers depend on inner ones, never the reverse.
+  <span class="en">The backend follows Clean Architecture (also known as Onion / Hexagonal).
+  Dependencies flow strictly inward: outer layers depend on inner ones, never the reverse.</span>
+  <span class="ar">تتبع الخلفية نمط البنية النظيفة (المعروفة أيضاً بـ Onion / Hexagonal).
+  تتدفق التبعيات إلى الداخل فقط: الطبقات الخارجية تعتمد على الداخلية وليس العكس.</span>
 </p>
 
 <div class="diagram">
@@ -218,39 +248,43 @@
   <div class="layer l-api">
     <strong>API Layer</strong> <span class="badge b-blue">TaskFlow.Api</span>
     <div class="path">backend/src/TaskFlow.Api/</div>
-    <div class="desc">ASP.NET Core Web API. Controllers, middleware, DI registration, JWT config, SignalR hubs. Contains no business logic.</div>
+    <div class="desc en">ASP.NET Core Web API. Controllers, middleware, DI registration, JWT config, SignalR hubs. Contains no business logic.</div>
+    <div class="desc ar">ASP.NET Core Web API. وحدات التحكم والوسيطات وتسجيل DI وإعداد JWT ومراكز SignalR. لا تحتوي على منطق أعمال.</div>
   </div>
   <div class="layer l-app">
     <strong>Application Layer</strong> <span class="badge b-purple">TaskFlow.Application</span>
     <div class="path">backend/src/TaskFlow.Application/</div>
-    <div class="desc">All business logic. Services, DTOs, interfaces (IApplicationDbContext, ICurrentUser, IEmailService). Defines what the system does.</div>
+    <div class="desc en">All business logic. Services, DTOs, interfaces (IApplicationDbContext, ICurrentUser, IEmailService). Defines what the system does.</div>
+    <div class="desc ar">جميع منطق الأعمال. الخدمات وDTOs والواجهات (IApplicationDbContext, ICurrentUser, IEmailService). تحدد ما يفعله النظام.</div>
   </div>
   <div class="layer l-infra">
     <strong>Infrastructure Layer</strong> <span class="badge b-yellow">TaskFlow.Infrastructure</span>
     <div class="path">backend/src/TaskFlow.Infrastructure/</div>
-    <div class="desc">Implements interfaces. EF Core DbContext, migrations, database seeder, email (SMTP), Identity setup.</div>
+    <div class="desc en">Implements interfaces. EF Core DbContext, migrations, database seeder, email (SMTP), Identity setup.</div>
+    <div class="desc ar">تنفيذ الواجهات. EF Core DbContext والترحيلات وبذر قاعدة البيانات والبريد الإلكتروني (SMTP) وإعداد Identity.</div>
   </div>
   <div class="layer l-dom">
     <strong>Domain Layer</strong> <span class="badge b-green">TaskFlow.Domain</span>
     <div class="path">backend/src/TaskFlow.Domain/</div>
-    <div class="desc">Pure C# classes only. Entities (WorkTask, User, Branch, …) and enums (WorkTaskStatus, TaskPriority, …). Zero framework dependencies.</div>
+    <div class="desc en">Pure C# classes only. Entities (WorkTask, User, Branch, …) and enums (WorkTaskStatus, TaskPriority, …). Zero framework dependencies.</div>
+    <div class="desc ar">كلاسات C# خالصة فقط. الكيانات (WorkTask, User, Branch, …) والتعدادات (WorkTaskStatus, TaskPriority, …). صفر اعتماديات على أي إطار عمل.</div>
   </div>
 </div>
 
-<h3 id="domain">Domain Layer — Key Entities</h3>
+<h3 id="domain"><span class="en">Domain Layer — Key Entities</span><span class="ar">طبقة المجال — الكيانات الرئيسية</span></h3>
 <div class="tree">
 <span class="d">TaskFlow.Domain/</span>
 ├── <span class="d">Entities/</span>
-│   ├── <span class="f">WorkTask.cs</span>    <span class="c">← central entity, soft-deleted</span>
+│   ├── <span class="f">WorkTask.cs</span>    <span class="c">← <span class="en">central entity, soft-deleted</span><span class="ar">الكيان المركزي، حذف منطقي</span></span>
 │   ├── <span class="f">User.cs</span>
 │   ├── <span class="f">Branch.cs</span>
 │   ├── <span class="f">Area.cs</span>
 │   ├── <span class="f">Project.cs</span>
 │   ├── <span class="f">TicketCategory.cs</span>
 │   ├── <span class="f">Tag.cs</span>
-│   ├── <span class="f">TaskTag.cs</span>      <span class="c">← M2M junction</span>
-│   ├── <span class="f">UserCategory.cs</span> <span class="c">← technician ↔ category M2M</span>
-│   ├── <span class="f">UserBranch.cs</span>   <span class="c">← cam-employee multi-branch</span>
+│   ├── <span class="f">TaskTag.cs</span>      <span class="c">← <span class="en">M2M junction</span><span class="ar">جدول وصل M2M</span></span>
+│   ├── <span class="f">UserCategory.cs</span> <span class="c">← <span class="en">technician ↔ category M2M</span><span class="ar">فني ↔ فئة M2M</span></span>
+│   ├── <span class="f">UserBranch.cs</span>   <span class="c">← <span class="en">cam-employee multi-branch</span><span class="ar">موظف cam متعدد الفروع</span></span>
 │   ├── <span class="f">Comment.cs</span>
 │   ├── <span class="f">Attachment.cs</span>
 │   ├── <span class="f">Notification.cs</span>
@@ -263,17 +297,21 @@
     └── <span class="f">TaskType.cs</span>        <span class="c">Task | Bug | Incident | ServiceRequest | Feature | Maintenance | Change</span>
 </div>
 
-<p><strong>Soft delete:</strong> <code>WorkTask</code> has an <code>IsDeleted</code> flag.
-A global EF Core query filter in <code>ApplicationDbContext</code> automatically excludes deleted rows from every query:</p>
+<p>
+  <span class="en"><strong>Soft delete:</strong> <code>WorkTask</code> has an <code>IsDeleted</code> flag.
+  A global EF Core query filter in <code>ApplicationDbContext</code> automatically excludes deleted rows from every query:</span>
+  <span class="ar"><strong>الحذف المنطقي:</strong> يمتلك <code>WorkTask</code> خاصية <code>IsDeleted</code>.
+  يُطبّق فلتر عام في <code>ApplicationDbContext</code> يستثني الصفوف المحذوفة تلقائياً من كل استعلام:</span>
+</p>
 <pre><code>modelBuilder.Entity&lt;WorkTask&gt;().HasQueryFilter(t =&gt; !t.IsDeleted);</code></pre>
 
-<h3 id="application">Application Layer</h3>
+<h3 id="application"><span class="en">Application Layer</span><span class="ar">طبقة التطبيق</span></h3>
 <div class="tree">
 <span class="d">TaskFlow.Application/</span>
 ├── <span class="d">Common/</span>
-│   ├── <span class="d">Authorization/</span>     <span class="c">Roles.cs — role name constants</span>
+│   ├── <span class="d">Authorization/</span>     <span class="c">Roles.cs — <span class="en">role name constants</span><span class="ar">ثوابت أسماء الأدوار</span></span>
 │   ├── <span class="d">Interfaces/</span>        <span class="c">IApplicationDbContext, ICurrentUser, IEmailService</span>
-│   └── <span class="d">Mapping/</span>           <span class="c">MappingExtensions.cs — entity → DTO (no AutoMapper)</span>
+│   └── <span class="d">Mapping/</span>           <span class="c">MappingExtensions.cs — <span class="en">entity → DTO (no AutoMapper)</span><span class="ar">كيان → DTO (بدون AutoMapper)</span></span>
 └── <span class="d">Features/</span>
     ├── <span class="d">Tasks/</span>             <span class="c">TaskService.cs, TaskDtos.cs</span>
     ├── <span class="d">Reports/</span>           <span class="c">ReportService.cs, ReportDtos.cs</span>
@@ -284,24 +322,28 @@ A global EF Core query filter in <code>ApplicationDbContext</code> automatically
     └── <span class="d">...</span>
 </div>
 
-<p>There is no MediatR/CQRS. Each feature has a <strong>service class</strong> and a <strong>DTOs file</strong>.
-Services are registered as scoped via <code>DependencyInjection.cs</code>.</p>
+<p>
+  <span class="en">There is no MediatR/CQRS. Each feature has a <strong>service class</strong> and a <strong>DTOs file</strong>.
+  Services are registered as scoped via <code>DependencyInjection.cs</code>.</span>
+  <span class="ar">لا يوجد MediatR/CQRS. لكل ميزة <strong>كلاس خدمة</strong> و<strong>ملف DTOs</strong>.
+  تُسجَّل الخدمات كـ scoped عبر <code>DependencyInjection.cs</code>.</span>
+</p>
 
-<h3 id="infrastructure">Infrastructure Layer</h3>
+<h3 id="infrastructure"><span class="en">Infrastructure Layer</span><span class="ar">طبقة البنية التحتية</span></h3>
 <div class="tree">
 <span class="d">TaskFlow.Infrastructure/</span>
 ├── <span class="d">Persistence/</span>
-│   ├── <span class="hl">ApplicationDbContext.cs</span>  <span class="c">← extends IdentityDbContext&lt;User&gt;</span>
-│   ├── <span class="d">Configurations/</span>          <span class="c">Fluent API entity configs (Configurations.cs)</span>
-│   ├── <span class="d">Migrations/</span>              <span class="c">EF Core migrations</span>
-│   └── <span class="hl">DatabaseSeeder.cs</span>        <span class="c">← seeds roles, admin user, demo data</span>
+│   ├── <span class="hl">ApplicationDbContext.cs</span>  <span class="c">← <span class="en">extends IdentityDbContext&lt;User&gt;</span><span class="ar">يمتد من IdentityDbContext&lt;User&gt;</span></span>
+│   ├── <span class="d">Configurations/</span>          <span class="c"><span class="en">Fluent API entity configs (Configurations.cs)</span><span class="ar">إعدادات كيانات Fluent API</span></span>
+│   ├── <span class="d">Migrations/</span>              <span class="c"><span class="en">EF Core migrations</span><span class="ar">ترحيلات EF Core</span></span>
+│   └── <span class="hl">DatabaseSeeder.cs</span>        <span class="c">← <span class="en">seeds roles, admin user, demo data</span><span class="ar">يبذر الأدوار والمسؤول والبيانات التجريبية</span></span>
 ├── <span class="d">Email/</span>
 │   └── <span class="f">EmailService.cs</span>
 └── <span class="d">Identity/</span>
-    └── <span class="f">CurrentUserService.cs</span>    <span class="c">← reads claims from HttpContext</span>
+    └── <span class="f">CurrentUserService.cs</span>    <span class="c">← <span class="en">reads claims from HttpContext</span><span class="ar">يقرأ المطالبات من HttpContext</span></span>
 </div>
 
-<h3 id="api">API Layer</h3>
+<h3 id="api"><span class="en">API Layer</span><span class="ar">طبقة API</span></h3>
 <div class="tree">
 <span class="d">TaskFlow.Api/</span>
 ├── <span class="d">Controllers/</span>
@@ -315,12 +357,12 @@ Services are registered as scoped via <code>DependencyInjection.cs</code>.</p>
 ├── <span class="d">Hubs/</span>
 │   ├── <span class="f">NotificationHub.cs</span>
 │   └── <span class="f">ChatHub.cs</span>
-├── <span class="f">Program.cs</span>               <span class="c">← app bootstrap, middleware pipeline</span>
-└── <span class="f">appsettings.json</span>          <span class="c">← connection string, JWT, SMTP, CORS</span>
+├── <span class="f">Program.cs</span>               <span class="c">← <span class="en">app bootstrap, middleware pipeline</span><span class="ar">تهيئة التطبيق وسلسلة الوسيطات</span></span>
+└── <span class="f">appsettings.json</span>          <span class="c">← <span class="en">connection string, JWT, SMTP, CORS</span><span class="ar">سلسلة الاتصال وJWT وSMTP وCORS</span></span>
 </div>
 
 <!-- ── Key Entities ── -->
-<h2 id="entities">Key Entities (ER overview)</h2>
+<h2 id="entities"><span class="en">Key Entities (ER overview)</span><span class="ar">الكيانات الرئيسية (نظرة ER)</span></h2>
 <div class="diagram">
 <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" font-family="Consolas,'JetBrains Mono',monospace" font-size="11">
   <defs>
@@ -396,59 +438,42 @@ Services are registered as scoped via <code>DependencyInjection.cs</code>.</p>
 </div>
 
 <!-- ── Ticket Lifecycle ── -->
-<h2 id="ticket-lifecycle">Ticket Lifecycle (State Machine)</h2>
+<h2 id="ticket-lifecycle"><span class="en">Ticket Lifecycle (State Machine)</span><span class="ar">دورة حياة التذكرة (آلة الحالات)</span></h2>
 <div class="diagram">
 <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, sans-serif" font-size="12">
   <defs>
     <marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 Z" fill="#94a3b8"/></marker>
   </defs>
-  <!-- States -->
   <rect x="20"  y="130" width="90" height="36" rx="18" fill="#475569"/>
   <text x="65"  y="153" text-anchor="middle" fill="white" font-weight="700">Backlog</text>
-
   <rect x="145" y="130" width="80" height="36" rx="18" fill="#6366f1"/>
   <text x="185" y="153" text-anchor="middle" fill="white" font-weight="700">To Do</text>
-
   <rect x="255" y="130" width="110" height="36" rx="18" fill="#2563eb"/>
   <text x="310" y="153" text-anchor="middle" fill="white" font-weight="700">In Progress</text>
-
   <rect x="395" y="130" width="100" height="36" rx="18" fill="#eab308"/>
   <text x="445" y="153" text-anchor="middle" fill="#0f172a" font-weight="700">In Review</text>
-
   <rect x="525" y="70"  width="90" height="36" rx="18" fill="#16a34a"/>
   <text x="570" y="93"  text-anchor="middle" fill="white" font-weight="700">Done ✓</text>
-
   <rect x="255" y="220" width="90" height="36" rx="18" fill="#dc2626"/>
   <text x="300" y="243" text-anchor="middle" fill="white" font-weight="700">Blocked</text>
-
   <rect x="525" y="195" width="100" height="36" rx="18" fill="#334155"/>
   <text x="575" y="218" text-anchor="middle" fill="#94a3b8" font-weight="700">Cancelled</text>
-
-  <!-- Transitions -->
   <line x1="110"  y1="148" x2="143"  y2="148" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar2)"/>
   <line x1="225"  y1="148" x2="253"  y2="148" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar2)"/>
   <line x1="365"  y1="148" x2="393"  y2="148" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar2)"/>
-  <!-- In Review → Done -->
   <path d="M 495 132 Q 520 88 523 88" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#ar2)"/>
-  <!-- In Review → In Progress (reject) -->
   <path d="M 395 162 Q 340 185 365 165" stroke="#94a3b8" stroke-width="1.2" fill="none" stroke-dasharray="4,3" marker-end="url(#ar2)"/>
-  <!-- In Progress → Blocked -->
   <line x1="310" y1="166" x2="300" y2="218" stroke="#dc2626" stroke-width="1.3" marker-end="url(#ar2)"/>
-  <!-- Blocked → In Progress -->
   <line x1="320" y1="218" x2="330" y2="167" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#ar2)"/>
-  <!-- Any → Cancelled -->
   <path d="M 495 155 Q 560 165 523 207" stroke="#334155" stroke-width="1.2" fill="none" stroke-dasharray="4,3" marker-end="url(#ar2)"/>
-  <!-- ClaimedAt label -->
   <rect x="222" y="100" width="130" height="22" rx="4" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
   <text x="287" y="116" text-anchor="middle" fill="#3b82f6" font-size="10">⚡ ClaimedAt recorded here</text>
   <line x1="287" y1="122" x2="310" y2="130" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3,2"/>
-  <!-- Actors -->
   <text x="175" y="200" fill="#64748b" font-size="10">Employee submits</text>
   <text x="175" y="212" fill="#64748b" font-size="10">→ auto Backlog</text>
   <text x="240" y="42"  fill="#a855f7" font-size="10">Technician accepts</text>
   <text x="395" y="198" fill="#64748b" font-size="10">Admin approves</text>
   <text x="525" y="260" fill="#64748b" font-size="10">Admin only</text>
-  <!-- Legend -->
   <line x1="20" y1="290" x2="60" y2="290" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar2)"/>
   <text x="65" y="294" fill="#94a3b8" font-size="10">Normal flow</text>
   <line x1="160" y1="290" x2="200" y2="290" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ar2)"/>
@@ -457,86 +482,143 @@ Services are registered as scoped via <code>DependencyInjection.cs</code>.</p>
 </div>
 
 <table>
-  <tr><th>Status</th><th>Who can set it</th><th>Notes</th></tr>
-  <tr><td>Backlog / To Do</td><td>Auto on create; Admin</td><td>Initial state when employee submits</td></tr>
-  <tr><td>In Progress</td><td>Technician (via Accept), Admin</td><td><code>ClaimedAt</code> recorded on first accept</td></tr>
-  <tr><td>In Review</td><td>Technician, Admin</td><td>Signals readiness for manager approval</td></tr>
-  <tr><td>Blocked</td><td>Technician, Admin</td><td>Waiting on external factor</td></tr>
-  <tr><td>Done</td><td>Admin only</td><td>Final state — triggers <code>CompletedAt</code></td></tr>
-  <tr><td>Cancelled</td><td>Admin only</td><td>Soft close without resolution</td></tr>
+  <tr>
+    <th><span class="en">Status</span><span class="ar">الحالة</span></th>
+    <th><span class="en">Who can set it</span><span class="ar">من يمكنه تعيينها</span></th>
+    <th><span class="en">Notes</span><span class="ar">ملاحظات</span></th>
+  </tr>
+  <tr>
+    <td>Backlog / To Do</td>
+    <td><span class="en">Auto on create; Admin</span><span class="ar">تلقائي عند الإنشاء؛ المسؤول</span></td>
+    <td><span class="en">Initial state when employee submits</span><span class="ar">الحالة الأولية عند تقديم الموظف</span></td>
+  </tr>
+  <tr>
+    <td>In Progress</td>
+    <td><span class="en">Technician (via Accept), Admin</span><span class="ar">الفني (عبر القبول)، المسؤول</span></td>
+    <td><span class="en"><code>ClaimedAt</code> recorded on first accept</span><span class="ar"><code>ClaimedAt</code> يُسجَّل عند القبول الأول</span></td>
+  </tr>
+  <tr>
+    <td>In Review</td>
+    <td><span class="en">Technician, Admin</span><span class="ar">الفني، المسؤول</span></td>
+    <td><span class="en">Signals readiness for manager approval</span><span class="ar">يشير إلى الجاهزية لموافقة المسؤول</span></td>
+  </tr>
+  <tr>
+    <td>Blocked</td>
+    <td><span class="en">Technician, Admin</span><span class="ar">الفني، المسؤول</span></td>
+    <td><span class="en">Waiting on external factor</span><span class="ar">انتظار عامل خارجي</span></td>
+  </tr>
+  <tr>
+    <td>Done</td>
+    <td><span class="en">Admin only</span><span class="ar">المسؤول فقط</span></td>
+    <td><span class="en">Final state — triggers <code>CompletedAt</code></span><span class="ar">الحالة النهائية — يُشغِّل <code>CompletedAt</code></span></td>
+  </tr>
+  <tr>
+    <td>Cancelled</td>
+    <td><span class="en">Admin only</span><span class="ar">المسؤول فقط</span></td>
+    <td><span class="en">Soft close without resolution</span><span class="ar">إغلاق منطقي دون حل</span></td>
+  </tr>
 </table>
 
 <!-- ── Roles ── -->
-<h2 id="roles">Roles & Authorization</h2>
-<p>Roles are stored in ASP.NET Identity's <code>AspNetRoles</code> table. The <code>Roles.cs</code> file contains string constants.</p>
+<h2 id="roles"><span class="en">Roles &amp; Authorization</span><span class="ar">الأدوار والتفويض</span></h2>
+<p>
+  <span class="en">Roles are stored in ASP.NET Identity's <code>AspNetRoles</code> table. The <code>Roles.cs</code> file contains string constants.</span>
+  <span class="ar">تُخزَّن الأدوار في جدول <code>AspNetRoles</code> الخاص بـ ASP.NET Identity. يحتوي ملف <code>Roles.cs</code> على ثوابت النصوص.</span>
+</p>
 
 <table>
-  <tr><th>Role</th><th>Constant</th><th>Access</th></tr>
-  <tr><td><span class="badge b-red">Admin</span></td><td><code>Roles.Admin</code></td><td>Full system access</td></tr>
-  <tr><td><span class="badge b-purple">Technician</span></td><td><code>Roles.Technician</code></td><td>Dashboard, Tasks, Board, My Reports</td></tr>
-  <tr><td><span class="badge b-blue">Branch-Employee</span></td><td><code>Roles.BranchEmployee</code></td><td>My Tickets, New Ticket, My Reports, Chat</td></tr>
-  <tr><td><span class="badge b-blue">HO-Employee</span></td><td><code>Roles.HoEmployee</code></td><td>Same as Branch-Employee</td></tr>
-  <tr><td><span class="badge b-blue">Cam-Employee</span></td><td><code>Roles.CamEmployee</code></td><td>Same, can have multiple branches</td></tr>
+  <tr>
+    <th><span class="en">Role</span><span class="ar">الدور</span></th>
+    <th><span class="en">Constant</span><span class="ar">الثابت</span></th>
+    <th><span class="en">Access</span><span class="ar">الوصول</span></th>
+  </tr>
+  <tr><td><span class="badge b-red">Admin</span></td><td><code>Roles.Admin</code></td><td><span class="en">Full system access</span><span class="ar">وصول كامل للنظام</span></td></tr>
+  <tr><td><span class="badge b-purple">Technician</span></td><td><code>Roles.Technician</code></td><td><span class="en">Dashboard, Tasks, Board, My Reports</span><span class="ar">لوحة التحكم، المهام، اللوحة، تقاريري</span></td></tr>
+  <tr><td><span class="badge b-blue">Branch-Employee</span></td><td><code>Roles.BranchEmployee</code></td><td><span class="en">My Tickets, New Ticket, My Reports, Chat</span><span class="ar">تذاكري، تذكرة جديدة، تقاريري، الدردشة</span></td></tr>
+  <tr><td><span class="badge b-blue">HO-Employee</span></td><td><code>Roles.HoEmployee</code></td><td><span class="en">Same as Branch-Employee</span><span class="ar">مثل Branch-Employee</span></td></tr>
+  <tr><td><span class="badge b-blue">Cam-Employee</span></td><td><code>Roles.CamEmployee</code></td><td><span class="en">Same, can have multiple branches</span><span class="ar">مثلهم، يمكن أن يكون له عدة فروع</span></td></tr>
 </table>
 
-<p><code>Roles.EmployeeRoles</code> is a helper array: <code>[BranchEmployee, HoEmployee, CamEmployee]</code>.</p>
+<p><code>Roles.EmployeeRoles</code> <span class="en">is a helper array: <code>[BranchEmployee, HoEmployee, CamEmployee]</code>.</span><span class="ar">مصفوفة مساعدة: <code>[BranchEmployee, HoEmployee, CamEmployee]</code>.</span></p>
 
-<h4>Technician Ticket Visibility Rule</h4>
-<p>
-  A technician sees on their board:
-</p>
+<h4><span class="en">Technician Ticket Visibility Rule</span><span class="ar">قاعدة رؤية التذاكر للفنيين</span></h4>
+<p><span class="en">A technician sees on their board:</span><span class="ar">يرى الفني في لوحته:</span></p>
 <ul style="margin:0 0 1rem 1.5rem;font-size:.88rem;">
-  <li>All tickets <strong>assigned to them</strong> (any project).</li>
-  <li>All tickets <strong>unassigned</strong> whose <code>CategoryId</code> matches one of their assigned categories — <strong>regardless of project</strong>.</li>
-  <li>If the technician has no category assignments, they see all unassigned tickets.</li>
+  <li><span class="en">All tickets <strong>assigned to them</strong> (any project).</span><span class="ar">جميع التذاكر <strong>المعيَّنة له</strong> (أي مشروع).</span></li>
+  <li><span class="en">All tickets <strong>unassigned</strong> whose <code>CategoryId</code> matches one of their assigned categories — <strong>regardless of project</strong>.</span><span class="ar">جميع التذاكر <strong>غير المعيَّنة</strong> التي يتطابق <code>CategoryId</code> فيها مع إحدى فئاته المعيَّنة — <strong>بغض النظر عن المشروع</strong>.</span></li>
+  <li><span class="en">If the technician has no category assignments, they see all unassigned tickets.</span><span class="ar">إذا لم يكن للفني فئات معيَّنة، يرى جميع التذاكر غير المعيَّنة.</span></li>
 </ul>
 
 <!-- ── Frontend ── -->
-<h2 id="frontend">Frontend Architecture</h2>
+<h2 id="frontend"><span class="en">Frontend Architecture</span><span class="ar">بنية الواجهة الأمامية</span></h2>
 
 <div class="tree">
 <span class="d">frontend/src/app/</span>
 ├── <span class="d">core/</span>
 │   ├── <span class="d">guards/</span>         <span class="c">authGuard, roleGuard</span>
-│   ├── <span class="d">interceptors/</span>    <span class="c">JWT attach, 401 refresh</span>
+│   ├── <span class="d">interceptors/</span>    <span class="c"><span class="en">JWT attach, 401 refresh</span><span class="ar">إرفاق JWT، تحديث 401</span></span>
 │   ├── <span class="d">models/</span>          <span class="c">models.ts, translations.ts</span>
 │   ├── <span class="d">pipes/</span>           <span class="c">translate.pipe.ts</span>
 │   └── <span class="d">services/</span>        <span class="c">auth, i18n, theme, data.services.ts</span>
 ├── <span class="d">features/</span>
 │   ├── <span class="d">auth/</span>            <span class="c">login.ts</span>
 │   ├── <span class="d">dashboard/</span>
-│   ├── <span class="d">tasks/</span>           <span class="c">task-list, task-board (Kanban), task-detail</span>
+│   ├── <span class="d">tasks/</span>           <span class="c"><span class="en">task-list, task-board (Kanban), task-detail</span><span class="ar">قائمة المهام، لوحة كانبان، تفاصيل المهمة</span></span>
 │   ├── <span class="d">my-tickets/</span>
-│   ├── <span class="d">ticket-picker/</span>   <span class="c">3-step wizard for employees</span>
+│   ├── <span class="d">ticket-picker/</span>   <span class="c"><span class="en">3-step wizard for employees</span><span class="ar">معالج 3 خطوات للموظفين</span></span>
 │   ├── <span class="d">reports/</span>
 │   ├── <span class="d">my-reports/</span>
 │   ├── <span class="d">users/</span>
 │   ├── <span class="d">organization/</span>
 │   ├── <span class="d">ticket-categories/</span>
-│   ├── <span class="d">chat/</span>            <span class="c">SignalR real-time</span>
-│   ├── <span class="d">help/</span>            <span class="c">animated user guide</span>
+│   ├── <span class="d">chat/</span>            <span class="c"><span class="en">SignalR real-time</span><span class="ar">وقت فعلي عبر SignalR</span></span>
+│   ├── <span class="d">help/</span>            <span class="c"><span class="en">animated user guide</span><span class="ar">دليل مستخدم متحرك</span></span>
 │   └── <span class="d">calendar/</span>
 ├── <span class="d">layout/</span>
-│   └── <span class="f">shell.ts</span>         <span class="c">sidebar, topbar, clock, guidelines, app-links</span>
+│   └── <span class="f">shell.ts</span>         <span class="c"><span class="en">sidebar, topbar, clock, guidelines, app-links</span><span class="ar">الشريط الجانبي والشريط العلوي والساعة والإرشادات والروابط</span></span>
 └── <span class="d">shared/</span>
     └── <span class="f">util.ts</span>          <span class="c">initials(), timeAgo()</span>
 </div>
 
-<h3 id="components">Key Design Patterns</h3>
+<h3 id="components"><span class="en">Key Design Patterns</span><span class="ar">أنماط التصميم الرئيسية</span></h3>
 
 <table>
-  <tr><th>Pattern</th><th>How used</th></tr>
-  <tr><td>Standalone components</td><td>Every component uses <code>standalone: true</code> — no NgModules</td></tr>
-  <tr><td>Signals</td><td>All state is <code>signal()</code>; derived state is <code>computed()</code></td></tr>
-  <tr><td>Lazy loading</td><td>Every route uses <code>loadComponent: () => import(...)</code></td></tr>
-  <tr><td>i18n</td><td><code>I18nService</code> holds lang signal; <code>TranslatePipe</code> (<code>| t</code>) translates keys from <code>translations.ts</code></td></tr>
-  <tr><td>RTL</td><td><code>dir="auto"</code> on dynamic text; <code>[attr.dir]="i18n.dir()"</code> on layout root</td></tr>
-  <tr><td>Theme</td><td><code>ThemeService</code> toggles a <code>dark</code> class on <code>&lt;body&gt;</code>; all colors are CSS variables</td></tr>
+  <tr>
+    <th><span class="en">Pattern</span><span class="ar">النمط</span></th>
+    <th><span class="en">How used</span><span class="ar">طريقة الاستخدام</span></th>
+  </tr>
+  <tr>
+    <td><span class="en">Standalone components</span><span class="ar">مكونات مستقلة</span></td>
+    <td><span class="en">Every component uses <code>standalone: true</code> — no NgModules</span><span class="ar">كل مكوّن يستخدم <code>standalone: true</code> — بدون NgModules</span></td>
+  </tr>
+  <tr>
+    <td>Signals</td>
+    <td><span class="en">All state is <code>signal()</code>; derived state is <code>computed()</code></span><span class="ar">جميع الحالات عبر <code>signal()</code>؛ الحالات المشتقة عبر <code>computed()</code></span></td>
+  </tr>
+  <tr>
+    <td><span class="en">Lazy loading</span><span class="ar">التحميل الكسول</span></td>
+    <td><span class="en">Every route uses <code>loadComponent: () => import(...)</code></span><span class="ar">كل مسار يستخدم <code>loadComponent: () => import(...)</code></span></td>
+  </tr>
+  <tr>
+    <td>i18n</td>
+    <td><span class="en"><code>I18nService</code> holds lang signal; <code>TranslatePipe</code> (<code>| t</code>) translates keys from <code>translations.ts</code></span><span class="ar"><code>I18nService</code> يحمل إشارة اللغة؛ <code>TranslatePipe</code> (<code>| t</code>) يترجم المفاتيح من <code>translations.ts</code></span></td>
+  </tr>
+  <tr>
+    <td>RTL</td>
+    <td><span class="en"><code>dir="auto"</code> on dynamic text; <code>[attr.dir]="i18n.dir()"</code> on layout root</span><span class="ar"><code>dir="auto"</code> للنصوص الديناميكية؛ <code>[attr.dir]="i18n.dir()"</code> على جذر التخطيط</span></td>
+  </tr>
+  <tr>
+    <td><span class="en">Theme</span><span class="ar">الثيم</span></td>
+    <td><span class="en"><code>ThemeService</code> toggles a <code>dark</code> class on <code>&lt;body&gt;</code>; all colors are CSS variables</span><span class="ar"><code>ThemeService</code> يبدّل كلاس <code>dark</code> على <code>&lt;body&gt;</code>؛ جميع الألوان متغيرات CSS</span></td>
+  </tr>
 </table>
 
-<h3 id="services">data.services.ts — Service List</h3>
+<h3 id="services"><span class="en">data.services.ts — Service List</span><span class="ar">data.services.ts — قائمة الخدمات</span></h3>
 <table>
-  <tr><th>Class</th><th>Endpoints</th></tr>
+  <tr>
+    <th><span class="en">Class</span><span class="ar">الكلاس</span></th>
+    <th><span class="en">Endpoints</span><span class="ar">نقاط النهاية</span></th>
+  </tr>
   <tr><td><code>TaskService</code></td><td><code>/api/tasks</code></td></tr>
   <tr><td><code>UserService</code></td><td><code>/api/users</code></td></tr>
   <tr><td><code>ProjectService</code></td><td><code>/api/projects</code></td></tr>
@@ -552,94 +634,131 @@ Services are registered as scoped via <code>DependencyInjection.cs</code>.</p>
 </table>
 
 <!-- ── API Reference ── -->
-<h2 id="api-ref">API Reference</h2>
-<p>Base URL: <code>http://192.168.100.68/api</code> · All endpoints require <code>Authorization: Bearer &lt;token&gt;</code></p>
+<h2 id="api-ref"><span class="en">API Reference</span><span class="ar">مرجع API</span></h2>
+<p>
+  <span class="en">Base URL: <code>http://192.168.100.68/api</code> · All endpoints require <code>Authorization: Bearer &lt;token&gt;</code></span>
+  <span class="ar">الرابط الأساسي: <code>http://192.168.100.68/api</code> · جميع نقاط النهاية تتطلب <code>Authorization: Bearer &lt;token&gt;</code></span>
+</p>
 
-<h3>Auth</h3>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/auth/login</span><span class="ep-desc">Body: {userName, password} → {accessToken, refreshToken, user}</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/auth/refresh</span><span class="ep-desc">Body: {refreshToken}</span></div>
+<h3><span class="en">Auth</span><span class="ar">المصادقة</span></h3>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/auth/login</span><span class="ep-desc"><span class="en">Body: {userName, password} → {accessToken, refreshToken, user}</span><span class="ar">الجسم: {userName, password} ← {accessToken, refreshToken, user}</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/auth/refresh</span><span class="ep-desc"><span class="en">Body: {refreshToken}</span><span class="ar">الجسم: {refreshToken}</span></span></div>
 
-<h3>Tasks</h3>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks</span><span class="ep-desc">Paged list, query params: search, status, priority, type, projectId, page, pageSize</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/{id}</span><span class="ep-desc">Full task detail with subtasks, comments, tags</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/tasks</span><span class="ep-desc">Create task</span></div>
-<div class="endpoint"><span class="method m-put">PUT</span><span class="ep-path">/tasks/{id}</span><span class="ep-desc">Update task</span></div>
-<div class="endpoint"><span class="method m-del">DEL</span><span class="ep-path">/tasks/{id}</span><span class="ep-desc">Soft delete (Admin only)</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/board</span><span class="ep-desc">Kanban view, optional ?projectId=</span></div>
-<div class="endpoint"><span class="method m-patch">PATCH</span><span class="ep-path">/tasks/{id}/move</span><span class="ep-desc">Drag-drop: body {status, boardOrder}</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/tasks/{id}/accept</span><span class="ep-desc">Technician claims ticket; records ClaimedAt</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/{id}/comments</span><span class="ep-desc">Comment list</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/tasks/{id}/comments</span><span class="ep-desc">Add comment</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/my-tickets</span><span class="ep-desc">Employee's own submitted tickets</span></div>
+<h3><span class="en">Tasks</span><span class="ar">المهام</span></h3>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks</span><span class="ep-desc"><span class="en">Paged list, query params: search, status, priority, type, projectId, page, pageSize</span><span class="ar">قائمة مقسّمة، معاملات: search, status, priority, type, projectId, page, pageSize</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/{id}</span><span class="ep-desc"><span class="en">Full task detail with subtasks, comments, tags</span><span class="ar">تفاصيل المهمة الكاملة مع المهام الفرعية والتعليقات والوسوم</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/tasks</span><span class="ep-desc"><span class="en">Create task</span><span class="ar">إنشاء مهمة</span></span></div>
+<div class="endpoint"><span class="method m-put">PUT</span><span class="ep-path">/tasks/{id}</span><span class="ep-desc"><span class="en">Update task</span><span class="ar">تحديث مهمة</span></span></div>
+<div class="endpoint"><span class="method m-del">DEL</span><span class="ep-path">/tasks/{id}</span><span class="ep-desc"><span class="en">Soft delete (Admin only)</span><span class="ar">حذف منطقي (المسؤول فقط)</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/board</span><span class="ep-desc"><span class="en">Kanban view, optional ?projectId=</span><span class="ar">عرض كانبان، اختياري: ?projectId=</span></span></div>
+<div class="endpoint"><span class="method m-patch">PATCH</span><span class="ep-path">/tasks/{id}/move</span><span class="ep-desc"><span class="en">Drag-drop: body {status, boardOrder}</span><span class="ar">سحب وإفلات: الجسم {status, boardOrder}</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/tasks/{id}/accept</span><span class="ep-desc"><span class="en">Technician claims ticket; records ClaimedAt</span><span class="ar">الفني يطالب بالتذكرة؛ يُسجِّل ClaimedAt</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/{id}/comments</span><span class="ep-desc"><span class="en">Comment list</span><span class="ar">قائمة التعليقات</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/tasks/{id}/comments</span><span class="ep-desc"><span class="en">Add comment</span><span class="ar">إضافة تعليق</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/tasks/my-tickets</span><span class="ep-desc"><span class="en">Employee's own submitted tickets</span><span class="ar">تذاكر الموظف المقدَّمة</span></span></div>
 
-<h3>Reports (Admin only)</h3>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/overview</span><span class="ep-desc">Organisation-wide stats</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/area/{id}</span><span class="ep-desc">Single area breakdown</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/branch/{id}</span><span class="ep-desc">Single branch breakdown</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/by-user</span><span class="ep-desc">All technicians ranked by performance</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/user/{userId}</span><span class="ep-desc">Deep single-user profile; ?from=&amp;to=</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/task/{taskId}</span><span class="ep-desc">Full ticket lifecycle with activity log</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/all-tasks</span><span class="ep-desc">All tickets with optional date filter; ?from=&amp;to=</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/trend</span><span class="ep-desc">Daily (last 30 days) + monthly (last 12 months) volume</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/overdue</span><span class="ep-desc">Aging / SLA: open tickets sorted by days open</span></div>
+<h3><span class="en">Reports (Admin only)</span><span class="ar">التقارير (المسؤول فقط)</span></h3>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/overview</span><span class="ep-desc"><span class="en">Organisation-wide stats</span><span class="ar">إحصاءات المنظمة</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/area/{id}</span><span class="ep-desc"><span class="en">Single area breakdown</span><span class="ar">تفصيل منطقة واحدة</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/branch/{id}</span><span class="ep-desc"><span class="en">Single branch breakdown</span><span class="ar">تفصيل فرع واحد</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/by-user</span><span class="ep-desc"><span class="en">All technicians ranked by performance</span><span class="ar">جميع الفنيين مرتَّبون حسب الأداء</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/user/{userId}</span><span class="ep-desc"><span class="en">Deep single-user profile; ?from=&amp;to=</span><span class="ar">ملف مستخدم واحد تفصيلي؛ ?from=&amp;to=</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/task/{taskId}</span><span class="ep-desc"><span class="en">Full ticket lifecycle with activity log</span><span class="ar">دورة حياة التذكرة الكاملة مع سجل النشاط</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/all-tasks</span><span class="ep-desc"><span class="en">All tickets with optional date filter; ?from=&amp;to=</span><span class="ar">جميع التذاكر مع فلتر تاريخ اختياري؛ ?from=&amp;to=</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/trend</span><span class="ep-desc"><span class="en">Daily (last 30 days) + monthly (last 12 months) volume</span><span class="ar">يومي (آخر 30 يوماً) + شهري (آخر 12 شهراً)</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/reports/overdue</span><span class="ep-desc"><span class="en">Aging / SLA: open tickets sorted by days open</span><span class="ar">التقادم / SLA: التذاكر المفتوحة مرتَّبة حسب أيام الفتح</span></span></div>
 
-<h3>Users</h3>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/users</span><span class="ep-desc">All users (Admin)</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/users</span><span class="ep-desc">Create user</span></div>
-<div class="endpoint"><span class="method m-put">PUT</span><span class="ep-path">/users/{id}</span><span class="ep-desc">Update user</span></div>
-<div class="endpoint"><span class="method m-patch">PATCH</span><span class="ep-path">/users/{id}/availability</span><span class="ep-desc">Toggle technician availability</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/users/{id}/reset-password</span><span class="ep-desc">Admin resets password</span></div>
+<h3><span class="en">Users</span><span class="ar">المستخدمون</span></h3>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/users</span><span class="ep-desc"><span class="en">All users (Admin)</span><span class="ar">جميع المستخدمين (المسؤول)</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/users</span><span class="ep-desc"><span class="en">Create user</span><span class="ar">إنشاء مستخدم</span></span></div>
+<div class="endpoint"><span class="method m-put">PUT</span><span class="ep-path">/users/{id}</span><span class="ep-desc"><span class="en">Update user</span><span class="ar">تحديث مستخدم</span></span></div>
+<div class="endpoint"><span class="method m-patch">PATCH</span><span class="ep-path">/users/{id}/availability</span><span class="ep-desc"><span class="en">Toggle technician availability</span><span class="ar">تبديل توفر الفني</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/users/{id}/reset-password</span><span class="ep-desc"><span class="en">Admin resets password</span><span class="ar">المسؤول يعيد تعيين كلمة المرور</span></span></div>
 
-<h3>Other endpoints</h3>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/dashboard</span><span class="ep-desc">KPI stats + charts for current user</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/categories</span><span class="ep-desc">Ticket categories</span></div>
-<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/attachments/upload/{taskId}</span><span class="ep-desc">Multipart file upload</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/organization/areas</span><span class="ep-desc">Areas list</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/organization/branches</span><span class="ep-desc">Branches list</span></div>
-<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/organization/my-branch</span><span class="ep-desc">Branch card for current employee</span></div>
+<h3><span class="en">Other endpoints</span><span class="ar">نقاط نهاية أخرى</span></h3>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/dashboard</span><span class="ep-desc"><span class="en">KPI stats + charts for current user</span><span class="ar">إحصاءات KPI + رسوم بيانية للمستخدم الحالي</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/categories</span><span class="ep-desc"><span class="en">Ticket categories</span><span class="ar">فئات التذاكر</span></span></div>
+<div class="endpoint"><span class="method m-post">POST</span><span class="ep-path">/attachments/upload/{taskId}</span><span class="ep-desc"><span class="en">Multipart file upload</span><span class="ar">رفع ملف متعدد الأجزاء</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/organization/areas</span><span class="ep-desc"><span class="en">Areas list</span><span class="ar">قائمة المناطق</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/organization/branches</span><span class="ep-desc"><span class="en">Branches list</span><span class="ar">قائمة الفروع</span></span></div>
+<div class="endpoint"><span class="method m-get">GET</span><span class="ep-path">/organization/my-branch</span><span class="ep-desc"><span class="en">Branch card for current employee</span><span class="ar">بطاقة فرع الموظف الحالي</span></span></div>
 
 <!-- ── Deployment ── -->
-<h2 id="deploy">Deployment Guide</h2>
+<h2 id="deploy"><span class="en">Deployment Guide</span><span class="ar">دليل النشر</span></h2>
 
 <div class="callout callout-info">
-  <strong>Overview</strong>
-  Two IIS applications on the same server: the Angular SPA at the root, the .NET API at <code>/api</code>.
-  ESET Endpoint Security manages firewall rules — port 80 must be allowed for LAN subnet.
+  <strong><span class="en">Overview</span><span class="ar">نظرة عامة</span></strong>
+  <span class="en">Two IIS applications on the same server: the Angular SPA at the root, the .NET API at <code>/api</code>.
+  ESET Endpoint Security manages firewall rules — port 80 must be allowed for LAN subnet.</span>
+  <span class="ar">تطبيقان IIS على نفس الخادم: Angular SPA على الجذر، .NET API على <code>/api</code>.
+  يدير ESET Endpoint Security قواعد جدار الحماية — يجب السماح بالمنفذ 80 لشبكة LAN الفرعية.</span>
 </div>
 
-<h3 id="backend-deploy">Backend (IIS) Deploy</h3>
+<h3 id="backend-deploy"><span class="en">Backend (IIS) Deploy</span><span class="ar">نشر الخلفية (IIS)</span></h3>
 <ol class="steps">
-  <li>Touch <code>app_offline.htm</code> in the API folder to gracefully stop IIS from serving requests while files are locked.<br><code>New-Item -ItemType File "D:\Projetcs\Cloude\deploy\api\app_offline.htm" -Force</code></li>
-  <li>Publish the .NET project:<br><code>dotnet publish src/TaskFlow.Api/TaskFlow.Api.csproj -c Release -o D:\Projetcs\Cloude\deploy\api_pub</code></li>
-  <li>Robocopy published output to IIS folder:<br><code>robocopy D:\Projetcs\Cloude\deploy\api_pub D:\Projetcs\Cloude\deploy\api /MIR /NFL /NDL</code><br>Robocopy exit codes 1–3 are <strong>success</strong>. Only ≥ 4 is an error.</li>
-  <li>Remove the offline marker to bring the API back online:<br><code>Remove-Item D:\Projetcs\Cloude\deploy\api\app_offline.htm -Force</code></li>
+  <li>
+    <span class="en">Touch <code>app_offline.htm</code> in the API folder to gracefully stop IIS from serving requests while files are locked.</span>
+    <span class="ar">أنشئ <code>app_offline.htm</code> في مجلد API لإيقاف IIS عن خدمة الطلبات بينما الملفات مقفلة.</span>
+    <br><code>New-Item -ItemType File "D:\Projetcs\Cloude\deploy\api\app_offline.htm" -Force</code>
+  </li>
+  <li>
+    <span class="en">Publish the .NET project:</span>
+    <span class="ar">انشر مشروع .NET:</span>
+    <br><code>dotnet publish src/TaskFlow.Api/TaskFlow.Api.csproj -c Release -o D:\Projetcs\Cloude\deploy\api_pub</code>
+  </li>
+  <li>
+    <span class="en">Robocopy published output to IIS folder:</span>
+    <span class="ar">انسخ المخرجات المنشورة إلى مجلد IIS عبر Robocopy:</span>
+    <br><code>robocopy D:\Projetcs\Cloude\deploy\api_pub D:\Projetcs\Cloude\deploy\api /MIR /NFL /NDL</code>
+    <br><span class="en">Robocopy exit codes 1–3 are <strong>success</strong>. Only ≥ 4 is an error.</span>
+    <span class="ar">أكواد خروج Robocopy 1–3 <strong>نجاح</strong>. فقط ≥ 4 يعني خطأ.</span>
+  </li>
+  <li>
+    <span class="en">Remove the offline marker to bring the API back online:</span>
+    <span class="ar">احذف ملف الوضع غير المتصل لإعادة API للعمل:</span>
+    <br><code>Remove-Item D:\Projetcs\Cloude\deploy\api\app_offline.htm -Force</code>
+  </li>
 </ol>
 
-<h3 id="frontend-deploy">Frontend (IIS) Deploy</h3>
+<h3 id="frontend-deploy"><span class="en">Frontend (IIS) Deploy</span><span class="ar">نشر الواجهة (IIS)</span></h3>
 <ol class="steps">
-  <li>Add Node to path (if needed in PowerShell session):<br><code>$env:Path += ";C:\Program Files\nodejs"</code></li>
-  <li>Build Angular:<br><code>cd frontend; node ".\node_modules\@angular\cli\bin\ng.js" build --configuration production</code></li>
-  <li>Robocopy the browser output:<br><code>robocopy frontend\dist\taskflow\browser D:\Projetcs\Cloude\deploy\web /MIR /NFL /NDL</code></li>
+  <li>
+    <span class="en">Add Node to path (if needed in PowerShell session):</span>
+    <span class="ar">أضف Node إلى المسار (إذا لزم في جلسة PowerShell):</span>
+    <br><code>$env:Path += ";C:\Program Files\nodejs"</code>
+  </li>
+  <li>
+    <span class="en">Build Angular:</span>
+    <span class="ar">ابنِ Angular:</span>
+    <br><code>cd frontend; node ".\node_modules\@angular\cli\bin\ng.js" build --configuration production</code>
+  </li>
+  <li>
+    <span class="en">Robocopy the browser output:</span>
+    <span class="ar">انسخ مخرجات المتصفح عبر Robocopy:</span>
+    <br><code>robocopy frontend\dist\taskflow\browser D:\Projetcs\Cloude\deploy\web /MIR /NFL /NDL</code>
+  </li>
 </ol>
 
 <div class="callout callout-warn">
-  <strong>ESET Firewall</strong>
-  If inbound connections fail on port 80 after deploy, open ESET Endpoint Security → Network protection → Rules,
-  and verify the rule allowing inbound TCP 80 for <code>w3wp.exe</code> is active.
+  <strong>ESET <span class="en">Firewall</span><span class="ar">جدار الحماية</span></strong>
+  <span class="en">If inbound connections fail on port 80 after deploy, open ESET Endpoint Security → Network protection → Rules,
+  and verify the rule allowing inbound TCP 80 for <code>w3wp.exe</code> is active.</span>
+  <span class="ar">إذا فشلت الاتصالات الواردة على المنفذ 80 بعد النشر، افتح ESET Endpoint Security ← حماية الشبكة ← القواعد،
+  وتحقق من تفعيل القاعدة التي تسمح بـ TCP 80 الوارد لـ <code>w3wp.exe</code>.</span>
 </div>
 
-<h3 id="db">Database Migrations</h3>
+<h3 id="db"><span class="en">Database Migrations</span><span class="ar">ترحيلات قاعدة البيانات</span></h3>
 <ol class="steps">
-  <li>Ensure connection string in <code>appsettings.json</code> is correct.</li>
-  <li>Add migration: <code>dotnet ef migrations add &lt;Name&gt; -p TaskFlow.Infrastructure -s TaskFlow.Api</code></li>
-  <li>Apply: <code>dotnet ef database update -p TaskFlow.Infrastructure -s TaskFlow.Api</code></li>
-  <li>The seeder (<code>DatabaseSeeder.cs</code>) runs automatically on first start to seed roles and admin user.</li>
+  <li><span class="en">Ensure connection string in <code>appsettings.json</code> is correct.</span><span class="ar">تأكد من صحة سلسلة الاتصال في <code>appsettings.json</code>.</span></li>
+  <li><span class="en">Add migration:</span><span class="ar">أضف ترحيلاً:</span> <code>dotnet ef migrations add &lt;Name&gt; -p TaskFlow.Infrastructure -s TaskFlow.Api</code></li>
+  <li><span class="en">Apply:</span><span class="ar">طبّق:</span> <code>dotnet ef database update -p TaskFlow.Infrastructure -s TaskFlow.Api</code></li>
+  <li><span class="en">The seeder (<code>DatabaseSeeder.cs</code>) runs automatically on first start to seed roles and admin user.</span><span class="ar">يعمل البذار (<code>DatabaseSeeder.cs</code>) تلقائياً عند التشغيل الأول لبذر الأدوار والمستخدم المسؤول.</span></li>
 </ol>
 
 <!-- ── Environment Config ── -->
-<h2 id="env">Environment Configuration</h2>
+<h2 id="env"><span class="en">Environment Configuration</span><span class="ar">إعداد البيئة</span></h2>
 
-<h4>Backend — appsettings.json</h4>
+<h4><span class="en">Backend — appsettings.json</span><span class="ar">الخلفية — appsettings.json</span></h4>
 <pre><code>{
   "ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=TaskFlowDb;Trusted_Connection=True;..."
@@ -659,57 +778,76 @@ Services are registered as scoped via <code>DependencyInjection.cs</code>.</p>
   }
 }</code></pre>
 
-<h4>Frontend — environment.ts</h4>
+<h4><span class="en">Frontend — environment.ts</span><span class="ar">الواجهة — environment.ts</span></h4>
 <pre><code>export const environment = {
   production: true,
   apiUrl: 'http://192.168.100.68/api'
 };</code></pre>
 
 <!-- ── Extending ── -->
-<h2 id="extending">Extending the App</h2>
+<h2 id="extending"><span class="en">Extending the App</span><span class="ar">توسعة التطبيق</span></h2>
 
-<h3>Adding a new report endpoint</h3>
+<h3><span class="en">Adding a new report endpoint</span><span class="ar">إضافة نقطة نهاية تقرير جديدة</span></h3>
 <ol class="steps">
-  <li><strong>DTO</strong> — add a new record to <code>ReportDtos.cs</code></li>
-  <li><strong>Interface</strong> — add the method signature to <code>IReportService</code> in <code>ReportService.cs</code></li>
-  <li><strong>Service</strong> — implement the method in the <code>ReportService</code> class (before <code>// ----- helpers -----</code>)</li>
-  <li><strong>Controller</strong> — add a <code>[HttpGet("...")]</code> action to <code>ReportsController.cs</code></li>
-  <li><strong>Frontend model</strong> — add the TypeScript interface to <code>models.ts</code></li>
-  <li><strong>Frontend service</strong> — add a method to <code>ReportService</code> in <code>data.services.ts</code></li>
-  <li><strong>UI</strong> — add the mode to <code>reports.ts</code> mode union, add a segment button, load method, and template section</li>
+  <li><strong>DTO</strong> — <span class="en">add a new record to <code>ReportDtos.cs</code></span><span class="ar">أضف سجلاً جديداً إلى <code>ReportDtos.cs</code></span></li>
+  <li><strong><span class="en">Interface</span><span class="ar">الواجهة</span></strong> — <span class="en">add the method signature to <code>IReportService</code> in <code>ReportService.cs</code></span><span class="ar">أضف توقيع الدالة إلى <code>IReportService</code> في <code>ReportService.cs</code></span></li>
+  <li><strong><span class="en">Service</span><span class="ar">الخدمة</span></strong> — <span class="en">implement the method in the <code>ReportService</code> class (before <code>// ----- helpers -----</code>)</span><span class="ar">نفِّذ الدالة في كلاس <code>ReportService</code> (قبل <code>// ----- helpers -----</code>)</span></li>
+  <li><strong><span class="en">Controller</span><span class="ar">وحدة التحكم</span></strong> — <span class="en">add a <code>[HttpGet("...")]</code> action to <code>ReportsController.cs</code></span><span class="ar">أضف إجراء <code>[HttpGet("...")]</code> إلى <code>ReportsController.cs</code></span></li>
+  <li><strong><span class="en">Frontend model</span><span class="ar">نموذج الواجهة</span></strong> — <span class="en">add the TypeScript interface to <code>models.ts</code></span><span class="ar">أضف واجهة TypeScript إلى <code>models.ts</code></span></li>
+  <li><strong><span class="en">Frontend service</span><span class="ar">خدمة الواجهة</span></strong> — <span class="en">add a method to <code>ReportService</code> in <code>data.services.ts</code></span><span class="ar">أضف دالة إلى <code>ReportService</code> في <code>data.services.ts</code></span></li>
+  <li><strong>UI</strong> — <span class="en">add the mode to <code>reports.ts</code> mode union, add a segment button, load method, and template section</span><span class="ar">أضف النمط إلى نوع الاتحاد في <code>reports.ts</code>، وأضف زر الشريحة ودالة التحميل وقسم القالب</span></li>
 </ol>
 
-<h3>Adding a new ticket category (via code)</h3>
+<h3><span class="en">Adding a new ticket category (via code)</span><span class="ar">إضافة فئة تذاكر جديدة (عبر الكود)</span></h3>
 <ol class="steps">
-  <li>In <code>DatabaseSeeder.cs</code>, add a new <code>TicketCategory</code> to the seed block.</li>
-  <li>Or use the Admin → Ticket Categories UI at runtime — no code change needed.</li>
+  <li><span class="en">In <code>DatabaseSeeder.cs</code>, add a new <code>TicketCategory</code> to the seed block.</span><span class="ar">في <code>DatabaseSeeder.cs</code>، أضف <code>TicketCategory</code> جديدة إلى كتلة البذر.</span></li>
+  <li><span class="en">Or use the Admin → Ticket Categories UI at runtime — no code change needed.</span><span class="ar">أو استخدم واجهة المسؤول ← فئات التذاكر في وقت التشغيل — لا يلزم تغيير الكود.</span></li>
 </ol>
 
-<h3>Adding a new user role</h3>
+<h3><span class="en">Adding a new user role</span><span class="ar">إضافة دور مستخدم جديد</span></h3>
 <ol class="steps">
-  <li>Add the role name string constant to <code>Roles.cs</code></li>
-  <li>Seed the role in <code>DatabaseSeeder.cs</code></li>
-  <li>Add <code>[Authorize(Roles = "...")]</code> to the relevant controllers</li>
-  <li>Update role checks in <code>shell.ts</code> nav guards (<code>auth.hasRole(...)</code>)</li>
-  <li>Update <code>roleGuard</code> data arrays in <code>app.routes.ts</code></li>
+  <li><span class="en">Add the role name string constant to <code>Roles.cs</code></span><span class="ar">أضف ثابت نص اسم الدور إلى <code>Roles.cs</code></span></li>
+  <li><span class="en">Seed the role in <code>DatabaseSeeder.cs</code></span><span class="ar">ابذر الدور في <code>DatabaseSeeder.cs</code></span></li>
+  <li><span class="en">Add <code>[Authorize(Roles = "...")]</code> to the relevant controllers</span><span class="ar">أضف <code>[Authorize(Roles = "...")]</code> إلى وحدات التحكم ذات الصلة</span></li>
+  <li><span class="en">Update role checks in <code>shell.ts</code> nav guards (<code>auth.hasRole(...)</code>)</span><span class="ar">حدِّث فحوصات الأدوار في حراس التنقل بـ <code>shell.ts</code> (<code>auth.hasRole(...)</code>)</span></li>
+  <li><span class="en">Update <code>roleGuard</code> data arrays in <code>app.routes.ts</code></span><span class="ar">حدِّث مصفوفات بيانات <code>roleGuard</code> في <code>app.routes.ts</code></span></li>
 </ol>
 
 <div class="callout callout-tip">
-  <strong>Hot tip: hand-written mappings</strong>
-  The project uses <code>MappingExtensions.cs</code> instead of AutoMapper. When you add a new property to a DTO,
-  update the corresponding <code>ToListItem()</code> or <code>ToDetail()</code> call AND the DTO record constructor in the same file.
+  <strong><span class="en">Hot tip: hand-written mappings</span><span class="ar">نصيحة: التعيينات المكتوبة يدوياً</span></strong>
+  <span class="en">The project uses <code>MappingExtensions.cs</code> instead of AutoMapper. When you add a new property to a DTO,
+  update the corresponding <code>ToListItem()</code> or <code>ToDetail()</code> call AND the DTO record constructor in the same file.</span>
+  <span class="ar">يستخدم المشروع <code>MappingExtensions.cs</code> بدلاً من AutoMapper. عند إضافة خاصية جديدة إلى DTO،
+  حدِّث استدعاء <code>ToListItem()</code> أو <code>ToDetail()</code> المقابل ومُنشئ سجل DTO في نفس الملف.</span>
 </div>
 
 <hr style="border:none;border-top:1px solid var(--border);margin:3rem 0 1rem"/>
 <p style="color:var(--muted);font-size:.8rem;text-align:center">
-  Altuwijri Ticket System · Developer Guide · Generated 2026-06-28
+  <span class="en">Altuwijri Ticket System · Developer Guide · Generated 2026-06-28</span>
+  <span class="ar">نظام تذاكر العتيجي · دليل المطور · تاريخ الإنشاء 2026-06-28</span>
 </p>
 
 </div><!-- /content -->
 </div><!-- /layout -->
 
 <script>
-// Highlight active TOC link on scroll
+/* ── Language toggle ── */
+function setLang(lang) {
+  const html = document.documentElement;
+  html.setAttribute('lang', lang);
+  html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  document.getElementById('btn-en').classList.toggle('on', lang === 'en');
+  document.getElementById('btn-ar').classList.toggle('on', lang === 'ar');
+  localStorage.setItem('dev-guide-lang', lang);
+}
+
+/* ── Restore saved lang ── */
+(function() {
+  const saved = localStorage.getItem('dev-guide-lang');
+  if (saved === 'ar') setLang('ar');
+})();
+
+/* ── Scroll-spy TOC ── */
 const links = document.querySelectorAll('.toc a[href^="#"]');
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {

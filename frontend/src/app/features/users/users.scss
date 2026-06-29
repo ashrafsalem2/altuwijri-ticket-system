@@ -30,6 +30,20 @@ tr.inactive { opacity: .55; }
 }
 .cat-check-name { font-size: .85rem; font-weight: 500; }
 
+/* Purge confirmation modal */
+.purge-modal { max-width: 440px; }
+.purge-avatar {
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  padding: 1rem 0 .75rem; text-align: center;
+  strong { font-size: 1rem; }
+}
+.avatar.lg { width: 56px; height: 56px; font-size: 1.25rem; }
+.purge-warning {
+  background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius-sm);
+  color: #9a3412; padding: .75rem 1rem; font-size: .84rem; line-height: 1.5;
+  margin-top: .5rem;
+}
+
 /* Excel import/export */
 .import-bar {
   display: flex; align-items: center; justify-content: space-between;

@@ -43,6 +43,7 @@ export class UserService {
   create(body: any): Observable<User> { return this.http.post<User>(this.base, body); }
   update(id: number, body: any): Observable<User> { return this.http.put<User>(`${this.base}/${id}`, body); }
   deactivate(id: number): Observable<void> { return this.http.delete<void>(`${this.base}/${id}`); }
+  hardDelete(id: number): Observable<void> { return this.http.delete<void>(`${this.base}/${id}/purge`); }
   resetPassword(id: number, newPassword: string): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/reset-password`, { newPassword });
   }

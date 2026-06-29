@@ -42,6 +42,14 @@ public class UsersController(IUserService users) : ApiControllerBase
     }
 
     [Authorize(Roles = Roles.Admin)]
+    [HttpDelete("{id:int}/purge")]
+    public async Task<IActionResult> HardDelete(int id, CancellationToken ct)
+    {
+        await users.HardDeleteAsync(id, CurrentUserId, ct);
+        return NoContent();
+    }
+
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost("{id:int}/reset-password")]
     public async Task<IActionResult> ResetPassword(int id, [FromBody] ResetPasswordRequest request, CancellationToken ct)
     {

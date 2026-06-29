@@ -108,6 +108,7 @@ export const EN = {
   'usr.phone': 'Phone', 'usr.active': 'Active', 'usr.inactive': 'Inactive',
   'usr.lastLogin': 'Last Login', 'usr.showInactive': 'Show inactive',
   'usr.newUser': 'New User', 'usr.resetPw': 'Reset PW', 'usr.branch': 'Branch', 'usr.branches': 'Branches (Multi-site)',
+  'usr.purge': 'Delete with History', 'usr.purgeConfirm': 'This will permanently delete the user and ALL their tickets, comments, and chat history. This cannot be undone.',
   // Reports
   'rep.title': 'Reports', 'rep.all': 'All Tickets', 'rep.period': 'By Period',
   'rep.single': 'Single Ticket', 'rep.generate': 'Generate', 'rep.from': 'From', 'rep.to': 'To',
@@ -330,6 +331,7 @@ export const AR: Record<keyof typeof EN, string> = {
   'usr.phone': 'الهاتف', 'usr.active': 'نشط', 'usr.inactive': 'غير نشط',
   'usr.lastLogin': 'آخر دخول', 'usr.showInactive': 'عرض غير النشطين',
   'usr.newUser': 'مستخدم جديد', 'usr.resetPw': 'إعادة كلمة المرور', 'usr.branch': 'الفرع', 'usr.branches': 'الفروع (متعدد المواقع)',
+  'usr.purge': 'حذف مع السجل', 'usr.purgeConfirm': 'سيتم حذف المستخدم نهائياً مع جميع تذاكره وتعليقاته وسجل المحادثات. لا يمكن التراجع عن هذا الإجراء.',
   // Reports
   'rep.title': 'التقارير', 'rep.all': 'جميع التذاكر', 'rep.period': 'حسب الفترة',
   'rep.single': 'تذكرة واحدة', 'rep.generate': 'توليد', 'rep.from': 'من', 'rep.to': 'إلى',

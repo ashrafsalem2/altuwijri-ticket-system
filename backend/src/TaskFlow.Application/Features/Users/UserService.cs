@@ -13,6 +13,7 @@ public interface IUserService
     Task<UserDto> CreateAsync(CreateUserRequest request, CancellationToken ct = default);
     Task<UserDto> UpdateAsync(int id, UpdateUserRequest request, CancellationToken ct = default);
     Task DeactivateAsync(int id, CancellationToken ct = default);
+    Task HardDeleteAsync(int id, int currentUserId, CancellationToken ct = default);
     Task ResetPasswordAsync(int id, string newPassword, CancellationToken ct = default);
     Task SetAvailabilityAsync(int userId, bool available, CancellationToken ct = default);
     Task<IReadOnlyList<RoleDto>> GetRolesAsync(CancellationToken ct = default);
@@ -112,6 +113,64 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id, ct)
             ?? throw new NotFoundException("User", id);
         user.IsActive = false;
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task HardDeleteAsync(int id, int currentUserId, CancellationToken ct = default)
+    {
+        if (id == currentUserId)
+            throw new BadRequestException("You cannot delete your own account.");
+
+        var user = await db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == id, ct)
+            ?? throw new NotFoundException("User", id);
+
+        // Null out ParentTaskId on subtasks of user's reported tasks to avoid Restrict FK
+        var reportedTaskIds = await db.Tasks.IgnoreQueryFilters()
+            .Where(t => t.ReporterId == id)
+            .Select(t => t.Id)
+            .ToListAsync(ct);
+
+        if (reportedTaskIds.Count > 0)
+        {
+            var orphanedSubtasks = await db.Tasks.IgnoreQueryFilters()
+                .Where(t => t.ParentTaskId.HasValue && reportedTaskIds.Contains(t.ParentTaskId.Value) && t.ReporterId != id)
+                .ToListAsync(ct);
+            foreach (var sub in orphanedSubtasks) sub.ParentTaskId = null;
+            if (orphanedSubtasks.Count > 0) await db.SaveChangesAsync(ct);
+
+            // Delete all tasks reported by user (cascades: comments, attachments, activity logs, tags)
+            var reportedTasks = await db.Tasks.IgnoreQueryFilters()
+                .Where(t => t.ReporterId == id)
+                .ToListAsync(ct);
+            db.Tasks.RemoveRange(reportedTasks);
+        }
+
+        // Delete remaining comments by user on other tasks
+        var comments = await db.Comments.IgnoreQueryFilters()
+            .Where(c => c.AuthorId == id)
+            .ToListAsync(ct);
+        db.Comments.RemoveRange(comments);
+
+        // Delete chat messages sent by user in conversations not owned by user
+        var ownedConvIds = await db.ChatConversations
+            .Where(c => c.IssuerId == id || c.TechnicianId == id)
+            .Select(c => c.Id).ToListAsync(ct);
+        if (ownedConvIds.Count < await db.ChatMessages.CountAsync(m => m.SenderId == id, ct))
+        {
+            var orphanMsgs = await db.ChatMessages
+                .Where(m => m.SenderId == id && !ownedConvIds.Contains(m.ConversationId))
+                .ToListAsync(ct);
+            db.ChatMessages.RemoveRange(orphanMsgs);
+        }
+
+        // Delete conversations owned by user (cascades: messages)
+        var conversations = await db.ChatConversations
+            .Where(c => c.IssuerId == id || c.TechnicianId == id)
+            .ToListAsync(ct);
+        db.ChatConversations.RemoveRange(conversations);
+
+        // Hard-delete user (cascades: RefreshTokens, Notifications, UserBranches, UserCategories)
+        db.Users.Remove(user);
         await db.SaveChangesAsync(ct);
     }
 

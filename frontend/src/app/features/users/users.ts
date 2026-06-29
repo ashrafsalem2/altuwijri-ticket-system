@@ -70,6 +70,7 @@ import { initials } from '../../shared/util';
                   <td><div class="flex gap-1">
                     <button class="btn btn-sm btn-ghost" (click)="openEdit(u)">{{ 'c.edit' | t }}</button>
                     <button class="btn btn-sm btn-ghost" (click)="resetPw(u)">{{ 'usr.resetPw' | t }}</button>
+                    <button class="btn btn-sm btn-danger" (click)="confirmPurge(u)">{{ 'usr.purge' | t }}</button>
                   </div></td>
                 }
               </tr>
@@ -162,6 +163,29 @@ import { initials } from '../../shared/util';
       </div>
     </div>
   }
+
+  @if (purgeTarget()) {
+    <div class="overlay" (click)="purgeTarget.set(null)">
+      <div class="modal card purge-modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>⚠ {{ 'usr.purge' | t }}</h3>
+          <button class="btn btn-icon btn-ghost" (click)="purgeTarget.set(null)">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="purge-avatar">
+            <span class="avatar lg" [style.background]="purgeTarget()!.avatarColor || '#64748b'">{{ ini(purgeTarget()!.fullName) }}</span>
+            <strong>{{ purgeTarget()!.fullName }}</strong>
+            <span class="text-sm muted">{{ purgeTarget()!.email }}</span>
+          </div>
+          <div class="purge-warning">{{ 'usr.purgeConfirm' | t }}</div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" (click)="purgeTarget.set(null)">{{ 'c.cancel' | t }}</button>
+          <button class="btn btn-danger" (click)="purge()" [disabled]="purging()">{{ 'usr.purge' | t }}</button>
+        </div>
+      </div>
+    </div>
+  }
   `
 })
 export class Users implements OnInit {
@@ -184,6 +208,8 @@ export class Users implements OnInit {
   error = signal('');
   importing = signal(false);
   importResult = signal<ImportResult | null>(null);
+  purgeTarget = signal<User | null>(null);
+  purging = signal(false);
   includeInactive = false;
   editing = false;
   editId?: number;
@@ -237,6 +263,18 @@ export class Users implements OnInit {
     obs.subscribe({
       next: () => { this.saving.set(false); this.showForm.set(false); this.load(); },
       error: e => { this.error.set(e?.error?.title ?? 'Save failed.'); this.saving.set(false); }
+    });
+  }
+
+  confirmPurge(u: User) { this.purgeTarget.set(u); }
+
+  purge() {
+    const u = this.purgeTarget();
+    if (!u) return;
+    this.purging.set(true);
+    this.svc.hardDelete(u.id).subscribe({
+      next: () => { this.purging.set(false); this.purgeTarget.set(null); this.load(); },
+      error: e => { this.purging.set(false); alert(e?.error?.title ?? 'Delete failed.'); }
     });
   }
 

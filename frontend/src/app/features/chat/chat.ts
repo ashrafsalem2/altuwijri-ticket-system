@@ -70,7 +70,7 @@ import { initials, timeAgo } from '../../shared/util';
             <button class="btn btn-sm btn-ghost" (click)="close(c)" [disabled]="c.status==='Closed'">{{ 'chat.close' | t }}</button>
           </div>
 
-          <div class="msgs" #msgList>
+          <div class="msgs" #msgList (scroll)="onMsgsScroll(msgList)">
             @for (m of messages(); track m.id) {
               <div class="msg" [class.mine]="m.isMine">
                 @if (!m.isMine) { <span class="avatar sm" [style.background]="m.senderColor || '#64748b'">{{ ini(m.senderName) }}</span> }
@@ -164,6 +164,7 @@ export class Chat implements OnInit, OnDestroy {
     return s ? this.technicians().filter(t => t.fullName.toLowerCase().includes(s)) : this.technicians();
   });
   private poll?: any;
+  private userScrolledUp = false;
 
   /** Availability map: userId -> isAvailable */
   private availMap = new Map<number, boolean>();
@@ -215,15 +216,30 @@ export class Chat implements OnInit, OnDestroy {
     });
   }
 
-  select(c: Conversation) { this.active.set(c); this.loadMessages(c.id); }
+  select(c: Conversation) {
+    this.active.set(c);
+    this.userScrolledUp = false;   // reset so conversation switch always jumps to bottom
+    this.loadMessages(c.id, true);
+  }
 
-  loadMessages(id: number) {
+  loadMessages(id: number, forceScroll = false) {
     this.chatSvc.messages(id).subscribe(m => {
       this.messages.set(m);
-      // Backend marks messages as read on GET; refresh badge immediately
       this.chatSvc.refreshUnread();
-      setTimeout(() => { const el = document.querySelector('.msgs'); if (el) el.scrollTop = el.scrollHeight; });
+      setTimeout(() => {
+        if (forceScroll || !this.userScrolledUp) this.scrollToBottom();
+      });
     });
+  }
+
+  onMsgsScroll(el: HTMLElement) {
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    this.userScrolledUp = distanceFromBottom > 80;
+  }
+
+  private scrollToBottom() {
+    const el = document.querySelector('.msgs') as HTMLElement;
+    if (el) el.scrollTop = el.scrollHeight;
   }
 
   send() {
@@ -232,7 +248,8 @@ export class Chat implements OnInit, OnDestroy {
     this.draft = '';
     this.chatSvc.send(c.id, text).subscribe(m => {
       this.messages.update(ms => [...ms, m]);
-      setTimeout(() => { const el = document.querySelector('.msgs'); if (el) el.scrollTop = el.scrollHeight; });
+      this.userScrolledUp = false;  // own message always snaps to bottom
+      setTimeout(() => this.scrollToBottom());
       this.loadConversations(false);
     });
   }

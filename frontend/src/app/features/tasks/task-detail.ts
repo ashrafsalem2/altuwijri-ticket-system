@@ -23,7 +23,7 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
       <div class="page-header">
         <div class="flex items-center gap-1">
           <a routerLink="/tasks" class="btn btn-ghost btn-sm">← {{ 'nav.tasks' | t }}</a>
-          <span class="badge" [class]="'st-' + t.status">{{ label(t.status) }}</span>
+          <span class="badge" [class]="'st-' + t.status" [class.status-pop]="statusFlash()">{{ label(t.status) }}</span>
           <span class="badge" [class]="'prio-' + t.priority">{{ t.priority }}</span>
           <span class="type-badge">{{ tIcon(t.type) }} {{ typeLabel(t.type) }}</span>
         </div>
@@ -290,6 +290,34 @@ import { initials, timeAgo, typeIcon } from '../../shared/util';
       <img class="lightbox-img" [src]="lightboxSrc()!" (click)="$event.stopPropagation()" />
     </div>
   }
+
+  <!-- Thumbs-up accepted animation -->
+  @if (showThumbUp()) {
+    <div class="anim-overlay" aria-hidden="true">
+      <div class="thumbup-bubble">
+        <span class="thumbup-emoji">👍</span>
+        <span class="thumbup-label">Ticket Accepted!</span>
+      </div>
+    </div>
+  }
+
+  <!-- Celebration animation -->
+  @if (showCelebration()) {
+    <div class="anim-overlay celebration-overlay" aria-hidden="true">
+      @for (p of confettiPieces; track p.id) {
+        <div class="confetti-p"
+          [style.left]="p.left"
+          [style.width.px]="p.w"
+          [style.height.px]="p.h"
+          [style.background]="p.color"
+          [style.border-radius]="p.br"
+          [style.animation-delay]="p.animDelay"
+          [style.animation-duration]="p.animDur">
+        </div>
+      }
+      <div class="celebration-msg">🎉&nbsp; Ticket Completed! &nbsp;🎊</div>
+    </div>
+  }
   `
 })
 export class TaskDetail implements OnInit, OnChanges, OnDestroy {
@@ -315,6 +343,25 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   newComment = '';
   linkTitle = '';
   linkUrl = '';
+
+  // ── Animations ────────────────────────────────────────────
+  statusFlash    = signal(false);
+  showThumbUp    = signal(false);
+  showCelebration = signal(false);
+
+  readonly confettiPieces = (() => {
+    const colors = ['#008272','#0ea5e9','#f59e0b','#ec4899','#10b981','#6366f1','#f97316','#84cc16'];
+    return Array.from({ length: 34 }, (_, i) => ({
+      id: i,
+      color: colors[i % colors.length],
+      left: `${((i * 3.07 + 0.8) % 97 + 1.5).toFixed(1)}%`,
+      animDelay: `${(i * 0.09 % 1.25).toFixed(2)}s`,
+      animDur:   `${(2.5 + (i % 7) * 0.28).toFixed(2)}s`,
+      w: 8 + (i % 5) * 2,
+      h: i % 3 === 0 ? 8 + (i % 4) * 3 : 5 + (i % 3) * 3,
+      br: i % 4 === 0 ? '50%' : '2px'
+    }));
+  })();
 
   // Handler panel
   staffUsers = signal<User[]>([]);
@@ -350,6 +397,22 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   quickSaved = signal(false);
   private commentPoll?: any;
   private taskPoll?: any;
+
+  private triggerStatusFlash() {
+    this.statusFlash.set(false);
+    setTimeout(() => {
+      this.statusFlash.set(true);
+      setTimeout(() => this.statusFlash.set(false), 700);
+    }, 16);
+  }
+  private triggerThumbUp() {
+    this.showThumbUp.set(true);
+    setTimeout(() => this.showThumbUp.set(false), 2700);
+  }
+  private triggerCelebration() {
+    this.showCelebration.set(true);
+    setTimeout(() => this.showCelebration.set(false), 4900);
+  }
 
   ngOnInit() { this.load(); }
   ngOnChanges(changes: SimpleChanges) {
@@ -391,9 +454,14 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
       next: fresh => {
         const cur = this.task();
         if (!cur) return;
-        if (fresh.status !== cur.status || fresh.progress !== cur.progress ||
+        const statusChanged = fresh.status !== cur.status;
+        if (statusChanged || fresh.progress !== cur.progress ||
             fresh.assigneeId !== cur.assigneeId || fresh.assigneeName !== cur.assigneeName) {
           this.task.set(fresh);
+        }
+        if (statusChanged) {
+          if (fresh.status === 'Done') this.triggerCelebration();
+          else this.triggerStatusFlash();
         }
       }
     });
@@ -461,6 +529,8 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
       next: () => {
         this.quickSaving.set(false);
         this.quickStatus = 'InProgress';
+        this.triggerThumbUp();
+        this.triggerStatusFlash();
         this.load();
       },
       error: () => this.quickSaving.set(false)
@@ -481,6 +551,9 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
       next: () => {
         this.handlerSaving.set(false);
         this.handlerSaved.set(true);
+        this.triggerThumbUp();
+        if (this.hStatus === 'Done') this.triggerCelebration();
+        else this.triggerStatusFlash();
         setTimeout(() => {
           this.handlerSaved.set(false);
           this.showHandlerModal.set(false);
@@ -548,6 +621,8 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
       next: () => {
         this.quickSaving.set(false);
         this.quickSaved.set(true);
+        if (this.quickStatus === 'Done') this.triggerCelebration();
+        else this.triggerStatusFlash();
         setTimeout(() => { this.quickSaved.set(false); this.load(); }, 1200);
       },
       error: () => this.quickSaving.set(false)

@@ -18,8 +18,12 @@
   transition: filter .3s;
 }
 .logo-img.hidden { display: none; }
-/* ── Dark mode: invert to white on dark sidebar ── */
-[data-theme="dark"] .logo-img { filter: brightness(0) invert(1); }
+/* ── Dark mode: invert to white + glow so it pops on dark teal sidebar ── */
+[data-theme="dark"] .logo-img {
+  filter: brightness(0) invert(1)
+          drop-shadow(0 0 8px rgba(200,235,232,.65))
+          drop-shadow(0 1px 3px rgba(0,0,0,.6));
+}
 
 .logo-txt {
   width: 40px; height: 40px; border-radius: 10px; background: var(--primary); color: #fff;

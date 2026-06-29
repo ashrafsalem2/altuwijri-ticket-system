@@ -18,11 +18,15 @@
   transition: filter .3s;
 }
 .logo-img.hidden { display: none; }
-/* ── Dark mode: invert to white + glow so it pops on dark teal sidebar ── */
+/* ── Dark mode: show logo on a frosted light pill so original colors stay readable ── */
+[data-theme="dark"] .logo-wrap {
+  background: rgba(255,255,255,.92);
+  border-radius: 8px;
+  padding: 2px 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.35);
+}
 [data-theme="dark"] .logo-img {
-  filter: brightness(0) invert(1)
-          drop-shadow(0 0 8px rgba(200,235,232,.65))
-          drop-shadow(0 1px 3px rgba(0,0,0,.6));
+  filter: none;
 }
 
 .logo-txt {
@@ -57,6 +61,7 @@
 
   .brand { padding: .65rem 0; justify-content: center; }
   .logo-img { width: 32px !important; height: 32px !important; }
+  .logo-wrap { padding: 2px !important; border-radius: 6px !important; }
   .logo-txt { width: 32px; height: 32px; font-size: .75rem; }
   .brand-text, .side-foot { display: none; }
   .branch-card { display: none; }

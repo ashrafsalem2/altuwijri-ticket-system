@@ -240,7 +240,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
 
         using var stream = file.OpenReadStream();
         using var wb = new XLWorkbook(stream);
-        var ws = wb.Worksheets.First();
+        var ws = wb.Worksheets.First(s => !s.Name.StartsWith("_"));
 
         var existingAreas    = await db.Areas.Where(a => !a.IsDeleted).ToListAsync(ct);
         var existingBranches = await db.Branches.Where(b => !b.IsDeleted).ToListAsync(ct);
@@ -437,7 +437,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
 
         using var stream = file.OpenReadStream();
         using var wb = new XLWorkbook(stream);
-        var ws = wb.Worksheets.First();
+        var ws = wb.Worksheets.First(s => !s.Name.StartsWith("_"));
 
         var existingCodes = await db.Projects.Select(p => p.Code).ToHashSetAsync(ct);
         var users = await db.Users.Where(u => u.IsActive && !u.IsDeleted).ToListAsync(ct);
@@ -624,7 +624,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
 
         using var stream = file.OpenReadStream();
         using var wb = new XLWorkbook(stream);
-        var ws = wb.Worksheets.First();
+        var ws = wb.Worksheets.First(s => !s.Name.StartsWith("_"));
 
         var existingNames = await db.TicketCategories
             .Where(c => !c.IsDeleted)

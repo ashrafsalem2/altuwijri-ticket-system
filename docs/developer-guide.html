@@ -144,6 +144,7 @@
   <hr class="toc-sep">
   <a href="#frontend"><span class="en">Frontend Architecture</span><span class="ar">بنية الواجهة</span></a>
   <a class="toc-h3" href="#components"><span class="en">Component Tree</span><span class="ar">شجرة المكونات</span></a>
+  <a class="toc-h3" href="#design-system"><span class="en">BC Design System</span><span class="ar">نظام تصميم BC</span></a>
   <a class="toc-h3" href="#services"><span class="en">Services</span><span class="ar">الخدمات</span></a>
   <hr class="toc-sep">
   <a href="#api-ref"><span class="en">API Reference</span><span class="ar">مرجع API</span></a>
@@ -168,8 +169,8 @@
 
 <h1>Altuwijri Ticket System</h1>
 <p style="color:var(--muted);margin-bottom:2rem">
-  <span class="en">Developer Reference — v2.1 · Last updated 2026-06-28</span>
-  <span class="ar">مرجع المطور — الإصدار 2.1 · آخر تحديث 2026-06-28</span>
+  <span class="en">Developer Reference — v2.2 · Last updated 2026-06-28</span>
+  <span class="ar">مرجع المطور — الإصدار 2.2 · آخر تحديث 2026-06-28</span>
 </p>
 
 <!-- ── Overview ── -->
@@ -575,7 +576,7 @@
 │   ├── <span class="d">help/</span>            <span class="c"><span class="en">animated user guide</span><span class="ar">دليل مستخدم متحرك</span></span>
 │   └── <span class="d">calendar/</span>
 ├── <span class="d">layout/</span>
-│   └── <span class="f">shell.ts</span>         <span class="c"><span class="en">sidebar, topbar, clock, guidelines, app-links</span><span class="ar">الشريط الجانبي والشريط العلوي والساعة والإرشادات والروابط</span></span>
+│   └── <span class="f">shell.ts</span>         <span class="c"><span class="en">sidebar (collapsible, signal-driven), topbar, live clock bar, guidelines panel, smart app-links bar</span><span class="ar">الشريط الجانبي (قابل للطي، مدفوع بالإشارات)، الشريط العلوي، شريط الساعة الحي، لوحة الإرشادات، شريط الروابط الذكي</span></span>
 └── <span class="d">shared/</span>
     └── <span class="f">util.ts</span>          <span class="c">initials(), timeAgo()</span>
 </div>
@@ -609,9 +610,44 @@
   </tr>
   <tr>
     <td><span class="en">Theme</span><span class="ar">الثيم</span></td>
-    <td><span class="en"><code>ThemeService</code> toggles a <code>dark</code> class on <code>&lt;body&gt;</code>; all colors are CSS variables</span><span class="ar"><code>ThemeService</code> يبدّل كلاس <code>dark</code> على <code>&lt;body&gt;</code>؛ جميع الألوان متغيرات CSS</span></td>
+    <td><span class="en"><code>ThemeService</code> sets <code>data-theme="dark"</code> on <code>&lt;html&gt;</code>; all colors are CSS custom properties declared in <code>:root</code> / <code>[data-theme="dark"]</code> blocks in <code>styles.scss</code></span><span class="ar"><code>ThemeService</code> يضبط <code>data-theme="dark"</code> على عنصر <code>&lt;html&gt;</code>؛ جميع الألوان متغيرات CSS مُعرَّفة في كتلتَي <code>:root</code> و<code>[data-theme="dark"]</code> في <code>styles.scss</code></span></td>
   </tr>
 </table>
+
+<h3 id="design-system"><span class="en">BC Central Design System</span><span class="ar">نظام تصميم BC Central</span></h3>
+<p>
+  <span class="en">The UI is themed after Microsoft Dynamics 365 Business Central. All design tokens live as CSS custom properties in <code>src/styles.scss</code>.</span>
+  <span class="ar">تم تصميم الواجهة على غرار Microsoft Dynamics 365 Business Central. تُعرَّف جميع رموز التصميم كمتغيرات CSS في <code>src/styles.scss</code>.</span>
+</p>
+<table>
+  <tr>
+    <th><span class="en">Variable</span><span class="ar">المتغير</span></th>
+    <th><span class="en">Light value</span><span class="ar">قيمة الوضع الفاتح</span></th>
+    <th><span class="en">Dark value</span><span class="ar">قيمة الوضع الداكن</span></th>
+    <th><span class="en">Usage</span><span class="ar">الاستخدام</span></th>
+  </tr>
+  <tr><td><code>--primary</code></td><td><code>#008272</code></td><td><code>#00B294</code></td><td><span class="en">Buttons, links, active nav, accent lines</span><span class="ar">الأزرار والروابط والتنقل النشط وخطوط التأكيد</span></td></tr>
+  <tr><td><code>--primary-dark</code></td><td><code>#006B6B</code></td><td><code>#008272</code></td><td><span class="en">Hover state, KPI tile tints</span><span class="ar">حالة التمرير، تدرجات بطاقات KPI</span></td></tr>
+  <tr><td><code>--primary-soft</code></td><td><code>#E0F2F0</code></td><td><code>#0D2B29</code></td><td><span class="en">Focus rings, unread notification bg</span><span class="ar">حلقات التركيز، خلفية الإشعارات غير المقروءة</span></td></tr>
+  <tr><td><code>--bg</code></td><td><code>#FAF9F8</code></td><td><code>#252423</code></td><td><span class="en">Page background</span><span class="ar">خلفية الصفحة</span></td></tr>
+  <tr><td><code>--surface</code></td><td><code>#FFFFFF</code></td><td><code>#2D2C2B</code></td><td><span class="en">Cards, dropdowns</span><span class="ar">البطاقات والقوائم المنسدلة</span></td></tr>
+  <tr><td><code>--sidebar</code></td><td><code>#FAF9F8</code></td><td><code>#005252</code></td><td><span class="en">Sidebar &amp; clock bar background</span><span class="ar">خلفية الشريط الجانبي وشريط الساعة</span></td></tr>
+  <tr><td><code>--sidebar-muted</code></td><td><code>#605E5C</code></td><td><code>#A8DEDA</code></td><td><span class="en">Sidebar nav label text</span><span class="ar">نص تسميات التنقل في الشريط الجانبي</span></td></tr>
+  <tr><td><code>--text</code></td><td><code>#323130</code></td><td><code>#F3F2F1</code></td><td><span class="en">Body text</span><span class="ar">نص المحتوى</span></td></tr>
+  <tr><td><code>--border</code></td><td><code>#D2D0CE</code></td><td><code>#484644</code></td><td><span class="en">Dividers, card borders</span><span class="ar">الفواصل وحدود البطاقات</span></td></tr>
+  <tr><td><code>--radius</code></td><td colspan="2"><code>4px</code></td><td><span class="en">BC angular card radius</span><span class="ar">نصف قطر البطاقات الزاوي</span></td></tr>
+  <tr><td><code>--radius-sm</code></td><td colspan="2"><code>2px</code></td><td><span class="en">Inputs, badges, small elements</span><span class="ar">المدخلات والشارات والعناصر الصغيرة</span></td></tr>
+</table>
+
+<p>
+  <span class="en"><strong>Sidebar &amp; clock bar accent lines:</strong> A <code>3px solid var(--primary)</code> border runs along the sidebar's right edge and the clock bar's bottom edge, replicating the BC Central "Insights" section divider.</span>
+  <span class="ar"><strong>خطوط التأكيد للشريط الجانبي وشريط الساعة:</strong> يمتد خط <code>3px solid var(--primary)</code> على الحافة اليمنى للشريط الجانبي وعلى الحافة السفلية لشريط الساعة، مُحاكياً فاصل قسم "Insights" في BC Central.</span>
+</p>
+
+<p>
+  <span class="en"><strong>Collapsible sidebar:</strong> <code>shell.ts</code> holds <code>sidebarCollapsed = signal(localStorage.getItem('ats-nav-collapsed') === '1')</code>. On desktop (≥ 861 px) the hamburger toggles between 240 px full and 52 px icon-only; on mobile it slides in as an overlay. The <code>.layout</code> div receives <code>[class.sidebar-collapsed]="sidebarCollapsed()"</code> and CSS handles the rest via the <code>.layout.sidebar-collapsed .sidebar</code> rule.</span>
+  <span class="ar"><strong>الشريط الجانبي القابل للطي:</strong> يحتفظ <code>shell.ts</code> بـ <code>sidebarCollapsed = signal(localStorage.getItem('ats-nav-collapsed') === '1')</code>. على سطح المكتب (≥ 861 بكسل) يبدّل زر القائمة بين 240 بكسل كاملاً و52 بكسل أيقونات فقط؛ على الهاتف ينزلق كطبقة تراكب. يستقبل <code>.layout</code> الخاصية <code>[class.sidebar-collapsed]="sidebarCollapsed()"</code> وتتولى CSS الباقي عبر قاعدة <code>.layout.sidebar-collapsed .sidebar</code>.</span>
+</p>
 
 <h3 id="services"><span class="en">data.services.ts — Service List</span><span class="ar">data.services.ts — قائمة الخدمات</span></h3>
 <table>

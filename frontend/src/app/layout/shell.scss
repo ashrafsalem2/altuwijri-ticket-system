@@ -11,23 +11,19 @@
   transition: width .22s cubic-bezier(.4,0,.2,1);
 }
 .brand { display: flex; align-items: center; gap: .5rem; padding: .85rem 1rem; flex-shrink: 0; }
-.logo-wrap { flex-shrink: 0; }
+.logo-wrap {
+  flex-shrink: 0;
+  background: var(--logo-pill-bg);
+  border-radius: var(--logo-pill-radius);
+  padding: var(--logo-pill-padding);
+  box-shadow: var(--logo-pill-shadow);
+  transition: background .25s, box-shadow .25s;
+}
 .logo-img {
   width: 130px; height: 52px; object-fit: contain; display: block;
-  filter: none;                       /* show real logo on light sidebar */
-  transition: filter .3s;
+  filter: var(--logo-filter);
 }
 .logo-img.hidden { display: none; }
-/* ── Dark mode: show logo on a frosted light pill so original colors stay readable ── */
-[data-theme="dark"] .logo-wrap {
-  background: rgba(255,255,255,.92);
-  border-radius: 8px;
-  padding: 2px 8px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.35);
-}
-[data-theme="dark"] .logo-img {
-  filter: none;
-}
 
 .logo-txt {
   width: 40px; height: 40px; border-radius: 10px; background: var(--primary); color: #fff;
@@ -61,7 +57,6 @@
 
   .brand { padding: .65rem 0; justify-content: center; }
   .logo-img { width: 32px !important; height: 32px !important; }
-  .logo-wrap { padding: 2px !important; border-radius: 6px !important; }
   .logo-txt { width: 32px; height: 32px; font-size: .75rem; }
   .brand-text, .side-foot { display: none; }
   .branch-card { display: none; }

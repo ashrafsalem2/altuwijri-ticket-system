@@ -275,7 +275,16 @@
   box-shadow: 0 2px 10px rgba(0,0,0,.28);
 
   &::before { display: none; }
-  &:hover { background: #007A7A; }
+  &:hover {
+    background: #007A7A;
+    .clkb-time    { color: #C8EBE8; text-shadow: 0 0 14px rgba(0,178,148,.4); }
+    .clkb-blink   { color: #00C4A4; }
+    .clkb-sec     { color: rgba(0,196,164,.65); }
+    .clkb-dayname { color: #fff; }
+    .clkb-datestr { color: rgba(255,255,255,.78); }
+    .clkb-hijri   { color: rgba(0,196,164,.92); }
+    .clkb-hint    { color: rgba(255,255,255,.5); }
+  }
 }
 
 .clkb-hint { position: absolute; top: 8px; right: 13px; font-size: .68rem; color: var(--text-muted); opacity: .5; }

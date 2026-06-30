@@ -9,13 +9,14 @@ import { AttachmentService, ChatService, UserService } from '../../core/services
 import { TaskForm } from './task-form';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TicketLifetime } from '../../shared/ticket-lifetime';
+import { CelebrationOverlay } from '../../shared/celebration-overlay';
 import { Attachment, Comment, STATUS_LABELS, TASK_STATUSES, TYPE_LABELS, TaskDetail as TaskDetailModel, User } from '../../core/models/models';
 import { initials, timeAgo, typeIcon } from '../../shared/util';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-task-detail',
-  imports: [RouterLink, FormsModule, DatePipe, TaskForm, TranslatePipe, TicketLifetime],
+  imports: [RouterLink, FormsModule, DatePipe, TaskForm, TranslatePipe, TicketLifetime, CelebrationOverlay],
   styleUrl: './task-detail.scss',
   template: `
   <div class="page" [attr.dir]="i18n.dir()">
@@ -303,22 +304,7 @@ import { ToastService } from '../../core/services/toast.service';
   }
 
   <!-- Celebration animation -->
-  @if (showCelebration()) {
-    <div class="anim-overlay celebration-overlay" aria-hidden="true">
-      @for (p of confettiPieces; track p.id) {
-        <div class="confetti-p"
-          [style.left]="p.left"
-          [style.width.px]="p.w"
-          [style.height.px]="p.h"
-          [style.background]="p.color"
-          [style.border-radius]="p.br"
-          [style.animation-delay]="p.animDelay"
-          [style.animation-duration]="p.animDur">
-        </div>
-      }
-      <div class="celebration-msg">🎉&nbsp; Ticket Completed! &nbsp;🎊</div>
-    </div>
-  }
+  <app-celebration-overlay [show]="showCelebration()" />
   `
 })
 export class TaskDetail implements OnInit, OnChanges, OnDestroy {
@@ -350,20 +336,6 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   statusFlash    = signal(false);
   showThumbUp    = signal(false);
   showCelebration = signal(false);
-
-  readonly confettiPieces = (() => {
-    const colors = ['#008272','#0ea5e9','#f59e0b','#ec4899','#10b981','#6366f1','#f97316','#84cc16'];
-    return Array.from({ length: 34 }, (_, i) => ({
-      id: i,
-      color: colors[i % colors.length],
-      left: `${((i * 3.07 + 0.8) % 97 + 1.5).toFixed(1)}%`,
-      animDelay: `${(i * 0.09 % 1.25).toFixed(2)}s`,
-      animDur:   `${(2.5 + (i % 7) * 0.28).toFixed(2)}s`,
-      w: 8 + (i % 5) * 2,
-      h: i % 3 === 0 ? 8 + (i % 4) * 3 : 5 + (i % 3) * 3,
-      br: i % 4 === 0 ? '50%' : '2px'
-    }));
-  })();
 
   // Handler panel
   staffUsers = signal<User[]>([]);

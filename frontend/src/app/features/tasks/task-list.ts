@@ -15,10 +15,11 @@ import {
 } from '../../core/models/models';
 import { initials, typeIcon } from '../../shared/util';
 import { ToastService } from '../../core/services/toast.service';
+import { CelebrationOverlay } from '../../shared/celebration-overlay';
 
 @Component({
   selector: 'app-task-list',
-  imports: [RouterLink, FormsModule, TaskForm, TranslatePipe, TicketLifetime],
+  imports: [RouterLink, FormsModule, TaskForm, TranslatePipe, TicketLifetime, CelebrationOverlay],
   styleUrl: './task-list.scss',
   template: `
   <div class="page" [attr.dir]="i18n.dir()">
@@ -132,6 +133,8 @@ import { ToastService } from '../../core/services/toast.service';
       </div>
     </div>
   }
+
+  <app-celebration-overlay [show]="showCelebration()" />
   `
 })
 export class TaskList implements OnInit, OnDestroy {
@@ -163,6 +166,7 @@ export class TaskList implements OnInit, OnDestroy {
   isTechnician = () => this.auth.user()?.role === 'Technician';
   approving = signal<number | null>(null);
   confirmTarget = signal<TaskListItem | null>(null);
+  showCelebration = signal(false);
 
   private listPoll?: any;
   ngOnDestroy() { clearInterval(this.listPoll); }
@@ -216,6 +220,8 @@ export class TaskList implements OnInit, OnDestroy {
         this.approving.set(null);
         this.confirmTarget.set(null);
         this.toast.success(`"${t.title}" marked Done.`);
+        this.showCelebration.set(true);
+        setTimeout(() => this.showCelebration.set(false), 4900);
         this.load();
       },
       error: e => { this.approving.set(null); this.toast.error(e?.error?.title ?? 'Could not update status.'); }

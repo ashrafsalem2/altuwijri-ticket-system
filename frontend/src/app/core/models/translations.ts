@@ -18,6 +18,8 @@ export const EN = {
   'auth.signIn': 'Sign In', 'auth.signOut': 'Sign Out', 'auth.username': 'Username or Email',
   'auth.password': 'Password', 'auth.welcome': 'Welcome back', 'auth.subtitle': 'Sign in to Altuwijri Ticket System',
   'auth.signingIn': 'Signing in…', 'auth.demoAccounts': 'Demo accounts (click to fill):',
+  'auth.changePassword': 'Change Password', 'auth.currentPassword': 'Current Password',
+  'auth.newPassword': 'New Password', 'auth.confirmPassword': 'Confirm New Password',
   // Task fields
   'task.new': 'New Task', 'task.edit': 'Edit Task', 'task.ticket': 'New Ticket',
   'task.title': 'Title', 'task.titlePlaceholder': 'Short, descriptive title',
@@ -243,6 +245,8 @@ export const AR: Record<keyof typeof EN, string> = {
   'auth.signIn': 'تسجيل الدخول', 'auth.signOut': 'تسجيل الخروج', 'auth.username': 'اسم المستخدم أو البريد',
   'auth.password': 'كلمة المرور', 'auth.welcome': 'مرحباً بعودتك', 'auth.subtitle': 'تسجيل الدخول إلى نظام تذاكر التويجري',
   'auth.signingIn': 'جارٍ الدخول…', 'auth.demoAccounts': 'حسابات تجريبية (انقر للملء):',
+  'auth.changePassword': 'تغيير كلمة المرور', 'auth.currentPassword': 'كلمة المرور الحالية',
+  'auth.newPassword': 'كلمة المرور الجديدة', 'auth.confirmPassword': 'تأكيد كلمة المرور الجديدة',
   // Task fields
   'task.new': 'مهمة جديدة', 'task.edit': 'تعديل المهمة', 'task.ticket': 'تذكرة جديدة',
   'task.title': 'العنوان', 'task.titlePlaceholder': 'عنوان قصير ووصفي',

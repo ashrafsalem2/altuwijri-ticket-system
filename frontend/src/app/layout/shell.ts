@@ -188,6 +188,7 @@ import { ConfirmService } from '../core/services/confirm.service';
                 <div class="dd-meta">{{ auth.user()?.email }}</div>
                 @if (auth.user()?.branchName) { <div class="dd-meta">Branch: {{ auth.user()?.branchName }}</div> }
               </div>
+              <button class="dd-item" (click)="openChangePassword()">🔑 {{ 'auth.changePassword' | t }}</button>
               <button class="dd-item" (click)="logout()">{{ 'auth.signOut' | t }}</button>
             </div>
           }
@@ -465,6 +466,39 @@ import { ConfirmService } from '../core/services/confirm.service';
 
     </div>
   }
+
+  <!-- ═══ CHANGE PASSWORD MODAL ═══ -->
+  @if (pwForm()) {
+    <div class="lf-overlay" (click)="pwForm.set(false)">
+      <div class="lf-modal" (click)="$event.stopPropagation()">
+        <div class="lf-head">
+          <strong>{{ 'auth.changePassword' | t }}</strong>
+          <button class="btn btn-icon btn-ghost" (click)="pwForm.set(false)">✕</button>
+        </div>
+        <div class="lf-body">
+          <div class="lf-field">
+            <label>{{ 'auth.currentPassword' | t }} *</label>
+            <input class="lf-input" type="password" [(ngModel)]="pwCurrent" autocomplete="current-password" />
+          </div>
+          <div class="lf-field">
+            <label>{{ 'auth.newPassword' | t }} *</label>
+            <input class="lf-input" type="password" [(ngModel)]="pwNew" autocomplete="new-password" />
+          </div>
+          <div class="lf-field">
+            <label>{{ 'auth.confirmPassword' | t }} *</label>
+            <input class="lf-input" type="password" [(ngModel)]="pwConfirm" autocomplete="new-password" />
+          </div>
+          @if (pwError()) { <div class="lf-err">{{ pwError() }}</div> }
+        </div>
+        <div class="disc-form-foot">
+          <button class="btn btn-ghost btn-sm" (click)="pwForm.set(false)">{{ 'c.cancel' | t }}</button>
+          <button class="btn btn-primary btn-sm" (click)="submitPasswordChange()" [disabled]="pwSaving()">
+            {{ pwSaving() ? ('c.saving' | t) : ('c.save' | t) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
   `
 })
 export class Shell implements OnInit, OnDestroy {
@@ -672,6 +706,30 @@ export class Shell implements OnInit, OnDestroy {
     else this.router.navigate(['/chat']);
   }
   logout() { this.auth.logout(); this.router.navigate(['/login']); }
+
+  // Change password
+  pwForm = signal(false);
+  pwCurrent = ''; pwNew = ''; pwConfirm = '';
+  pwError = signal('');
+  pwSaving = signal(false);
+
+  openChangePassword() {
+    this.pwCurrent = ''; this.pwNew = ''; this.pwConfirm = '';
+    this.pwError.set('');
+    this.pwForm.set(true);
+    this.userOpen.set(false);
+  }
+
+  submitPasswordChange() {
+    if (!this.pwCurrent || !this.pwNew || !this.pwConfirm) { this.pwError.set('All fields are required.'); return; }
+    if (this.pwNew.length < 6) { this.pwError.set('New password must be at least 6 characters.'); return; }
+    if (this.pwNew !== this.pwConfirm) { this.pwError.set('New passwords do not match.'); return; }
+    this.pwSaving.set(true); this.pwError.set('');
+    this.auth.changePassword(this.pwCurrent, this.pwNew).subscribe({
+      next: () => { this.pwSaving.set(false); this.pwForm.set(false); this.toast.success('Password changed successfully.'); },
+      error: e => { this.pwSaving.set(false); this.pwError.set(e?.error?.title ?? 'Could not change password.'); }
+    });
+  }
 
   // App links CRUD
   newLink() {

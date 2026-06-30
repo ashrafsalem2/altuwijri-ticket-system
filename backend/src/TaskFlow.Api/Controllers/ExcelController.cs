@@ -46,6 +46,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         {
             ("FullName",       true),
             ("Email",          true),
+            ("Username",       false),
             ("Password",       true),
             ("Role",           true),
             ("JobTitle",       false),
@@ -60,21 +61,22 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
 
         ws.Cell(2, 1).Value = "Ahmed Al-Rashidi";
         ws.Cell(2, 2).Value = "ahmed@example.com";
-        ws.Cell(2, 3).Value = "Pass@1234";
-        ws.Cell(2, 4).Value = "Employee";
-        ws.Cell(2, 5).Value = "IT Support";
-        ws.Cell(2, 6).Value = branches.FirstOrDefault() ?? "Riyadh Branch";
-        ws.Cell(2, 7).Value = departments.FirstOrDefault() ?? "IT Department";
-        ws.Cell(2, 8).Value = "0501234567";
+        ws.Cell(2, 3).Value = "ahmed.rashidi";
+        ws.Cell(2, 4).Value = "Pass@1234";
+        ws.Cell(2, 5).Value = "Employee";
+        ws.Cell(2, 6).Value = "IT Support";
+        ws.Cell(2, 7).Value = branches.FirstOrDefault() ?? "Riyadh Branch";
+        ws.Cell(2, 8).Value = departments.FirstOrDefault() ?? "IT Department";
+        ws.Cell(2, 9).Value = "0501234567";
         StyleExampleRow(ws, cols.Length, "#fef9f9");
 
-        AddDropdown(ws, "D2:D10000", "_Roles",       4);
-        AddDropdown(ws, "F2:F10000", "_Branches",    branches.Count);
-        AddDropdown(ws, "G2:G10000", "_Departments", departments.Count);
+        AddDropdown(ws, "E2:E10000", "_Roles",       4);
+        AddDropdown(ws, "G2:G10000", "_Branches",    branches.Count);
+        AddDropdown(ws, "H2:H10000", "_Departments", departments.Count);
 
         ws.Column(1).Width = 26; ws.Column(2).Width = 30; ws.Column(3).Width = 20;
-        ws.Column(4).Width = 18; ws.Column(5).Width = 22; ws.Column(6).Width = 26;
-        ws.Column(7).Width = 24; ws.Column(8).Width = 18;
+        ws.Column(4).Width = 20; ws.Column(5).Width = 18; ws.Column(6).Width = 22;
+        ws.Column(7).Width = 26; ws.Column(8).Width = 24; ws.Column(9).Width = 18;
         ws.SheetView.FreezeRows(1);
 
         return ExcelFile(wb, "users-import-template.xlsx");
@@ -101,17 +103,19 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         var errors   = new List<string>();
         var lastRow  = ws.LastRowUsed()?.RowNumber() ?? 1;
 
-        var existingEmails = await db.Users.Select(u => u.Email).ToHashSetAsync(ct);
+        var existingEmails    = await db.Users.Select(u => u.Email).ToHashSetAsync(ct);
+        var existingUserNames = await db.Users.Select(u => u.UserName.ToLower()).ToHashSetAsync(ct);
 
         for (int row = 2; row <= lastRow; row++)
         {
             string Get(int col) => ws.Cell(row, col).GetString().Trim();
 
-            // Cols: 1=FullName 2=Email 3=Password 4=Role 5=JobTitle 6=BranchName 7=DepartmentName 8=Phone
+            // Cols: 1=FullName 2=Email 3=Username 4=Password 5=Role 6=JobTitle 7=BranchName 8=DepartmentName 9=Phone
             var fullName = Get(1);
             var email    = Get(2).ToLower();
-            var password = Get(3);
-            var roleName = Get(4);
+            var userName = Blank(Get(3))?.ToLower() ?? email;
+            var password = Get(4);
+            var roleName = Get(5);
 
             if (string.IsNullOrEmpty(fullName) && string.IsNullOrEmpty(email)) continue;
 
@@ -126,6 +130,12 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
                 continue;
             }
 
+            if (existingUserNames.Contains(userName))
+            {
+                errors.Add($"Row {row}: Username '{userName}' already exists.");
+                continue;
+            }
+
             var role = roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
             if (role is null)
             {
@@ -134,7 +144,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             }
 
             int? branchId = null;
-            var branchName = Get(6);
+            var branchName = Get(7);
             if (!string.IsNullOrEmpty(branchName))
             {
                 var branch = branches.FirstOrDefault(b => b.Name.Equals(branchName, StringComparison.OrdinalIgnoreCase));
@@ -147,7 +157,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             }
 
             int? departmentId = null;
-            var deptName = Get(7);
+            var deptName = Get(8);
             if (!string.IsNullOrEmpty(deptName))
             {
                 var dept = departments.FirstOrDefault(d => d.Name.Equals(deptName, StringComparison.OrdinalIgnoreCase));
@@ -162,20 +172,21 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             db.Users.Add(new User
             {
                 FullName     = fullName,
-                UserName     = email,
+                UserName     = userName,
                 Email        = email,
                 PasswordHash = hasher.Hash(password),
                 RoleId       = role.Id,
                 BranchId     = branchId,
                 DepartmentId = departmentId,
-                JobTitle     = Blank(Get(5)),
-                PhoneNumber  = Blank(Get(8)),
+                JobTitle     = Blank(Get(6)),
+                PhoneNumber  = Blank(Get(9)),
                 AvatarColor  = colors[rnd.Next(colors.Length)],
                 IsActive     = true,
                 IsAvailable  = false
             });
 
             existingEmails.Add(email);
+            existingUserNames.Add(userName);
             imported++;
         }
 

@@ -101,7 +101,17 @@ type OrgTab = 'areas' | 'branches' | 'departments';
                 <div class="area-card-body">
                   <div class="area-card-top">
                     <span class="area-code-chip">{{ a.code }}</span>
-                    <span class="area-branch-pill">🏢 {{ a.branchCount }}</span>
+                    <span class="area-branch-pill-wrap">
+                      <span class="area-branch-pill">🏢 {{ a.branchCount }}</span>
+                      @if (a.branchCount > 0) {
+                        <div class="branch-tooltip">
+                          <div class="branch-tooltip-title">{{ i18n.lang() === 'ar' ? 'الفروع' : 'Branches' }}</div>
+                          @for (b of branchesInArea(a.id); track b.id) {
+                            <div class="branch-tooltip-item">{{ b.name }}</div>
+                          }
+                        </div>
+                      }
+                    </span>
                   </div>
                   <h3 class="area-card-name">{{ a.name }}</h3>
                   <p class="area-card-desc">{{ a.description || (i18n.lang() === 'ar' ? 'لا يوجد وصف' : 'No description') }}</p>
@@ -511,6 +521,8 @@ export class Organization implements OnInit {
     this.orgSvc.getBranches().subscribe(b => this.branches.set(b));
     this.deptSvc.getAll().subscribe(d => this.departments.set(d));
   }
+
+  branchesInArea(areaId: number) { return this.branches().filter(b => b.areaId === areaId); }
 
   // ── Areas ──
   newArea()  { this.editing = false; this.error.set(''); this.am = { name:'', code:'', description:'' }; this.areaForm.set(true); }

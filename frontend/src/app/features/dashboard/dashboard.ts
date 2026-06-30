@@ -32,7 +32,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
     <!-- ══ EMPLOYEE DASHBOARD ══ -->
     @if (isEmployee()) {
-      <div class="dash-header">
+      <div class="dash-header no-print">
         <div>
           <h2>{{ greeting }}, {{ auth.user()?.fullName?.split(' ')?.[0] }}!</h2>
           <span class="muted text-sm">{{ today | date:'EEEE, MMMM d, y' }}</span>
@@ -170,7 +170,7 @@ const PRIORITY_COLORS: Record<string, string> = {
         </div>
 
         <!-- Sticky calendar sidebar -->
-        <div class="emp-dash-side">
+        <div class="emp-dash-side no-print">
           <div class="card card-pad mini-cal-card emp-cal-sticky">
             <app-mini-calendar [tasks]="empAllTickets()"></app-mini-calendar>
           </div>
@@ -179,7 +179,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
     <!-- ══ TECHNICIAN DASHBOARD ══ -->
     } @else if (isTechnician()) {
-      <div class="dash-header">
+      <div class="dash-header no-print">
         <div>
           <h2>{{ greeting }}, {{ auth.user()?.fullName?.split(' ')?.[0] }}!</h2>
           <span class="muted text-sm">{{ today | date:'EEEE, MMMM d, y' }}</span>
@@ -236,7 +236,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
     <!-- ══ ADMIN DASHBOARD ══ -->
     } @else {
-      <div class="dash-header">
+      <div class="dash-header no-print">
         <div>
           <h2>{{ greeting }}, {{ auth.user()?.fullName?.split(' ')?.[0] }}!</h2>
           <span class="muted text-sm">{{ today | date:'EEEE, MMMM d, y' }}</span>

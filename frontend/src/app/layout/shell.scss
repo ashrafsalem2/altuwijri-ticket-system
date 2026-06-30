@@ -196,13 +196,14 @@
 .dropdown {
   position: absolute; right: 0; top: 48px; background: var(--surface);
   border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow-lg); min-width: 280px; z-index: 200; overflow: hidden;
+  box-shadow: var(--shadow-lg); min-width: 320px; z-index: 200; overflow: hidden;
 }
 .dd-head { padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
 .dd-item { display: block; width: 100%; text-align: left; padding: .65rem 1rem; background: none; border: none; cursor: pointer; font: inherit; color: var(--text); &:hover { background: var(--surface-2); } }
 .notif-list { max-height: 420px; overflow: auto; }
 .notif-item {
-  display: block; padding: .65rem 1rem; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: .35rem;
+  padding: .65rem 1rem; border-bottom: 1px solid var(--border);
   cursor: pointer; text-decoration: none; color: var(--text);
   &:hover { background: var(--surface-2); }
   &.un {
@@ -212,9 +213,14 @@
     .ni-title { color: var(--primary-dark); font-weight: 700; }
   }
 }
-.ni-title { font-weight: 600; font-size: .85rem; line-height: 1.45; }
-.ni-ticket { display: block; font-weight: 700; font-size: .85rem; color: var(--primary); margin-top: .1rem; }
-.notif-item.un .ni-ticket { color: var(--primary-dark); }
+.ni-title { font-weight: 600; font-size: .85rem; line-height: 1.4; }
+.ni-ticket-box {
+  font-size: .82rem; font-weight: 700; line-height: 1.4;
+  color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: .4rem .6rem;
+}
+.notif-item.un .ni-ticket-box { background: #fff; border-color: var(--primary); color: var(--primary-dark); }
 
 /* ══════════════════════════════════════════════════════
    SMART BAR
@@ -638,6 +644,7 @@
   .notif-item {
     color: var(--text); border-bottom-color: var(--border);
     .ni-title { color: var(--text); }
+    .ni-ticket-box { color: var(--text); background: var(--surface-2); border-color: var(--border); }
     .muted { color: var(--text-muted); }
     &:hover { background: rgba(0,130,114,.12); }
     &.un {
@@ -645,6 +652,7 @@
       border-left: 3px solid var(--primary);
       padding-left: calc(1rem - 3px);
       .ni-title { color: #E8F4F3; font-weight: 700; }
+      .ni-ticket-box { background: var(--surface); border-color: var(--primary); color: #E8F4F3; }
       .muted { color: #C8C6C4; }
     }
   }

@@ -163,10 +163,8 @@ import { ToastService } from '../core/services/toast.service';
               </div>
               @for (n of notifications(); track n.id) {
                 <div class="notif-item" [class.un]="!n.isRead" (click)="open(n)">
-                  <div class="ni-title" dir="auto">
-                    {{ n.title }}
-                    @if (n.message) { <span class="ni-ticket" dir="auto">"{{ n.message }}"</span> }
-                  </div>
+                  <div class="ni-title" dir="auto">{{ n.title }}</div>
+                  @if (n.message) { <div class="ni-ticket-box" dir="auto">🎫 {{ n.message }}</div> }
                   <div class="text-xs muted">{{ ago(n.createdAt) }}</div>
                 </div>
               } @empty { <div class="empty text-sm">No notifications</div> }

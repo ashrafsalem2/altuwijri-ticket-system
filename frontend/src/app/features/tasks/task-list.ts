@@ -29,54 +29,79 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
       @if (canEdit()) { <button class="btn btn-primary" (click)="showForm.set(true)">+ {{ 'task.new' | t }}</button> }
     </div>
 
-    <div class="card card-pad filters">
-      <input class="input" placeholder="{{ 'task.search' | t }}" [(ngModel)]="q.search" (keyup.enter)="apply()" />
-      <select [(ngModel)]="q.status" (ngModelChange)="apply()">
-        <option [ngValue]="undefined">{{ 'task.allStatuses' | t }}</option>
-        @for (s of statuses; track s) { <option [ngValue]="s">{{ 'st.' + s | t }}</option> }
-      </select>
-      <select [(ngModel)]="q.priority" (ngModelChange)="apply()">
-        <option [ngValue]="undefined">{{ 'task.allPriorities' | t }}</option>
-        @for (p of priorities; track p) { <option [ngValue]="p">{{ 'pr.' + p | t }}</option> }
-      </select>
-      <select [(ngModel)]="q.type" (ngModelChange)="apply()">
-        <option [ngValue]="undefined">{{ 'task.allTypes' | t }}</option>
-        @for (t of types; track t) { <option [ngValue]="t">{{ icon(t) }} {{ 'ty.' + t | t }}</option> }
-      </select>
-      <select [(ngModel)]="q.projectId" (ngModelChange)="apply()">
-        <option [ngValue]="undefined">{{ 'task.allProjects' | t }}</option>
-        @for (p of projects(); track p.id) { <option [ngValue]="p.id">{{ p.name }}</option> }
-      </select>
-      <select [(ngModel)]="q.branchId" (ngModelChange)="apply()">
-        <option [ngValue]="undefined">{{ 'task.allBranches' | t }}</option>
-        @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
-      </select>
-      @if (!isTechnician()) {
-        <select [(ngModel)]="q.assigneeId" (ngModelChange)="apply()">
-          <option [ngValue]="undefined">{{ 'task.anyone' | t }}</option>
-          @for (u of users(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
-        </select>
-      }
-    </div>
+    @if (hasActiveFilters()) {
+      <div class="active-filters no-print">
+        <span class="text-sm muted">{{ 'task.filtersActive' | t }}</span>
+        <button class="btn btn-sm btn-ghost" (click)="clearFilters()">✕ {{ 'task.clearFilters' | t }}</button>
+      </div>
+    }
 
     <div class="card mt-2">
       @if (loading()) { <div class="spin"></div> } @else {
         <div class="table-wrap">
         <table class="table">
-          <thead><tr>
-            <th (click)="sort('title')">{{ 'task.title' | t }}</th>
-            <th>{{ 'task.project' | t }}</th>
-            <th>{{ 'task.status' | t }}</th>
-            <th>{{ 'task.priority' | t }}</th>
-            <th>{{ 'task.type' | t }}</th>
-            <th>{{ 'task.assignee' | t }}</th>
-            <th>{{ 'task.elapsed' | t }}</th>
-          </tr></thead>
+          <thead>
+            <tr>
+              <th (click)="sort('title')">{{ 'task.title' | t }}</th>
+              <th>{{ 'task.project' | t }}</th>
+              <th>{{ 'org.branch' | t }}</th>
+              <th>{{ 'task.status' | t }}</th>
+              <th>{{ 'task.priority' | t }}</th>
+              <th>{{ 'task.type' | t }}</th>
+              <th>{{ 'task.assignee' | t }}</th>
+              <th>{{ 'task.elapsed' | t }}</th>
+            </tr>
+            <tr class="filter-row no-print">
+              <th>
+                <input class="col-filter-input" placeholder="{{ 'task.search' | t }}" [(ngModel)]="q.search" (keyup.enter)="apply()" />
+              </th>
+              <th>
+                <select class="col-filter-select" [(ngModel)]="q.projectId" (ngModelChange)="apply()">
+                  <option [ngValue]="undefined">{{ 'task.allProjects' | t }}</option>
+                  @for (p of projects(); track p.id) { <option [ngValue]="p.id">{{ p.name }}</option> }
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" [(ngModel)]="q.branchId" (ngModelChange)="apply()">
+                  <option [ngValue]="undefined">{{ 'task.allBranches' | t }}</option>
+                  @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" [(ngModel)]="q.status" (ngModelChange)="apply()">
+                  <option [ngValue]="undefined">{{ 'task.allStatuses' | t }}</option>
+                  @for (s of statuses; track s) { <option [ngValue]="s">{{ 'st.' + s | t }}</option> }
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" [(ngModel)]="q.priority" (ngModelChange)="apply()">
+                  <option [ngValue]="undefined">{{ 'task.allPriorities' | t }}</option>
+                  @for (p of priorities; track p) { <option [ngValue]="p">{{ 'pr.' + p | t }}</option> }
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" [(ngModel)]="q.type" (ngModelChange)="apply()">
+                  <option [ngValue]="undefined">{{ 'task.allTypes' | t }}</option>
+                  @for (t of types; track t) { <option [ngValue]="t">{{ icon(t) }} {{ 'ty.' + t | t }}</option> }
+                </select>
+              </th>
+              <th>
+                @if (!isTechnician()) {
+                  <select class="col-filter-select" [(ngModel)]="q.assigneeId" (ngModelChange)="apply()">
+                    <option [ngValue]="undefined">{{ 'task.anyone' | t }}</option>
+                    @for (u of users(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
+                  </select>
+                }
+              </th>
+              <th></th>
+            </tr>
+          </thead>
           <tbody>
             @for (t of page()?.items; track t.id) {
               <tr>
                 <td><a [routerLink]="['/tasks', t.id]" class="t-title" dir="auto">{{ t.title }}</a></td>
                 <td><span class="proj-dot" [style.background]="t.projectColor"></span> {{ t.projectName }}</td>
+                <td class="text-sm">{{ t.branchName || '—' }}</td>
                 <td class="status-cell">
                   <span class="flex items-center gap-1 status-row">
                     <span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span>
@@ -97,7 +122,7 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
                   <app-ticket-lifetime [startDate]="t.startDate" [status]="t.status" [completedAt]="undefined" [showEmpty]="false"></app-ticket-lifetime>
                 </td>
               </tr>
-            } @empty { <tr><td colspan="7"><div class="empty">{{ 'task.noMatch' | t }}</div></td></tr> }
+            } @empty { <tr><td colspan="8"><div class="empty">{{ 'task.noMatch' | t }}</div></td></tr> }
           </tbody>
         </table>
         </div>
@@ -191,6 +216,17 @@ export class TaskList implements OnInit, OnDestroy {
     this.q.sortBy = by; this.load();
   }
   onSaved() { this.showForm.set(false); this.load(); }
+
+  hasActiveFilters(): boolean {
+    return !!(this.q.search || this.q.status || this.q.priority || this.q.type ||
+      this.q.projectId || this.q.branchId || this.q.assigneeId);
+  }
+  clearFilters() {
+    this.q.search = undefined; this.q.status = undefined; this.q.priority = undefined;
+    this.q.type = undefined; this.q.projectId = undefined; this.q.branchId = undefined;
+    this.q.assigneeId = undefined;
+    this.apply();
+  }
 
   async approveDone(t: TaskListItem) {
     const ok = await this.confirmSvc.ask({

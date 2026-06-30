@@ -1,16 +1,24 @@
-/* ── Filter bar ───────────────────────────────────────────── */
-.filters {
-  display: grid;
-  grid-template-columns: 2fr repeat(5, 1fr) auto;
-  gap: .6rem;
-  align-items: center;
+/* ── Active filters bar ───────────────────────────────────── */
+.active-filters {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .5rem .1rem; margin-bottom: .5rem;
 }
-.filters .chk {
-  display: flex;
-  align-items: center;
-  gap: .35rem;
-  font-size: .82rem;
-  white-space: nowrap;
+
+/* ── Per-column header filter row ────────────────────────── */
+.filter-row th {
+  padding: .4rem .5rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+}
+.col-filter-input, .col-filter-select {
+  width: 100%; box-sizing: border-box;
+  font-size: .78rem; font-weight: 400;
+  padding: .32rem .45rem;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text);
+  outline: none;
+  &:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
 }
 
 /* ── Table wrapper — enables horizontal scroll on narrow screens */
@@ -20,7 +28,7 @@
 }
 
 /* ── Table ────────────────────────────────────────────────── */
-.table { min-width: 680px; }
+.table { min-width: 780px; }
 :host-context([dir="rtl"]) .status-cell { text-align: center; }
 :host-context([dir="rtl"]) .status-row { justify-content: center; }
 .t-title { font-weight: 600; }
@@ -54,25 +62,15 @@
 .pager { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem; }
 
 /* ── Hide non-essential columns on smaller screens ────────── */
-/* ≤900px: hide Type column (5th) */
+/* Columns: 1 Title, 2 Project, 3 Branch, 4 Status, 5 Priority, 6 Type, 7 Assignee, 8 Elapsed */
+/* ≤900px: hide Type (6th) and Branch (3rd) */
 @media (max-width: 900px) {
-  .table th:nth-child(5),
-  .table td:nth-child(5) { display: none; }
+  .table th:nth-child(6), .table td:nth-child(6),
+  .table th:nth-child(3), .table td:nth-child(3) { display: none; }
 }
 
 /* ≤620px: also hide Project column (2nd) */
 @media (max-width: 620px) {
   .table th:nth-child(2),
   .table td:nth-child(2) { display: none; }
-}
-
-/* ── Filter grid breakpoints ──────────────────────────────── */
-@media (max-width: 1100px) {
-  .filters { grid-template-columns: 1fr 1fr 1fr; }
-}
-@media (max-width: 700px) {
-  .filters { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 480px) {
-  .filters { grid-template-columns: 1fr; }
 }

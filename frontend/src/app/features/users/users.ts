@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { UserService, OrganizationService, TicketCategoryService, ExcelService, DepartmentService } from '../../core/services/data.services';
@@ -47,12 +47,56 @@ import { ToastService } from '../../core/services/toast.service';
       }
     }
 
+    @if (hasActiveUserFilters()) {
+      <div class="active-filters">
+        <span class="text-sm muted">{{ 'task.filtersActive' | t }}</span>
+        <button class="btn btn-sm btn-ghost" (click)="clearUserFilters()">✕ {{ 'task.clearFilters' | t }}</button>
+      </div>
+    }
+
     <div class="card">
       @if (loading()) { <div class="spin"></div> } @else {
         <table class="table">
-          <thead><tr><th>{{ 'usr.name' | t }}</th><th>{{ 'usr.username' | t }}</th><th>{{ 'usr.role' | t }}</th><th>{{ 'usr.branch' | t }}</th><th>{{ 'usr.dept' | t }}</th><th>{{ 'usr.lastLogin' | t }}</th><th>{{ 'task.status' | t }}</th>@if (isAdmin()){<th></th>}</tr></thead>
+          <thead>
+            <tr>
+              <th>{{ 'usr.name' | t }}</th><th>{{ 'usr.username' | t }}</th><th>{{ 'usr.role' | t }}</th>
+              <th>{{ 'usr.branch' | t }}</th><th>{{ 'usr.dept' | t }}</th><th>{{ 'usr.lastLogin' | t }}</th>
+              <th>{{ 'task.status' | t }}</th>@if (isAdmin()){<th></th>}
+            </tr>
+            <tr class="filter-row">
+              <th><input class="col-filter-input" placeholder="{{ 'usr.name' | t }}" [ngModel]="nameFilter()" (ngModelChange)="nameFilter.set($event)" /></th>
+              <th><input class="col-filter-input" placeholder="{{ 'usr.username' | t }}" [ngModel]="usernameFilter()" (ngModelChange)="usernameFilter.set($event)" /></th>
+              <th>
+                <select class="col-filter-select" [ngModel]="roleFilter()" (ngModelChange)="roleFilter.set($event)">
+                  <option [ngValue]="null">{{ 'usr.allRoles' | t }}</option>
+                  @for (r of roles(); track r.id) { <option [ngValue]="r.id">{{ r.name }}</option> }
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" [ngModel]="branchFilter()" (ngModelChange)="branchFilter.set($event)">
+                  <option [ngValue]="null">{{ 'usr.allBranches' | t }}</option>
+                  @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" [ngModel]="deptFilter()" (ngModelChange)="deptFilter.set($event)">
+                  <option [ngValue]="null">{{ 'usr.allDepts' | t }}</option>
+                  @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
+                </select>
+              </th>
+              <th></th>
+              <th>
+                <select class="col-filter-select" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+                  <option value="all">{{ 'usr.allStatuses' | t }}</option>
+                  <option value="active">{{ 'usr.active' | t }}</option>
+                  <option value="inactive">{{ 'usr.inactive' | t }}</option>
+                </select>
+              </th>
+              @if (isAdmin()){<th></th>}
+            </tr>
+          </thead>
           <tbody>
-            @for (u of users(); track u.id) {
+            @for (u of filteredUsers(); track u.id) {
               <tr [class.inactive]="!u.isActive">
                 <td><span class="flex items-center gap-1"><span class="avatar sm" [style.background]="u.avatarColor || '#64748b'">{{ ini(u.fullName) }}</span> {{ u.fullName }}</span></td>
                 <td class="text-sm">{{ u.userName }}</td>
@@ -75,7 +119,7 @@ import { ToastService } from '../../core/services/toast.service';
                   </div></td>
                 }
               </tr>
-            }
+            } @empty { <tr><td [attr.colspan]="isAdmin() ? 8 : 7"><div class="empty">{{ 'c.empty' | t }}</div></td></tr> }
           </tbody>
         </table>
       }
@@ -221,6 +265,40 @@ export class Users implements OnInit {
   isAdmin          = () => this.auth.hasRole('Admin');
   isTechnicianRole = () => this.roles().find(r => r.id === this.model.roleId)?.name === 'Technician';
   isCamRole        = () => this.roles().find(r => r.id === this.model.roleId)?.name === 'Cam-Employee';
+
+  // ── Per-column filters ──
+  nameFilter = signal('');
+  usernameFilter = signal('');
+  roleFilter = signal<number | null>(null);
+  branchFilter = signal<number | null>(null);
+  deptFilter = signal<number | null>(null);
+  statusFilter = signal<'all' | 'active' | 'inactive'>('all');
+
+  filteredUsers = computed(() => {
+    const name = this.nameFilter().trim().toLowerCase();
+    const uname = this.usernameFilter().trim().toLowerCase();
+    const role = this.roleFilter();
+    const branch = this.branchFilter();
+    const dept = this.deptFilter();
+    const status = this.statusFilter();
+    return this.users().filter(u =>
+      (!name || u.fullName.toLowerCase().includes(name)) &&
+      (!uname || u.userName.toLowerCase().includes(uname)) &&
+      (!role || u.roleId === role) &&
+      (!branch || u.branchId === branch || u.branchIds?.includes(branch)) &&
+      (!dept || u.departmentId === dept) &&
+      (status === 'all' || (status === 'active' ? u.isActive : !u.isActive))
+    );
+  });
+
+  hasActiveUserFilters(): boolean {
+    return !!(this.nameFilter() || this.usernameFilter() || this.roleFilter() ||
+      this.branchFilter() || this.deptFilter() || this.statusFilter() !== 'all');
+  }
+  clearUserFilters() {
+    this.nameFilter.set(''); this.usernameFilter.set(''); this.roleFilter.set(null);
+    this.branchFilter.set(null); this.deptFilter.set(null); this.statusFilter.set('all');
+  }
 
   ngOnInit() {
     this.svc.roles().subscribe(r => this.roles.set(r));

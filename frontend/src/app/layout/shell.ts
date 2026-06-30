@@ -165,7 +165,7 @@ import { ToastService } from '../core/services/toast.service';
                 <div class="notif-item" [class.un]="!n.isRead" (click)="open(n)">
                   <div class="ni-title" dir="auto">{{ n.title }}</div>
                   @if (n.message) { <div class="ni-ticket-box" dir="auto">🎫 {{ n.message }}</div> }
-                  <div class="text-xs muted">{{ ago(n.createdAt) }}</div>
+                  <div class="text-xs ni-time">{{ ago(n.createdAt) }}</div>
                 </div>
               } @empty { <div class="empty text-sm">No notifications</div> }
             </div>

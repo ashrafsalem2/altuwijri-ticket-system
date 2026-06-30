@@ -217,10 +217,12 @@
 .ni-ticket-box {
   font-size: .82rem; font-weight: 700; line-height: 1.4;
   color: var(--text); background: var(--surface);
-  border: 1px solid var(--border); border-radius: 6px;
+  border-radius: 6px;
   padding: .4rem .6rem;
 }
-.notif-item.un .ni-ticket-box { background: #fff; border-color: var(--primary); color: var(--primary-dark); }
+.notif-item.un .ni-ticket-box { background: #fff; color: var(--primary-dark); }
+.ni-time { color: var(--text); }
+.notif-item.un .ni-time { color: var(--primary-dark); }
 
 /* ══════════════════════════════════════════════════════
    SMART BAR
@@ -644,7 +646,8 @@
   .notif-item {
     color: var(--text); border-bottom-color: var(--border);
     .ni-title { color: var(--text); }
-    .ni-ticket-box { color: var(--text); background: var(--surface-2); border-color: var(--border); }
+    .ni-ticket-box { color: var(--text); background: var(--surface-2); }
+    .ni-time { color: var(--text); }
     .muted { color: var(--text-muted); }
     &:hover { background: rgba(0,130,114,.12); }
     &.un {
@@ -652,7 +655,8 @@
       border-left: 3px solid var(--primary);
       padding-left: calc(1rem - 3px);
       .ni-title { color: #E8F4F3; font-weight: 700; }
-      .ni-ticket-box { background: var(--surface); border-color: var(--primary); color: #E8F4F3; }
+      .ni-ticket-box { background: var(--surface); color: #E8F4F3; }
+      .ni-time { color: #E8F4F3; }
       .muted { color: #C8C6C4; }
     }
   }

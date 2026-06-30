@@ -7,6 +7,7 @@ import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { Branch, Department, ImportResult, Role, TicketCategory, User } from '../../core/models/models';
 import { initials } from '../../shared/util';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-users',
@@ -195,6 +196,7 @@ export class Users implements OnInit {
   private deptSvc = inject(DepartmentService);
   private auth = inject(AuthService);
   private xlSvc = inject(ExcelService);
+  toast = inject(ToastService);
   i18n = inject(I18nService);
 
   users = signal<User[]>([]);
@@ -261,7 +263,7 @@ export class Users implements OnInit {
     this.saving.set(true); this.error.set('');
     const obs = this.editing && this.editId ? this.svc.update(this.editId, this.model) : this.svc.create(this.model);
     obs.subscribe({
-      next: () => { this.saving.set(false); this.showForm.set(false); this.load(); },
+      next: () => { this.saving.set(false); this.showForm.set(false); this.load(); this.toast.success(this.editing ? 'User updated.' : 'User created.'); },
       error: e => { this.error.set(e?.error?.title ?? 'Save failed.'); this.saving.set(false); }
     });
   }
@@ -273,15 +275,18 @@ export class Users implements OnInit {
     if (!u) return;
     this.purging.set(true);
     this.svc.hardDelete(u.id).subscribe({
-      next: () => { this.purging.set(false); this.purgeTarget.set(null); this.load(); },
-      error: e => { this.purging.set(false); alert(e?.error?.title ?? 'Delete failed.'); }
+      next: () => { this.purging.set(false); this.purgeTarget.set(null); this.load(); this.toast.success(`${u.fullName} deleted permanently.`); },
+      error: e => { this.purging.set(false); this.toast.error(e?.error?.title ?? 'Delete failed.'); }
     });
   }
 
   resetPw(u: User) {
     const pw = prompt(`New password for ${u.fullName} (min 6 chars):`);
     if (!pw) return;
-    this.svc.resetPassword(u.id, pw).subscribe({ next: () => alert('Password reset.'), error: e => alert(e?.error?.title ?? 'Failed.') });
+    this.svc.resetPassword(u.id, pw).subscribe({
+      next: () => this.toast.success('Password reset.'),
+      error: e => this.toast.error(e?.error?.title ?? 'Failed.')
+    });
   }
 
   xlDownload() { this.xlSvc.downloadTemplate('users'); }
@@ -293,7 +298,7 @@ export class Users implements OnInit {
     this.importResult.set(null);
     this.xlSvc.import('users', file).subscribe({
       next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
-      error: e => { this.importing.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+      error: e => { this.importing.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
   }

@@ -212,7 +212,9 @@
     .ni-title { color: var(--primary-dark); font-weight: 700; }
   }
 }
-.ni-title { font-weight: 600; font-size: .85rem; }
+.ni-title { font-weight: 600; font-size: .85rem; line-height: 1.45; }
+.ni-ticket { display: block; font-weight: 700; font-size: .85rem; color: var(--primary); margin-top: .1rem; }
+.notif-item.un .ni-ticket { color: var(--primary-dark); }
 
 /* ══════════════════════════════════════════════════════
    SMART BAR

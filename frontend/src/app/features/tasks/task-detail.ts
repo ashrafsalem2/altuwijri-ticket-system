@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TicketLifetime } from '../../shared/ticket-lifetime';
 import { Attachment, Comment, STATUS_LABELS, TASK_STATUSES, TYPE_LABELS, TaskDetail as TaskDetailModel, User } from '../../core/models/models';
 import { initials, timeAgo, typeIcon } from '../../shared/util';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-task-detail',
@@ -329,6 +330,7 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   private attachmentSvc = inject(AttachmentService);
   private chatSvc = inject(ChatService);
   private userSvc = inject(UserService);
+  toast = inject(ToastService);
 
   task = signal<TaskDetailModel | null>(null);
   comments = signal<Comment[]>([]);
@@ -533,7 +535,7 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
         this.triggerStatusFlash();
         this.load();
       },
-      error: e => { this.quickSaving.set(false); alert(e?.error?.title ?? 'Could not accept ticket.'); }
+      error: e => { this.quickSaving.set(false); this.toast.error(e?.error?.title ?? 'Could not accept ticket.'); }
     });
   }
 

@@ -199,6 +199,9 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
             foreach (var tagId in request.TagIds.Distinct())
                 task.TaskTags.Add(new TaskTag { TagId = tagId });
 
+        if (request.AssigneeId.HasValue)
+            await ValidateAssigneeCategoryAsync(request.AssigneeId.Value, request.CategoryId, ct);
+
         db.Tasks.Add(task);
         await db.SaveChangesAsync(ct);
 
@@ -221,6 +224,9 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         if (currentUser.Role == Roles.Technician &&
             (request.Status == WorkTaskStatus.Done || request.Status == WorkTaskStatus.Cancelled))
             throw new BadRequestException("Technicians cannot close tickets. Set status to 'In Review' to request manager approval.");
+
+        if (request.AssigneeId.HasValue)
+            await ValidateAssigneeCategoryAsync(request.AssigneeId.Value, request.CategoryId, ct);
 
         if (task.Status != request.Status)
             LogActivity(id, "status changed", "Status", task.Status.ToString(), request.Status.ToString());
@@ -284,6 +290,27 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
             task.CompletedAt = null;
 
         await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Blocks assigning a ticket to a technician whose configured categories don't include the ticket's category.</summary>
+    private async Task ValidateAssigneeCategoryAsync(int assigneeId, int? categoryId, CancellationToken ct)
+    {
+        if (!categoryId.HasValue) return;
+
+        var assignee = await db.Users.AsNoTracking()
+            .Where(u => u.Id == assigneeId)
+            .Select(u => new { u.FullName, RoleName = u.Role.Name })
+            .FirstOrDefaultAsync(ct)
+            ?? throw new BadRequestException("Selected assignee does not exist.");
+
+        if (assignee.RoleName != Roles.Technician) return;
+
+        var techCatIds = await db.UserCategories.Where(uc => uc.UserId == assigneeId).Select(uc => uc.CategoryId).ToListAsync(ct);
+        if (techCatIds.Count == 0 || techCatIds.Contains(categoryId.Value)) return;
+
+        var catName = await db.TicketCategories.AsNoTracking()
+            .Where(c => c.Id == categoryId.Value).Select(c => c.Name).FirstOrDefaultAsync(ct);
+        throw new BadRequestException($"{assignee.FullName} does not handle the '{catName}' category. Choose a technician assigned to this category.");
     }
 
     public async Task ClaimAsync(int id, CancellationToken ct = default)

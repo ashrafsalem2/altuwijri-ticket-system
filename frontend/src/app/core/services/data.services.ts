@@ -8,6 +8,7 @@ import {
   Department, EmployeeTicketReport, Guideline, ImportResult, Notification, OverdueReport, OverviewReport, Project, Role,
   SaveTicketCategoryRequest, SingleTaskReport, SingleUserReport, Tag, TicketCategory, TrendReport, User
 } from '../models/models';
+import { ToastService } from './toast.service';
 
 const api = environment.apiBaseUrl;
 
@@ -215,6 +216,7 @@ export class DepartmentService {
 @Injectable({ providedIn: 'root' })
 export class ExcelService {
   private http = inject(HttpClient);
+  private toast = inject(ToastService);
   private base = `${api}/api/excel`;
 
   downloadTemplate(type: 'users' | 'branches' | 'areas' | 'projects' | 'ticket-categories' | 'departments'): void {
@@ -229,7 +231,7 @@ export class ExcelService {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       },
-      error: e => alert(`Template download failed: ${e?.status ?? ''} ${e?.statusText ?? 'Unknown error'}`)
+      error: e => this.toast.error(`Template download failed: ${e?.status ?? ''} ${e?.statusText ?? 'Unknown error'}`)
     });
   }
 

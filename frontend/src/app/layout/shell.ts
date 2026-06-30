@@ -9,6 +9,7 @@ import { NotificationService, ChatService, UserService, AppLinksService, Guideli
 import { TranslatePipe } from '../core/pipes/translate.pipe';
 import { Notification, AppLink, Guideline, BranchPublic } from '../core/models/models';
 import { initials, timeAgo } from '../shared/util';
+import { ToastService } from '../core/services/toast.service';
 
 @Component({
   selector: 'app-shell',
@@ -162,8 +163,10 @@ import { initials, timeAgo } from '../shared/util';
               </div>
               @for (n of notifications(); track n.id) {
                 <div class="notif-item" [class.un]="!n.isRead" (click)="open(n)">
-                  <div class="ni-title" dir="auto">{{ n.title }}</div>
-                  <div class="text-xs muted" dir="auto">{{ n.message }}</div>
+                  <div class="ni-title" dir="auto">
+                    {{ n.title }}
+                    @if (n.message) { <span class="ni-ticket" dir="auto">"{{ n.message }}"</span> }
+                  </div>
                   <div class="text-xs muted">{{ ago(n.createdAt) }}</div>
                 </div>
               } @empty { <div class="empty text-sm">No notifications</div> }
@@ -475,6 +478,7 @@ export class Shell implements OnInit, OnDestroy {
   private appLinksSvc = inject(AppLinksService);
   private guidelinesSvc = inject(GuidelinesService);
   private orgSvc      = inject(OrganizationService);
+  toast = inject(ToastService);
   private router      = inject(Router);
 
   unread        = signal(0);
@@ -700,7 +704,7 @@ export class Shell implements OnInit, OnDestroy {
   }
   deleteLink(l: AppLink) {
     if (!confirm(`Remove "${l.title}" from the banner?`)) return;
-    this.appLinksSvc.delete(l.id).subscribe({ next: () => this.loadLinks(), error: () => alert('Failed to delete.') });
+    this.appLinksSvc.delete(l.id).subscribe({ next: () => this.loadLinks(), error: () => this.toast.error('Failed to delete.') });
   }
 
   // Guidelines CRUD

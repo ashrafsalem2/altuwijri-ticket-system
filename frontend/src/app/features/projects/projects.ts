@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { PROJECT_STATUSES, ImportResult, Project, ProjectStatus, User } from '../../core/models/models';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-projects',
@@ -111,6 +112,7 @@ export class Projects implements OnInit {
   private svc = inject(ProjectService);
   private userSvc = inject(UserService);
   private xlSvc = inject(ExcelService);
+  toast = inject(ToastService);
   private auth = inject(AuthService);
   i18n = inject(I18nService);
 
@@ -159,7 +161,7 @@ export class Projects implements OnInit {
 
   remove(p: Project) {
     if (!confirm(`Delete project "${p.name}"?`)) return;
-    this.svc.delete(p.id).subscribe({ next: () => this.load(), error: e => alert(e?.error?.title ?? 'Delete failed.') });
+    this.svc.delete(p.id).subscribe({ next: () => { this.load(); this.toast.success('Project deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Delete failed.') });
   }
 
   xlDownload() { this.xlSvc.downloadTemplate('projects'); }
@@ -170,7 +172,7 @@ export class Projects implements OnInit {
     this.importResult.set(null);
     this.xlSvc.import('projects', file).subscribe({
       next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
-      error: e => { this.importing.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+      error: e => { this.importing.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
   }

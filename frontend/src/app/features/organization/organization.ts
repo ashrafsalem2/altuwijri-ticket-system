@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { Area, Branch, Department, Device, ImportResult } from '../../core/models/models';
+import { ToastService } from '../../core/services/toast.service';
 
 type OrgTab = 'areas' | 'branches' | 'departments';
 
@@ -456,6 +457,7 @@ export class Organization implements OnInit {
   private xlSvc   = inject(ExcelService);
   private auth    = inject(AuthService);
   i18n = inject(I18nService);
+  toast = inject(ToastService);
 
   readonly PALETTE = ['#3b82f6','#8b5cf6','#06b6d4','#22c55e','#f59e0b','#ef4444','#ec4899','#f97316','#10b981','#64748b'];
 
@@ -520,7 +522,7 @@ export class Organization implements OnInit {
   }
   delArea(a: Area) {
     if (confirm(`Delete area "${a.name}"?`))
-      this.orgSvc.deleteArea(a.id).subscribe({ next: () => this.load(), error: e => alert(e?.error?.title ?? 'Failed.') });
+      this.orgSvc.deleteArea(a.id).subscribe({ next: () => { this.load(); this.toast.success('Area deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
   }
 
   // ── Excel areas ──
@@ -530,7 +532,7 @@ export class Organization implements OnInit {
     this.xlAreaImporting.set(true); this.xlAreaResult.set(null);
     this.xlSvc.import('areas', file).subscribe({
       next: r => { this.xlAreaImporting.set(false); this.xlAreaResult.set(r); if (r.imported > 0) this.load(); },
-      error: e => { this.xlAreaImporting.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+      error: e => { this.xlAreaImporting.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
   }
@@ -549,7 +551,7 @@ export class Organization implements OnInit {
   }
   delBranch(b: Branch) {
     if (confirm(`Delete branch "${b.name}"?`))
-      this.orgSvc.deleteBranch(b.id).subscribe({ next: () => this.load(), error: e => alert(e?.error?.title ?? 'Failed.') });
+      this.orgSvc.deleteBranch(b.id).subscribe({ next: () => { this.load(); this.toast.success('Branch deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
   }
 
   // ── Excel branches ──
@@ -559,7 +561,7 @@ export class Organization implements OnInit {
     this.xlImporting.set(true); this.xlResult.set(null);
     this.xlSvc.import('branches', file).subscribe({
       next: r => { this.xlImporting.set(false); this.xlResult.set(r); if (r.imported > 0) this.load(); },
-      error: e => { this.xlImporting.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+      error: e => { this.xlImporting.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
   }
@@ -574,7 +576,7 @@ export class Organization implements OnInit {
   }
   delDept(d: Department) {
     if (confirm(`Delete department "${d.name}"?`))
-      this.deptSvc.delete(d.id).subscribe({ next: () => this.load(), error: e => alert(e?.error?.title ?? 'Failed.') });
+      this.deptSvc.delete(d.id).subscribe({ next: () => { this.load(); this.toast.success('Department deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
   }
 
   // ── Excel departments ──
@@ -584,7 +586,7 @@ export class Organization implements OnInit {
     this.xlDeptImporting.set(true); this.xlDeptResult.set(null);
     this.xlSvc.import('departments', file).subscribe({
       next: r => { this.xlDeptImporting.set(false); this.xlDeptResult.set(r); if (r.imported > 0) this.load(); },
-      error: e => { this.xlDeptImporting.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+      error: e => { this.xlDeptImporting.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
   }
@@ -632,7 +634,7 @@ export class Organization implements OnInit {
           this.activeBranch.set(b.find(x => x.id === branchId) ?? null);
         });
       },
-      error: e => alert(e?.error?.title ?? 'Failed.')
+      error: e => this.toast.error(e?.error?.title ?? 'Failed.')
     });
   }
 }

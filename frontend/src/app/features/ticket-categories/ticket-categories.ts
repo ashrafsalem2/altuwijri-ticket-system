@@ -4,6 +4,7 @@ import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TicketCategoryService, ExcelService } from '../../core/services/data.services';
 import { ImportResult, SaveTicketCategoryRequest, TicketCategory } from '../../core/models/models';
+import { ToastService } from '../../core/services/toast.service';
 
 const ICON_PRESETS = [
   '🔧','🌐','💻','🔐','🛡','🐛','✨','⚙️','📞','📋','🖥','🖨','🔌','📡',
@@ -253,6 +254,7 @@ const ICON_PRESETS = [
 export class TicketCategories implements OnInit {
   private svc = inject(TicketCategoryService);
   private xlSvc = inject(ExcelService);
+  toast = inject(ToastService);
   i18n = inject(I18nService);
 
   categories = signal<TicketCategory[]>([]);
@@ -326,7 +328,7 @@ export class TicketCategories implements OnInit {
       ? `هل تريد حذف تصنيف "${cat.name}"؟`
       : `Delete category "${cat.name}"?`;
     if (!confirm(msg)) return;
-    this.svc.delete(cat.id).subscribe({ next: () => this.load(), error: () => {} });
+    this.svc.delete(cat.id).subscribe({ next: () => { this.load(); this.toast.success('Category deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Delete failed.') });
   }
 
   xlDownload() { this.xlSvc.downloadTemplate('ticket-categories'); }
@@ -337,7 +339,7 @@ export class TicketCategories implements OnInit {
     this.importResult.set(null);
     this.xlSvc.import('ticket-categories', file).subscribe({
       next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
-      error: e => { this.importing.set(false); alert(e?.error?.title ?? 'Import failed.'); }
+      error: e => { this.importing.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
   }

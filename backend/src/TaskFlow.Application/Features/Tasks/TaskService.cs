@@ -294,10 +294,10 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
         var task = await db.Tasks.FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted, ct)
             ?? throw new NotFoundException("Task", id);
 
-        if (task.AssigneeId.HasValue)
-            throw new BadRequestException("This ticket is already claimed by someone.");
-
         var uid = currentUser.UserId.Value;
+
+        if (task.AssigneeId.HasValue && task.AssigneeId.Value != uid)
+            throw new BadRequestException("This ticket is already claimed by someone.");
 
         // Technicians can only claim tickets in their categories
         if (currentUser.Role == Roles.Technician)

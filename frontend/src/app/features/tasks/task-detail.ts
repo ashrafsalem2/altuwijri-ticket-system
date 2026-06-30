@@ -533,7 +533,7 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
         this.triggerStatusFlash();
         this.load();
       },
-      error: () => this.quickSaving.set(false)
+      error: e => { this.quickSaving.set(false); alert(e?.error?.title ?? 'Could not accept ticket.'); }
     });
   }
 

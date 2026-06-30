@@ -17,6 +17,7 @@ public interface ITaskService
     Task<TaskDetailDto> CreateAsync(CreateTaskRequest request, CancellationToken ct = default);
     Task<TaskDetailDto> UpdateAsync(int id, UpdateTaskRequest request, CancellationToken ct = default);
     Task MoveAsync(int id, MoveTaskRequest request, CancellationToken ct = default);
+    Task SetStatusAsync(int id, WorkTaskStatus status, CancellationToken ct = default);
     Task ClaimAsync(int id, CancellationToken ct = default);
     Task DeleteAsync(int id, CancellationToken ct = default);
 }
@@ -285,6 +286,33 @@ public class TaskService(IApplicationDbContext db, ICurrentUserService currentUs
             task.StartDate = DateTime.UtcNow;
 
         if (request.Status == WorkTaskStatus.Done)
+            task.CompletedAt ??= DateTime.UtcNow;
+        else
+            task.CompletedAt = null;
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Lightweight status-only shortcut (e.g. the ticket list's InReview → Done action). Subject to the same close restriction as UpdateAsync.</summary>
+    public async Task SetStatusAsync(int id, WorkTaskStatus status, CancellationToken ct = default)
+    {
+        if (currentUser.Role == Roles.Technician && (status == WorkTaskStatus.Done || status == WorkTaskStatus.Cancelled))
+            throw new BadRequestException("Technicians cannot close tickets. Set status to 'In Review' to request manager approval.");
+
+        var task = await db.Tasks.FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted, ct)
+            ?? throw new NotFoundException("Task", id);
+
+        if (task.Status != status)
+            LogActivity(id, "status changed", "Status", task.Status.ToString(), status.ToString());
+
+        task.Status = status;
+        task.UpdatedAt = DateTime.UtcNow;
+        task.UpdatedById = currentUser.UserId;
+
+        if (status == WorkTaskStatus.InProgress && task.StartDate == null)
+            task.StartDate = DateTime.UtcNow;
+
+        if (status == WorkTaskStatus.Done)
             task.CompletedAt ??= DateTime.UtcNow;
         else
             task.CompletedAt = null;

@@ -43,6 +43,9 @@ export class TaskService {
   move(id: number, status: WorkTaskStatus, boardOrder: number): Observable<void> {
     return this.http.patch<void>(`${this.base}/${id}/move`, { status, boardOrder });
   }
+  setStatus(id: number, status: WorkTaskStatus): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${id}/status`, { status });
+  }
   claim(id: number): Observable<void> { return this.http.post<void>(`${this.base}/${id}/claim`, {}); }
   delete(id: number): Observable<void> { return this.http.delete<void>(`${this.base}/${id}`); }
 

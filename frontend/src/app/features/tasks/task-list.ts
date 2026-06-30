@@ -14,6 +14,7 @@ import {
   TaskListItem, User, WorkTaskStatus, TaskType
 } from '../../core/models/models';
 import { initials, typeIcon } from '../../shared/util';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-task-list',
@@ -74,7 +75,15 @@ import { initials, typeIcon } from '../../shared/util';
               <tr>
                 <td><a [routerLink]="['/tasks', t.id]" class="t-title" dir="auto">{{ t.title }}</a></td>
                 <td><span class="proj-dot" [style.background]="t.projectColor"></span> {{ t.projectName }}</td>
-                <td><span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span></td>
+                <td>
+                  <span class="flex items-center gap-1">
+                    <span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span>
+                    @if (t.status === 'InReview' && canClose()) {
+                      <button class="btn btn-sm btn-primary" title="{{ 'task.approveDone' | t }}"
+                        [disabled]="approving() === t.id" (click)="approveDone(t)">✓ {{ 'st.Done' | t }}</button>
+                    }
+                  </span>
+                </td>
                 <td><span class="badge" [class]="'prio-' + t.priority">{{ 'pr.' + t.priority | t }}</span></td>
                 <td class="text-sm"><span class="type-em">{{ icon(t.type) }}</span> {{ 'ty.' + t.type | t }}</td>
                 <td>
@@ -113,6 +122,7 @@ export class TaskList implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   i18n = inject(I18nService);
+  toast = inject(ToastService);
 
   page = signal<PagedResult<TaskListItem> | null>(null);
   projects = signal<Project[]>([]);
@@ -129,7 +139,9 @@ export class TaskList implements OnInit, OnDestroy {
   label = (s: WorkTaskStatus) => STATUS_LABELS[s];
   typeLabel = (t: TaskType) => TYPE_LABELS[t];
   canEdit = () => this.auth.hasRole('Admin', 'Technician');
+  canClose = () => this.auth.hasRole('Admin');
   isTechnician = () => this.auth.user()?.role === 'Technician';
+  approving = signal<number | null>(null);
 
   private listPoll?: any;
   ngOnDestroy() { clearInterval(this.listPoll); }
@@ -173,4 +185,13 @@ export class TaskList implements OnInit, OnDestroy {
     this.q.sortBy = by; this.load();
   }
   onSaved() { this.showForm.set(false); this.load(); }
+
+  approveDone(t: TaskListItem) {
+    if (!confirm(`Mark "${t.title}" as Done?`)) return;
+    this.approving.set(t.id);
+    this.taskSvc.setStatus(t.id, 'Done').subscribe({
+      next: () => { this.approving.set(null); this.toast.success(`"${t.title}" marked Done.`); this.load(); },
+      error: e => { this.approving.set(null); this.toast.error(e?.error?.title ?? 'Could not update status.'); }
+    });
+  }
 }

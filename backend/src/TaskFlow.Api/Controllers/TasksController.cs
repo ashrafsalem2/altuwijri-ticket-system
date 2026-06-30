@@ -44,6 +44,14 @@ public class TasksController(ITaskService tasks, ICommentService comments) : Api
     }
 
     [Authorize(Roles = Roles.AllStaff)]
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> SetStatus(int id, SetTaskStatusRequest request, CancellationToken ct)
+    {
+        await tasks.SetStatusAsync(id, request.Status, ct);
+        return NoContent();
+    }
+
+    [Authorize(Roles = Roles.AllStaff)]
     [HttpPost("{id:int}/claim")]
     public async Task<IActionResult> Claim(int id, CancellationToken ct)
     {

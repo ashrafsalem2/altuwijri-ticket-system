@@ -88,6 +88,9 @@ public record UpdateTaskRequest(
 /// <summary>Payload for drag-and-drop moves on the Kanban board.</summary>
 public record MoveTaskRequest(WorkTaskStatus Status, int BoardOrder);
 
+/// <summary>Payload for the list-view status shortcut (e.g. InReview → Done).</summary>
+public record SetTaskStatusRequest(WorkTaskStatus Status);
+
 /// <summary>Filtering/sorting options including category.</summary>
 
 public record TagDto(int Id, string Name, string Color, string? Icon);

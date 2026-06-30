@@ -216,11 +216,10 @@
 .ni-title { font-weight: 600; font-size: .85rem; line-height: 1.4; }
 .ni-ticket-box {
   font-size: .82rem; font-weight: 700; line-height: 1.4;
-  color: var(--text); background: var(--surface);
-  border-radius: 6px;
-  padding: .4rem .6rem;
+  color: var(--text); background: transparent;
+  padding: 0;
 }
-.notif-item.un .ni-ticket-box { background: #fff; color: var(--primary-dark); }
+.notif-item.un .ni-ticket-box { color: var(--primary-dark); }
 .ni-time { color: var(--text); }
 .notif-item.un .ni-time { color: var(--primary-dark); }
 
@@ -646,7 +645,7 @@
   .notif-item {
     color: var(--text); border-bottom-color: var(--border);
     .ni-title { color: var(--text); }
-    .ni-ticket-box { color: var(--text); background: var(--surface-2); }
+    .ni-ticket-box { color: var(--text); background: transparent; }
     .ni-time { color: var(--text); }
     .muted { color: var(--text-muted); }
     &:hover { background: rgba(0,130,114,.12); }
@@ -655,7 +654,7 @@
       border-left: 3px solid var(--primary);
       padding-left: calc(1rem - 3px);
       .ni-title { color: #E8F4F3; font-weight: 700; }
-      .ni-ticket-box { background: var(--surface); color: #E8F4F3; }
+      .ni-ticket-box { background: transparent; color: #E8F4F3; }
       .ni-time { color: #E8F4F3; }
       .muted { color: #C8C6C4; }
     }

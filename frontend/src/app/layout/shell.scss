@@ -339,8 +339,8 @@
 /* ══════════════════════════════════════════════════════
    LINK FORM MODAL
 ══════════════════════════════════════════════════════ */
-.lf-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; z-index: 600; backdrop-filter: blur(2px); }
-.lf-modal   { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); width: 100%; max-width: 480px; display: flex; flex-direction: column; overflow: hidden; }
+.lf-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; z-index: 600; backdrop-filter: blur(2px); animation: overlay-fade-in .2s ease-in-out; }
+.lf-modal   { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); width: 100%; max-width: 480px; display: flex; flex-direction: column; overflow: hidden; animation: modal-pop-in .25s ease-in-out; }
 .lf-head    { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1.1rem; border-bottom: 1px solid var(--border); font-size: 1rem; }
 .lf-body    { padding: 1.1rem; display: flex; flex-direction: column; gap: .85rem; overflow: auto; max-height: 70vh; }
 .lf-foot    { display: flex; justify-content: flex-end; gap: .5rem; padding: .8rem 1.1rem; border-top: 1px solid var(--border); }
@@ -370,10 +370,12 @@
 .pw-overlay {
   position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 1.5rem;
+  animation: overlay-fade-in .2s ease-in-out;
 }
 .pw-modal {
   width: 100%; max-width: 400px; background: var(--surface); border-radius: var(--radius);
   border: 1px solid var(--border); box-shadow: var(--shadow-lg); overflow: hidden;
+  animation: modal-pop-in .25s ease-in-out;
 }
 .pw-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 1rem 1rem 0; }
 .pw-icon {

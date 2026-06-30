@@ -59,14 +59,14 @@
   background: rgba(15,23,42,.55);
   display: flex; align-items: center; justify-content: center;
   padding: 1.5rem;
-  animation: hm-in .15s ease;
+  animation: overlay-fade-in .2s ease-in-out;
 }
-@keyframes hm-in { from { opacity: 0; } to { opacity: 1; } }
 .hm-modal {
   width: 520px; max-width: 95vw;
   border-radius: 14px; overflow: hidden;
   display: flex; flex-direction: column;
   box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  animation: modal-pop-in .25s ease-in-out;
 }
 .hm-head {
   display: flex; align-items: flex-start; justify-content: space-between;

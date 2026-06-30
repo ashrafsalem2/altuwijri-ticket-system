@@ -201,12 +201,14 @@
   position: fixed; inset: 0; z-index: 200;
   background: rgba(0,0,0,.45); backdrop-filter: blur(3px);
   display: flex; align-items: center; justify-content: center; padding: 1rem;
+  animation: overlay-fade-in .2s ease-in-out;
   &.overlay-top { align-items: flex-start; padding-top: 5rem; }
 }
 .modal {
   width: 100%; max-width: 500px; max-height: 90vh;
   display: flex; flex-direction: column; overflow: hidden;
   border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: modal-pop-in .25s ease-in-out;
   &.modal-lg { max-width: 680px; }
 }
 .modal-head {

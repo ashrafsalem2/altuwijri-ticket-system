@@ -52,8 +52,8 @@
 
 .composer { display: flex; gap: .5rem; padding: .75rem 1rem; border-top: 1px solid var(--border); flex-shrink: 0; }
 
-.overlay { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 500; display: flex; align-items: flex-start; justify-content: center; padding: 2.5rem 1rem; overflow: auto; }
-.modal { width: 100%; max-width: 480px; }
+.overlay { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 500; display: flex; align-items: flex-start; justify-content: center; padding: 2.5rem 1rem; overflow: auto; animation: overlay-fade-in .2s ease-in-out; }
+.modal { width: 100%; max-width: 480px; animation: modal-pop-in .25s ease-in-out; }
 .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
 .modal-head h3 { margin: 0; }
 .modal-body { padding: 1.25rem; }

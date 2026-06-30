@@ -80,7 +80,7 @@ import { ToastService } from '../../core/services/toast.service';
                     <span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span>
                     @if (t.status === 'InReview' && canClose()) {
                       <button class="btn btn-sm btn-primary" title="{{ 'task.approveDone' | t }}"
-                        [disabled]="approving() === t.id" (click)="approveDone(t)">✓ {{ 'st.Done' | t }}</button>
+                        [disabled]="approving() === t.id" (click)="confirmTarget.set(t)">✓ {{ 'st.Done' | t }}</button>
                     }
                   </span>
                 </td>
@@ -112,6 +112,26 @@ import { ToastService } from '../../core/services/toast.service';
   </div>
 
   @if (showForm()) { <app-task-form (saved)="onSaved()" (cancel)="showForm.set(false)"></app-task-form> }
+
+  @if (confirmTarget()) {
+    <div class="overlay" (click)="confirmTarget.set(null)">
+      <div class="modal card confirm-modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div class="confirm-icon">✓</div>
+          <button class="btn btn-icon btn-ghost" (click)="confirmTarget.set(null)">✕</button>
+        </div>
+        <div class="modal-body">
+          <h3>{{ 'task.approveDone' | t }}</h3>
+          <p class="confirm-text">{{ 'task.approveDoneConfirm' | t }}</p>
+          <div class="confirm-ticket-ref" dir="auto">{{ confirmTarget()!.title }}</div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" (click)="confirmTarget.set(null)">{{ 'c.cancel' | t }}</button>
+          <button class="btn btn-primary" (click)="approveDone()" [disabled]="approving() !== null">✓ {{ 'st.Done' | t }}</button>
+        </div>
+      </div>
+    </div>
+  }
   `
 })
 export class TaskList implements OnInit, OnDestroy {
@@ -142,6 +162,7 @@ export class TaskList implements OnInit, OnDestroy {
   canClose = () => this.auth.hasRole('Admin');
   isTechnician = () => this.auth.user()?.role === 'Technician';
   approving = signal<number | null>(null);
+  confirmTarget = signal<TaskListItem | null>(null);
 
   private listPoll?: any;
   ngOnDestroy() { clearInterval(this.listPoll); }
@@ -186,11 +207,17 @@ export class TaskList implements OnInit, OnDestroy {
   }
   onSaved() { this.showForm.set(false); this.load(); }
 
-  approveDone(t: TaskListItem) {
-    if (!confirm(`Mark "${t.title}" as Done?`)) return;
+  approveDone() {
+    const t = this.confirmTarget();
+    if (!t) return;
     this.approving.set(t.id);
     this.taskSvc.setStatus(t.id, 'Done').subscribe({
-      next: () => { this.approving.set(null); this.toast.success(`"${t.title}" marked Done.`); this.load(); },
+      next: () => {
+        this.approving.set(null);
+        this.confirmTarget.set(null);
+        this.toast.success(`"${t.title}" marked Done.`);
+        this.load();
+      },
       error: e => { this.approving.set(null); this.toast.error(e?.error?.title ?? 'Could not update status.'); }
     });
   }

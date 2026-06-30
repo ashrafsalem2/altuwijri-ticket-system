@@ -37,9 +37,6 @@ const PRIORITY_COLORS: Record<string, string> = {
           <h2>{{ greeting }}, {{ auth.user()?.fullName?.split(' ')?.[0] }}!</h2>
           <span class="muted text-sm">{{ today | date:'EEEE, MMMM d, y' }}</span>
         </div>
-        @if (empReport()) {
-          <button class="btn btn-primary no-print" (click)="print()">🖨 {{ 'c.print' | t }}</button>
-        }
       </div>
 
       <!-- Report mode controls -->
@@ -392,7 +389,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-  print() { window.print(); }
 
   empReportTitle = computed(() => {
     const m = this.empMode();

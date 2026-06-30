@@ -199,6 +199,7 @@
   box-shadow: var(--shadow-lg); min-width: 320px; z-index: 200; overflow: hidden;
 }
 .dd-head { padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
+.dd-meta { font-size: .74rem; color: var(--primary-dark); margin-top: .15rem; }
 .dd-item { display: block; width: 100%; text-align: left; padding: .65rem 1rem; background: none; border: none; cursor: pointer; font: inherit; color: var(--text); &:hover { background: var(--surface-2); } }
 .notif-list { max-height: 420px; overflow: auto; }
 .notif-item {
@@ -641,6 +642,7 @@
     color: var(--text);
   }
   .dd-head  { border-bottom-color: var(--border); color: var(--text); }
+  .dd-meta  { color: var(--primary); }
   .dd-item  { color: var(--text); &:hover { background: rgba(0,130,114,.15); } }
   .notif-item {
     color: var(--text); border-bottom-color: var(--border);

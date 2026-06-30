@@ -184,8 +184,8 @@ import { ToastService } from '../core/services/toast.service';
             <div class="dropdown user-dd" (click)="$event.stopPropagation()">
               <div class="dd-head">
                 <strong>{{ auth.user()?.fullName }}</strong>
-                <div class="text-xs muted">{{ auth.user()?.email }}</div>
-                @if (auth.user()?.branchName) { <div class="text-xs muted">Branch: {{ auth.user()?.branchName }}</div> }
+                <div class="dd-meta">{{ auth.user()?.email }}</div>
+                @if (auth.user()?.branchName) { <div class="dd-meta">Branch: {{ auth.user()?.branchName }}</div> }
               </div>
               <button class="dd-item" (click)="logout()">{{ 'auth.signOut' | t }}</button>
             </div>

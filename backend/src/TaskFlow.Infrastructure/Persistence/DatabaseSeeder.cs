@@ -169,24 +169,25 @@ public static class DatabaseSeeder
         var branches = await db.Branches.ToDictionaryAsync(br => br.Code, br => br.Id);
         var depts    = await db.Departments.ToDictionaryAsync(d => d.Name, d => d.Id);
         int? D(string name) => depts.TryGetValue(name, out var id) ? id : null;
+        int? B(string code) => branches.TryGetValue(code, out var id) ? id : null;
 
         var users = new[]
         {
             new User { UserName = "admin", Email = "admin@itdept.local", FullName = "System Administrator",
                 RoleId = roles[Roles.Admin], JobTitle = "IT Director", DepartmentId = D("IT"), AvatarColor = "#3b82f6",
-                BranchId = branches["HQ"], PasswordHash = hasher.Hash("Admin@123") },
+                BranchId = B("HQ"), PasswordHash = hasher.Hash("Admin@123") },
             new User { UserName = "ttech", Email = "tech@itdept.local", FullName = "Tariq Technician",
                 RoleId = roles[Roles.Technician], JobTitle = "Systems Engineer", DepartmentId = D("Infrastructure"), AvatarColor = "#22c55e",
-                BranchId = branches["HQ"], IsAvailable = true, PasswordHash = hasher.Hash("Tech@123") },
+                BranchId = B("HQ"), IsAvailable = true, PasswordHash = hasher.Hash("Tech@123") },
             new User { UserName = "sara", Email = "sara@itdept.local", FullName = "Sara Helpdesk",
                 RoleId = roles[Roles.Technician], JobTitle = "Helpdesk Analyst", DepartmentId = D("Support"), AvatarColor = "#f97316",
-                BranchId = branches["DT"], IsAvailable = true, PasswordHash = hasher.Hash("Tech@123") },
+                BranchId = B("DT"), IsAvailable = true, PasswordHash = hasher.Hash("Tech@123") },
             new User { UserName = "omar", Email = "omar@itdept.local", FullName = "Omar Field",
                 RoleId = roles[Roles.Technician], JobTitle = "Field Engineer", DepartmentId = D("Infrastructure"), AvatarColor = "#0ea5e9",
-                BranchId = branches["HB"], IsAvailable = false, PasswordHash = hasher.Hash("Tech@123") },
+                BranchId = B("HB"), IsAvailable = false, PasswordHash = hasher.Hash("Tech@123") },
             new User { UserName = "emp1", Email = "emp1@itdept.local", FullName = "Emma Branch",
                 RoleId = roles[Roles.BranchEmployee], JobTitle = "Branch Coordinator", DepartmentId = D("Operations"), AvatarColor = "#06b6d4",
-                BranchId = branches["DT"], PasswordHash = hasher.Hash("Emp@123") },
+                BranchId = B("DT"), PasswordHash = hasher.Hash("Emp@123") },
             new User { UserName = "emp2", Email = "emp2@itdept.local", FullName = "Hassan HO",
                 RoleId = roles[Roles.HoEmployee], JobTitle = "Finance Officer", DepartmentId = D("Finance"), AvatarColor = "#84cc16",
                 PasswordHash = hasher.Hash("Emp@123") },

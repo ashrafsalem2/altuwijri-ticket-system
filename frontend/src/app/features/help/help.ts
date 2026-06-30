@@ -112,6 +112,8 @@ const CARDS: HelpCard[] = [
       { en: 'For Technicians: assign them to one or more Ticket Categories so they see the right tickets.', ar: 'للتقنيين: عيّنهم لتصنيف تذكرة أو أكثر حتى يتمكنوا من رؤية التذاكر المناسبة.' },
       { en: 'For Cam-Employees: assign multiple branches if they work across locations.', ar: 'لموظفي الكاميرا: عيّن لهم فروعاً متعددة إذا كانوا يعملون في أكثر من موقع.' },
       { en: 'Click "Reset PW" to reset a user\'s password. Click the toggle to deactivate without deleting.', ar: 'انقر "إعادة تعيين كلمة المرور" لإعادة تعيين كلمة مرور المستخدم. انقر التبديل لإلغاء التفعيل دون حذف.' },
+      { en: '"Delete with History" permanently removes a user AND all their tickets, comments, and chat history — this cannot be undone. Use it only when you are certain.', ar: '"حذف مع السجل" يحذف المستخدم نهائياً مع جميع تذاكره وتعليقاته وسجل محادثاته — لا يمكن التراجع عن هذا الإجراء. استخدمه فقط عند التأكد.', tip: { en: 'Regular deactivation (the toggle) is safer and reversible — prefer it unless you specifically need to erase the user\'s history.', ar: 'إلغاء التفعيل العادي (التبديل) أكثر أماناً وقابل للتراجع — يُفضَّل استخدامه إلا إذا احتجت تحديداً لمسح سجل المستخدم.' } },
+      { en: 'Use the filter row under the table header to search by Name/Username or narrow by Role, Branch, Department, and Status.', ar: 'استخدم صف التصفية أسفل عناوين الجدول للبحث بالاسم/اسم المستخدم أو التضييق حسب الدور أو الفرع أو القسم أو الحالة.' },
     ]
   },
   {
@@ -131,8 +133,10 @@ const CARDS: HelpCard[] = [
     steps: [
       { en: 'Open any ticket from the Tasks list or Board. Use the edit panel to change assignee, status, or priority.', ar: 'افتح أي تذكرة من قائمة المهام أو اللوحة. استخدم لوحة التحرير لتغيير المُسند إليه أو الحالة أو الأولوية.' },
       { en: 'To close a ticket: set status to "Done". Only Admin/Manager can mark tickets Done or Cancelled.', ar: 'لإغلاق تذكرة: اضبط الحالة على "منجزة". فقط المدير/المشرف يمكنه التعيين كـ"منجزة" أو "ملغاة".' },
+      { en: 'Shortcut: in the Tasks list, any ticket "In Review" shows a "✓ Done" button right in the Status column — approve it with one click without opening the ticket.', ar: 'اختصار: في قائمة المهام، أي تذكرة "قيد المراجعة" تظهر زر "✓ منجزة" مباشرة في عمود الحالة — اعتمدها بنقرة واحدة دون فتح التذكرة.' },
       { en: 'Add subtasks inside a ticket for complex issues that need multiple steps.', ar: 'أضف مهاماً فرعية داخل التذكرة للمشكلات المعقدة التي تتطلب خطوات متعددة.' },
       { en: 'Use Tags to label tickets for easier filtering and reporting.', ar: 'استخدم الوسوم لتصنيف التذاكر لتسهيل التصفية وإعداد التقارير.' },
+      { en: 'Tip: every column in the Tasks list now has its own filter box right under the header — type or pick a value to narrow results instantly.', ar: 'نصيحة: لكل عمود في قائمة المهام الآن مربع تصفية خاص أسفل العنوان مباشرة — اكتب أو اختر قيمة لتضييق النتائج فوراً.' },
     ]
   },
   {
@@ -159,6 +163,16 @@ const CARDS: HelpCard[] = [
     ]
   },
   // ── All roles ──────────────────────────────────────────────────────────────
+  {
+    id: 'all-pw', icon: '🔑', role: 'all',
+    titleEn: 'Change Your Password', titleAr: 'تغيير كلمة المرور',
+    steps: [
+      { en: 'Click your name/avatar in the top-right corner to open the user menu.', ar: 'انقر اسمك/صورتك في الزاوية العلوية اليمنى لفتح قائمة المستخدم.' },
+      { en: 'Select "🔑 Change Password".', ar: 'اختر "🔑 تغيير كلمة المرور".' },
+      { en: 'Enter your current password, then your new password twice to confirm, and click Save.', ar: 'أدخل كلمة المرور الحالية، ثم كلمة المرور الجديدة مرتين للتأكيد، وانقر حفظ.' },
+      { en: 'New password must be at least 6 characters. You no longer need to ask an Admin to change it for you.', ar: 'يجب أن تكون كلمة المرور الجديدة 6 أحرف على الأقل. لم تعد بحاجة لطلب تغييرها من المدير.' },
+    ]
+  },
   {
     id: 'all-chat', icon: '💬', role: 'all',
     titleEn: 'Support Chat', titleAr: 'الدردشة الداعمة',

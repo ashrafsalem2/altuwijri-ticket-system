@@ -21,6 +21,8 @@
 
 /* ── Table ────────────────────────────────────────────────── */
 .table { min-width: 680px; }
+[dir="rtl"] .status-cell { text-align: center; }
+[dir="rtl"] .status-row { justify-content: center; }
 .t-title { font-weight: 600; }
 .proj-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: .25rem; }
 .avatar.sm { width: 24px; height: 24px; font-size: .65rem; }

@@ -76,8 +76,8 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
               <tr>
                 <td><a [routerLink]="['/tasks', t.id]" class="t-title" dir="auto">{{ t.title }}</a></td>
                 <td><span class="proj-dot" [style.background]="t.projectColor"></span> {{ t.projectName }}</td>
-                <td>
-                  <span class="flex items-center gap-1">
+                <td class="status-cell">
+                  <span class="flex items-center gap-1 status-row">
                     <span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span>
                     @if (t.status === 'InReview' && canClose()) {
                       <button class="btn btn-sm btn-primary" title="{{ 'task.approveDone' | t }}"

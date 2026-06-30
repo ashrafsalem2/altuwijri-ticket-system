@@ -6,6 +6,7 @@ import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { PROJECT_STATUSES, ImportResult, Project, ProjectStatus, User } from '../../core/models/models';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 @Component({
   selector: 'app-projects',
@@ -113,6 +114,7 @@ export class Projects implements OnInit {
   private userSvc = inject(UserService);
   private xlSvc = inject(ExcelService);
   toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   private auth = inject(AuthService);
   i18n = inject(I18nService);
 
@@ -159,8 +161,9 @@ export class Projects implements OnInit {
     });
   }
 
-  remove(p: Project) {
-    if (!confirm(`Delete project "${p.name}"?`)) return;
+  async remove(p: Project) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Project', message: 'This project will be permanently removed.', detail: p.name });
+    if (!ok) return;
     this.svc.delete(p.id).subscribe({ next: () => { this.load(); this.toast.success('Project deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Delete failed.') });
   }
 

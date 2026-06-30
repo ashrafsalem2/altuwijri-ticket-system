@@ -5,6 +5,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TicketCategoryService, ExcelService } from '../../core/services/data.services';
 import { ImportResult, SaveTicketCategoryRequest, TicketCategory } from '../../core/models/models';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 const ICON_PRESETS = [
   '🔧','🌐','💻','🔐','🛡','🐛','✨','⚙️','📞','📋','🖥','🖨','🔌','📡',
@@ -255,6 +256,7 @@ export class TicketCategories implements OnInit {
   private svc = inject(TicketCategoryService);
   private xlSvc = inject(ExcelService);
   toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   i18n = inject(I18nService);
 
   categories = signal<TicketCategory[]>([]);
@@ -323,11 +325,16 @@ export class TicketCategories implements OnInit {
     });
   }
 
-  del(cat: TicketCategory) {
-    const msg = this.i18n.lang() === 'ar'
-      ? `هل تريد حذف تصنيف "${cat.name}"؟`
-      : `Delete category "${cat.name}"?`;
-    if (!confirm(msg)) return;
+  async del(cat: TicketCategory) {
+    const isAr = this.i18n.lang() === 'ar';
+    const ok = await this.confirmSvc.ask({
+      title: isAr ? 'حذف التصنيف' : 'Delete Category',
+      message: isAr ? 'سيتم حذف هذا التصنيف نهائياً.' : 'This category will be permanently removed.',
+      detail: cat.name,
+      cancelLabel: isAr ? 'إلغاء' : 'Cancel',
+      confirmLabel: isAr ? 'حذف' : 'Delete'
+    });
+    if (!ok) return;
     this.svc.delete(cat.id).subscribe({ next: () => { this.load(); this.toast.success('Category deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Delete failed.') });
   }
 

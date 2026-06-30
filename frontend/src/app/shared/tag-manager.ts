@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TagService } from '../core/services/data.services';
 import { TranslatePipe } from '../core/pipes/translate.pipe';
 import { Tag } from '../core/models/models';
+import { ConfirmService } from '../core/services/confirm.service';
 
 const PRESET_COLORS = [
   '#ef4444', '#f97316', '#f59e0b', '#eab308',
@@ -168,6 +169,7 @@ export class TagManager implements OnInit {
   @Output() changed = new EventEmitter<void>();
 
   private tagSvc = inject(TagService);
+  private confirmSvc = inject(ConfirmService);
 
   tags = signal<Tag[]>([]);
   saving = signal(false);
@@ -228,8 +230,9 @@ export class TagManager implements OnInit {
     });
   }
 
-  remove(tag: Tag) {
-    if (!confirm(`Delete tag "${tag.name}"?`)) return;
+  async remove(tag: Tag) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Tag', message: 'This tag will be removed from all tickets.', detail: tag.name });
+    if (!ok) return;
     this.tagSvc.delete(tag.id).subscribe({
       next: () => { this.load(); this.changed.emit(); },
       error: e => this.createError.set(e?.error?.title ?? 'Delete failed.')

@@ -15,6 +15,7 @@ import {
 } from '../../core/models/models';
 import { initials, typeIcon } from '../../shared/util';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 import { CelebrationOverlay } from '../../shared/celebration-overlay';
 
 @Component({
@@ -81,7 +82,7 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
                     <span class="badge" [class]="'st-' + t.status">{{ 'st.' + t.status | t }}</span>
                     @if (t.status === 'InReview' && canClose()) {
                       <button class="btn btn-sm btn-primary" title="{{ 'task.approveDone' | t }}"
-                        [disabled]="approving() === t.id" (click)="confirmTarget.set(t)">✓ {{ 'st.Done' | t }}</button>
+                        [disabled]="approving() === t.id" (click)="approveDone(t)">✓ {{ 'st.Done' | t }}</button>
                     }
                   </span>
                 </td>
@@ -114,26 +115,6 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
 
   @if (showForm()) { <app-task-form (saved)="onSaved()" (cancel)="showForm.set(false)"></app-task-form> }
 
-  @if (confirmTarget()) {
-    <div class="overlay" (click)="confirmTarget.set(null)">
-      <div class="modal card confirm-modal" (click)="$event.stopPropagation()">
-        <div class="modal-head">
-          <div class="confirm-icon">✓</div>
-          <button class="btn btn-icon btn-ghost" (click)="confirmTarget.set(null)">✕</button>
-        </div>
-        <div class="modal-body">
-          <h3>{{ 'task.approveDone' | t }}</h3>
-          <p class="confirm-text">{{ 'task.approveDoneConfirm' | t }}</p>
-          <div class="confirm-ticket-ref" dir="auto">{{ confirmTarget()!.title }}</div>
-        </div>
-        <div class="modal-foot">
-          <button class="btn btn-ghost" (click)="confirmTarget.set(null)">{{ 'c.cancel' | t }}</button>
-          <button class="btn btn-primary" (click)="approveDone()" [disabled]="approving() !== null">✓ {{ 'st.Done' | t }}</button>
-        </div>
-      </div>
-    </div>
-  }
-
   <app-celebration-overlay [show]="showCelebration()" />
   `
 })
@@ -146,6 +127,7 @@ export class TaskList implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   i18n = inject(I18nService);
   toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
 
   page = signal<PagedResult<TaskListItem> | null>(null);
   projects = signal<Project[]>([]);
@@ -165,7 +147,6 @@ export class TaskList implements OnInit, OnDestroy {
   canClose = () => this.auth.hasRole('Admin');
   isTechnician = () => this.auth.user()?.role === 'Technician';
   approving = signal<number | null>(null);
-  confirmTarget = signal<TaskListItem | null>(null);
   showCelebration = signal(false);
 
   private listPoll?: any;
@@ -211,14 +192,20 @@ export class TaskList implements OnInit, OnDestroy {
   }
   onSaved() { this.showForm.set(false); this.load(); }
 
-  approveDone() {
-    const t = this.confirmTarget();
-    if (!t) return;
+  async approveDone(t: TaskListItem) {
+    const ok = await this.confirmSvc.ask({
+      title: 'Approve and mark as Done',
+      message: 'This ticket will be marked as Done and closed.',
+      detail: t.title,
+      confirmLabel: 'Done',
+      variant: 'success',
+      icon: '✓'
+    });
+    if (!ok) return;
     this.approving.set(t.id);
     this.taskSvc.setStatus(t.id, 'Done').subscribe({
       next: () => {
         this.approving.set(null);
-        this.confirmTarget.set(null);
         this.toast.success(`"${t.title}" marked Done.`);
         this.showCelebration.set(true);
         setTimeout(() => this.showCelebration.set(false), 4900);

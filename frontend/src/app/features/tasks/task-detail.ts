@@ -13,6 +13,7 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
 import { Attachment, Comment, STATUS_LABELS, TASK_STATUSES, TYPE_LABELS, TaskDetail as TaskDetailModel, User } from '../../core/models/models';
 import { initials, timeAgo, typeIcon } from '../../shared/util';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 @Component({
   selector: 'app-task-detail',
@@ -317,6 +318,7 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   private chatSvc = inject(ChatService);
   private userSvc = inject(UserService);
   toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
 
   task = signal<TaskDetailModel | null>(null);
   comments = signal<Comment[]>([]);
@@ -496,8 +498,9 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  deleteAttachment(a: Attachment) {
-    if (!confirm(`Remove "${a.fileName}"?`)) return;
+  async deleteAttachment(a: Attachment) {
+    const ok = await this.confirmSvc.ask({ title: 'Remove Attachment', message: 'This file will be removed from the ticket.', detail: a.fileName });
+    if (!ok) return;
     this.attachmentSvc.delete(Number(this.id), a.id).subscribe(() => this.attachments.update(l => l.filter(x => x.id !== a.id)));
   }
 
@@ -561,8 +564,9 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  remove() {
-    if (!confirm('Delete this task?')) return;
+  async remove() {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Ticket', message: 'This ticket will be permanently removed.', detail: this.task()?.title });
+    if (!ok) return;
     this.taskSvc.delete(Number(this.id)).subscribe(() => this.router.navigate(['/tasks']));
   }
 

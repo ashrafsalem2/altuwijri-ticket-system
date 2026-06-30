@@ -6,6 +6,7 @@ import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { Area, Branch, Department, Device, ImportResult } from '../../core/models/models';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 type OrgTab = 'areas' | 'branches' | 'departments';
 
@@ -468,6 +469,7 @@ export class Organization implements OnInit {
   private auth    = inject(AuthService);
   i18n = inject(I18nService);
   toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
 
   readonly PALETTE = ['#3b82f6','#8b5cf6','#06b6d4','#22c55e','#f59e0b','#ef4444','#ec4899','#f97316','#10b981','#64748b'];
 
@@ -532,9 +534,10 @@ export class Organization implements OnInit {
     const obs = this.editing && this.editId ? this.orgSvc.updateArea(this.editId, this.am) : this.orgSvc.createArea(this.am);
     obs.subscribe({ next: () => { this.areaForm.set(false); this.load(); }, error: e => this.error.set(e?.error?.title ?? 'Failed.') });
   }
-  delArea(a: Area) {
-    if (confirm(`Delete area "${a.name}"?`))
-      this.orgSvc.deleteArea(a.id).subscribe({ next: () => { this.load(); this.toast.success('Area deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
+  async delArea(a: Area) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Area', message: 'This area will be permanently removed.', detail: a.name });
+    if (!ok) return;
+    this.orgSvc.deleteArea(a.id).subscribe({ next: () => { this.load(); this.toast.success('Area deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
   }
 
   // ── Excel areas ──
@@ -561,9 +564,10 @@ export class Organization implements OnInit {
     const obs = this.editing && this.editId ? this.orgSvc.updateBranch(this.editId, this.bm) : this.orgSvc.createBranch(this.bm);
     obs.subscribe({ next: () => { this.branchForm.set(false); this.load(); }, error: e => this.error.set(e?.error?.title ?? 'Failed.') });
   }
-  delBranch(b: Branch) {
-    if (confirm(`Delete branch "${b.name}"?`))
-      this.orgSvc.deleteBranch(b.id).subscribe({ next: () => { this.load(); this.toast.success('Branch deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
+  async delBranch(b: Branch) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Branch', message: 'This branch will be permanently removed.', detail: b.name });
+    if (!ok) return;
+    this.orgSvc.deleteBranch(b.id).subscribe({ next: () => { this.load(); this.toast.success('Branch deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
   }
 
   // ── Excel branches ──
@@ -586,9 +590,10 @@ export class Organization implements OnInit {
     const obs = this.editingDept && this.editDeptId ? this.deptSvc.update(this.editDeptId, this.dm2) : this.deptSvc.create(this.dm2);
     obs.subscribe({ next: () => { this.deptFormOpen.set(false); this.load(); }, error: e => this.deptError.set(e?.error?.title ?? 'Failed.') });
   }
-  delDept(d: Department) {
-    if (confirm(`Delete department "${d.name}"?`))
-      this.deptSvc.delete(d.id).subscribe({ next: () => { this.load(); this.toast.success('Department deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
+  async delDept(d: Department) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Department', message: 'This department will be permanently removed.', detail: d.name });
+    if (!ok) return;
+    this.deptSvc.delete(d.id).subscribe({ next: () => { this.load(); this.toast.success('Department deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Failed.') });
   }
 
   // ── Excel departments ──
@@ -636,8 +641,9 @@ export class Organization implements OnInit {
       error: e => this.devError.set(e?.error?.title ?? 'Failed.')
     });
   }
-  delDevice(d: Device) {
-    if (!confirm(`Delete device "${d.label}"?`)) return;
+  async delDevice(d: Device) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Device', message: 'This device will be permanently removed.', detail: d.label });
+    if (!ok) return;
     const branchId = this.activeBranch()!.id;
     this.orgSvc.deleteDevice(d.id).subscribe({
       next: () => {

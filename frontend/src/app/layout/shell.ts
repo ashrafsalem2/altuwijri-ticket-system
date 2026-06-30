@@ -10,6 +10,7 @@ import { TranslatePipe } from '../core/pipes/translate.pipe';
 import { Notification, AppLink, Guideline, BranchPublic } from '../core/models/models';
 import { initials, timeAgo } from '../shared/util';
 import { ToastService } from '../core/services/toast.service';
+import { ConfirmService } from '../core/services/confirm.service';
 
 @Component({
   selector: 'app-shell',
@@ -477,6 +478,7 @@ export class Shell implements OnInit, OnDestroy {
   private guidelinesSvc = inject(GuidelinesService);
   private orgSvc      = inject(OrganizationService);
   toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   private router      = inject(Router);
 
   unread        = signal(0);
@@ -700,8 +702,9 @@ export class Shell implements OnInit, OnDestroy {
       error: e => this.linkError.set(e?.error?.title ?? e?.error?.detail ?? e?.statusText ?? `Error ${e?.status}`)
     });
   }
-  deleteLink(l: AppLink) {
-    if (!confirm(`Remove "${l.title}" from the banner?`)) return;
+  async deleteLink(l: AppLink) {
+    const ok = await this.confirmSvc.ask({ title: 'Remove Link', message: 'This link will be removed from the banner.', detail: l.title });
+    if (!ok) return;
     this.appLinksSvc.delete(l.id).subscribe({ next: () => this.loadLinks(), error: () => this.toast.error('Failed to delete.') });
   }
 
@@ -732,8 +735,9 @@ export class Shell implements OnInit, OnDestroy {
       }
     });
   }
-  deleteGuideline(g: Guideline) {
-    if (!confirm(`Delete guideline "${g.title}"?`)) return;
+  async deleteGuideline(g: Guideline) {
+    const ok = await this.confirmSvc.ask({ title: 'Delete Guideline', message: 'This guideline will be permanently removed.', detail: g.title });
+    if (!ok) return;
     this.guidelinesSvc.delete(g.id).subscribe({ next: () => this.loadGuidelines() });
   }
 }

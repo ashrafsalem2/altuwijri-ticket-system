@@ -422,13 +422,17 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
   }
   ngOnDestroy() { clearInterval(this.commentPoll); clearInterval(this.taskPoll); }
 
-  load() {
+  load(prevStatus?: string) {
     const id = Number(this.id);
     this.loading.set(true);
     this.taskSvc.get(id).subscribe({
       next: t => {
         this.task.set(t);
         this.loading.set(false);
+        if (prevStatus && t.status !== prevStatus) {
+          if (t.status === 'Done') this.triggerCelebration();
+          else this.triggerStatusFlash();
+        }
         if (this.isStaff()) {
           this.hStatus = t.status === 'Backlog' || t.status === 'ToDo' ? 'InProgress' : t.status;
           this.hAssigneeId = t.assigneeId ?? null;
@@ -590,7 +594,11 @@ export class TaskDetail implements OnInit, OnChanges, OnDestroy {
     this.taskSvc.delete(Number(this.id)).subscribe(() => this.router.navigate(['/tasks']));
   }
 
-  onSaved() { this.showEdit.set(false); this.load(); }
+  onSaved() {
+    const prevStatus = this.task()?.status;
+    this.showEdit.set(false);
+    this.load(prevStatus);
+  }
 
   todayStr() { return new Date().toISOString().substring(0, 10); }
 

@@ -145,101 +145,133 @@ import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
   @if (showForm()) {
     <div class="overlay" (click)="showForm.set(false)">
       <div class="modal card" (click)="$event.stopPropagation()">
-        <div class="modal-head"><h3>{{ editing ? ('c.edit' | t) : ('usr.newUser' | t) }}</h3>
-          <button class="btn btn-icon btn-ghost" (click)="showForm.set(false)">✕</button></div>
+
+        <div class="modal-head">
+          <h3>{{ editing ? ('c.edit' | t) : ('usr.newUser' | t) }}</h3>
+          <button class="btn btn-icon btn-ghost" (click)="showForm.set(false)">✕</button>
+        </div>
+
         <div class="modal-body">
-          <div class="form-row">
-            <div class="field"><label>{{ 'usr.name' | t }} *</label><input class="input" [(ngModel)]="model.fullName" /></div>
-            <div class="field"><label>{{ 'usr.username' | t }} *</label><input class="input" [(ngModel)]="model.userName" [disabled]="editing" /></div>
-          </div>
-          <div class="field"><label>{{ 'usr.email' | t }} *</label><input class="input" type="email" [(ngModel)]="model.email" /></div>
-          @if (!editing) {
-            <div class="field"><label>{{ 'auth.password' | t }} *</label><input class="input" type="password" [(ngModel)]="model.password" /></div>
-          }
-          <div class="form-row">
-            <div class="field"><label>{{ 'usr.role' | t }}</label>
-              <select [(ngModel)]="model.roleId">@for (r of roles(); track r.id) { <option [ngValue]="r.id">{{ r.name }}</option> }</select>
+
+          <!-- ── Identity ── -->
+          <div class="modal-section">
+            <div class="form-row">
+              <div class="field"><label>{{ 'usr.name' | t }} *</label><input class="input" [(ngModel)]="model.fullName" /></div>
+              <div class="field"><label>{{ 'usr.username' | t }} @if (!editing) { * }</label><input class="input" [(ngModel)]="model.userName" [disabled]="editing" [class.input-disabled]="editing" /></div>
             </div>
-            @if (!isCamRole()) {
-              <div class="field"><label>{{ 'usr.branch' | t }}</label>
-                <select [(ngModel)]="model.branchId">
-                  <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
-                  @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }} ({{ b.areaName }})</option> }
+            @if (!editing) {
+              <div class="form-row">
+                <div class="field"><label>{{ 'usr.email' | t }} *</label><input class="input" type="email" [(ngModel)]="model.email" /></div>
+                <div class="field"><label>{{ 'auth.password' | t }} *</label><input class="input" type="password" [(ngModel)]="model.password" /></div>
+              </div>
+            } @else {
+              <div class="field"><label>{{ 'usr.email' | t }} *</label><input class="input" type="email" [(ngModel)]="model.email" /></div>
+            }
+          </div>
+
+          <hr class="modal-divider" />
+
+          <!-- ── Role & Location ── -->
+          <div class="modal-section">
+            <div class="form-row">
+              <div class="field"><label>{{ 'usr.role' | t }}</label>
+                <select [(ngModel)]="model.roleId">
+                  @for (r of roles(); track r.id) { <option [ngValue]="r.id">{{ r.name }}</option> }
                 </select>
+              </div>
+              @if (!isCamRole()) {
+                <div class="field"><label>{{ 'usr.branch' | t }}</label>
+                  <select [(ngModel)]="model.branchId">
+                    <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
+                    @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }} ({{ b.areaName }})</option> }
+                  </select>
+                </div>
+              }
+            </div>
+            @if (isCamRole()) {
+              <div class="field">
+                <label>{{ 'usr.branches' | t }}</label>
+                <div class="cat-check-list">
+                  @for (b of branches(); track b.id) {
+                    <label class="cat-check-item">
+                      <input type="checkbox" [checked]="model.branchIds?.includes(b.id)" (change)="toggleBranch(b.id, $event)" />
+                      <span class="cat-check-name">{{ b.name }} <span class="text-xs muted">({{ b.areaName }})</span></span>
+                    </label>
+                  }
+                </div>
               </div>
             }
           </div>
-          @if (isCamRole()) {
-            <div class="field">
-              <label>{{ 'usr.branches' | t }}</label>
-              <div class="cat-check-list">
-                @for (b of branches(); track b.id) {
-                  <label class="cat-check-item">
-                    <input type="checkbox"
-                           [checked]="model.branchIds?.includes(b.id)"
-                           (change)="toggleBranch(b.id, $event)" />
-                    <span class="cat-check-name">{{ b.name }} <span class="text-xs muted">({{ b.areaName }})</span></span>
-                  </label>
-                }
+
+          <hr class="modal-divider" />
+
+          <!-- ── Details ── -->
+          <div class="modal-section">
+            <div class="form-row-3">
+              <div class="field"><label>{{ 'usr.dept' | t }}</label>
+                <select [(ngModel)]="model.departmentId">
+                  <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
+                  @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
+                </select>
               </div>
+              <div class="field"><label>{{ 'usr.jobTitle' | t }}</label><input class="input" [(ngModel)]="model.jobTitle" /></div>
+              <div class="field"><label>{{ 'usr.phone' | t }}</label><input class="input" [(ngModel)]="model.phoneNumber" /></div>
             </div>
-          }
-          <div class="form-row">
-            <div class="field"><label>{{ 'usr.dept' | t }}</label>
-              <select [(ngModel)]="model.departmentId">
-                <option [ngValue]="null">— {{ 'c.none' | t }} —</option>
-                @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
-              </select>
-            </div>
-            <div class="field"><label>{{ 'usr.jobTitle' | t }}</label><input class="input" [(ngModel)]="model.jobTitle" /></div>
           </div>
-          <div class="field"><label>{{ 'usr.phone' | t }}</label><input class="input" [(ngModel)]="model.phoneNumber" /></div>
+
+          <hr class="modal-divider" />
+
+          <!-- ── Ticket Categories ── -->
           @if (isTechnicianRole()) {
-            <div class="field">
-              <label>{{ 'usr.category' | t }}</label>
-              <div class="cat-check-list">
-                @for (c of categories(); track c.id) {
-                  @if (c.isActive) {
-                    <label class="cat-check-item">
-                      <input type="checkbox"
-                             [checked]="model.categoryIds?.includes(c.id)"
-                             (change)="toggleCat(c.id, $event)" />
-                      <span class="cat-check-icon" [style.background]="c.color + '22'" [style.border-color]="c.color + '55'">{{ c.icon }}</span>
-                      <span class="cat-check-name">{{ c.name }}</span>
-                    </label>
+            <div class="modal-section">
+              <div class="field">
+                <label>{{ 'usr.category' | t }}</label>
+                <div class="cat-check-list">
+                  @for (c of categories(); track c.id) {
+                    @if (c.isActive) {
+                      <label class="cat-check-item">
+                        <input type="checkbox" [checked]="model.categoryIds?.includes(c.id)" (change)="toggleCat(c.id, $event)" />
+                        <span class="cat-check-icon" [style.background]="c.color + '22'" [style.border-color]="c.color + '55'">{{ c.icon }}</span>
+                        <span class="cat-check-name">{{ c.name }}</span>
+                      </label>
+                    }
                   }
-                }
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="modal-section">
+              <div class="field">
+                <label>{{ 'usr.issuableCategories' | t }}</label>
+                <p class="field-hint">{{ i18n.lang() === 'ar' ? 'اترك فارغاً للسماح بجميع الأنواع' : 'Leave empty to allow all ticket types' }}</p>
+                <div class="cat-check-list">
+                  @for (c of categories(); track c.id) {
+                    @if (c.isActive) {
+                      <label class="cat-check-item">
+                        <input type="checkbox" [checked]="model.issuableCategoryIds?.includes(c.id)" (change)="toggleIssuableCat(c.id, $event)" />
+                        <span class="cat-check-icon" [style.background]="c.color + '22'" [style.border-color]="c.color + '55'">{{ c.icon }}</span>
+                        <span class="cat-check-name">{{ c.name }}</span>
+                      </label>
+                    }
+                  }
+                </div>
               </div>
             </div>
           }
-          @if (!isTechnicianRole()) {
-            <div class="field">
-              <label>{{ 'usr.issuableCategories' | t }}</label>
-              <p class="field-hint">{{ i18n.lang() === 'ar' ? 'اترك فارغاً للسماح بجميع الأنواع' : 'Leave empty to allow all ticket types' }}</p>
-              <div class="cat-check-list">
-                @for (c of categories(); track c.id) {
-                  @if (c.isActive) {
-                    <label class="cat-check-item">
-                      <input type="checkbox"
-                             [checked]="model.issuableCategoryIds?.includes(c.id)"
-                             (change)="toggleIssuableCat(c.id, $event)" />
-                      <span class="cat-check-icon" [style.background]="c.color + '22'" [style.border-color]="c.color + '55'">{{ c.icon }}</span>
-                      <span class="cat-check-name">{{ c.name }}</span>
-                    </label>
-                  }
-                }
-              </div>
-            </div>
-          }
+
+          <!-- ── Status + Error ── -->
           @if (editing) {
             <label class="chk"><input type="checkbox" [(ngModel)]="model.isActive" /> {{ 'usr.active' | t }}</label>
           }
           @if (error()) { <div class="err">{{ error() }}</div> }
+
         </div>
+
         <div class="modal-foot">
           <button class="btn btn-ghost" (click)="showForm.set(false)">{{ 'c.cancel' | t }}</button>
           <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ 'c.save' | t }}</button>
         </div>
+
       </div>
     </div>
   }

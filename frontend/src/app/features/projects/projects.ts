@@ -18,7 +18,7 @@ import { ConfirmService } from '../../core/services/confirm.service';
       <h2>{{ 'proj.title' | t }}</h2>
       @if (canEdit()) {
         <div class="flex gap-1 items-center">
-          <button class="btn btn-ghost" (click)="xlDownload()">{{ 'xl.template' | t }}</button>
+          <button class="btn btn-ghost" (click)="xlDownload()">{{ 'xl.export' | t }}</button>
           <label class="btn btn-ghost" [class.loading]="importing()">
             {{ 'xl.import' | t }}
             <input type="file" accept=".xlsx,.xls" style="display:none" (change)="xlImport($event)" />
@@ -31,8 +31,9 @@ import { ConfirmService } from '../../core/services/confirm.service';
     @if (importResult()) {
       <div class="import-bar" [class.has-errors]="(importResult()?.failed ?? 0) > 0">
         <span>
-          ✓ {{ importResult()?.imported }} {{ 'xl.imported' | t }}
-          @if ((importResult()?.failed ?? 0) > 0) { · ✗ {{ importResult()?.failed }} {{ 'xl.failed' | t }} }
+          @if ((importResult()?.imported ?? 0) > 0) { ✓ {{ importResult()?.imported }} {{ 'xl.imported' | t }} }
+          @if ((importResult()?.updated ?? 0) > 0) { &nbsp;· ✏ {{ importResult()?.updated }} {{ 'xl.updated' | t }} }
+          @if ((importResult()?.failed ?? 0) > 0) { &nbsp;· ✗ {{ importResult()?.failed }} {{ 'xl.failed' | t }} }
         </span>
         <button class="btn btn-sm btn-ghost" (click)="importResult.set(null)">✕</button>
       </div>
@@ -167,14 +168,14 @@ export class Projects implements OnInit {
     this.svc.delete(p.id).subscribe({ next: () => { this.load(); this.toast.success('Project deleted.'); }, error: e => this.toast.error(e?.error?.title ?? 'Delete failed.') });
   }
 
-  xlDownload() { this.xlSvc.downloadTemplate('projects'); }
+  xlDownload() { this.xlSvc.downloadExport('projects'); }
   xlImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     this.importing.set(true);
     this.importResult.set(null);
     this.xlSvc.import('projects', file).subscribe({
-      next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
+      next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0 || r.updated > 0) this.load(); },
       error: e => { this.importing.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';

@@ -222,6 +222,7 @@ export const EN = {
   // Excel import/export
   'xl.template': '⬇ Template', 'xl.import': '⬆ Import',
   'xl.imported': 'imported', 'xl.failed': 'failed',
+  'xl.export': '⬇ Export', 'xl.updated': 'updated',
   // Departments
   'dept.title': 'Departments', 'dept.new': 'New Department', 'dept.edit': 'Edit Department',
   'dept.name': 'Name', 'dept.code': 'Code', 'dept.desc': 'Description',
@@ -452,6 +453,7 @@ export const AR: Record<keyof typeof EN, string> = {
   // Excel import/export
   'xl.template': '⬇ نموذج', 'xl.import': '⬆ استيراد',
   'xl.imported': 'مستورد', 'xl.failed': 'فشل',
+  'xl.export': '⬇ تصدير', 'xl.updated': 'محدث',
   // Departments
   'dept.title': 'الأقسام', 'dept.new': 'قسم جديد', 'dept.edit': 'تعديل القسم',
   'dept.name': 'الاسم', 'dept.code': 'الكود', 'dept.desc': 'الوصف',

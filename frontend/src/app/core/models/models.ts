@@ -257,7 +257,7 @@ export interface OverdueReport {
 }
 
 // ---- Excel Import ----
-export interface ImportResult { imported: number; failed: number; errors: string[]; }
+export interface ImportResult { imported: number; updated: number; failed: number; errors: string[]; }
 
 // ---- Comments ----
 export interface Comment {

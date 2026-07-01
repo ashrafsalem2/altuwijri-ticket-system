@@ -68,7 +68,7 @@ type OrgTab = 'areas' | 'branches' | 'departments';
           <p class="section-bar-hint">{{ i18n.lang() === 'ar' ? 'المناطق الجغرافية التي تنتمي إليها الفروع' : 'Geographic regions that group your branches' }}</p>
           @if (canEdit()) {
             <div class="flex gap-1 items-center">
-              <button class="btn btn-ghost btn-sm" (click)="xlAreaDownload()">{{ 'xl.template' | t }}</button>
+              <button class="btn btn-ghost btn-sm" (click)="xlAreaDownload()">{{ 'xl.export' | t }}</button>
               <button class="btn btn-ghost btn-sm" [class.loading]="xlAreaImporting()" (click)="areaFileInput.click()">{{ 'xl.import' | t }}</button>
               <input #areaFileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="xlAreaImport($event)" />
               <button class="btn btn-primary btn-sm" (click)="newArea()">＋ {{ 'org.newArea' | t }}</button>
@@ -77,8 +77,10 @@ type OrgTab = 'areas' | 'branches' | 'departments';
         </div>
         @if (xlAreaResult()) {
           <div class="import-bar" [class.has-errors]="(xlAreaResult()?.failed ?? 0) > 0">
-            <span>✓ {{ xlAreaResult()?.imported }} {{ 'xl.imported' | t }}
-              @if ((xlAreaResult()?.failed ?? 0) > 0) { · ✗ {{ xlAreaResult()?.failed }} {{ 'xl.failed' | t }} }
+            <span>
+              @if ((xlAreaResult()?.imported ?? 0) > 0) { ✓ {{ xlAreaResult()?.imported }} {{ 'xl.imported' | t }} }
+              @if ((xlAreaResult()?.updated ?? 0) > 0) { &nbsp;· ✏ {{ xlAreaResult()?.updated }} {{ 'xl.updated' | t }} }
+              @if ((xlAreaResult()?.failed ?? 0) > 0) { &nbsp;· ✗ {{ xlAreaResult()?.failed }} {{ 'xl.failed' | t }} }
             </span>
             <button class="btn btn-xs btn-ghost" (click)="xlAreaResult.set(null)">✕</button>
           </div>
@@ -143,7 +145,7 @@ type OrgTab = 'areas' | 'branches' | 'departments';
           <p class="section-bar-hint">{{ i18n.lang() === 'ar' ? 'مكاتب وفروع المنظمة بتفاصيلها ومعداتها' : 'Office locations with contacts and device inventory' }}</p>
           @if (canEdit()) {
             <div class="flex gap-1 items-center">
-              <button class="btn btn-ghost btn-sm" (click)="xlDownload()">{{ 'xl.template' | t }}</button>
+              <button class="btn btn-ghost btn-sm" (click)="xlDownload()">{{ 'xl.export' | t }}</button>
               <button class="btn btn-ghost btn-sm" [class.loading]="xlImporting()" (click)="branchFileInput.click()">{{ 'xl.import' | t }}</button>
               <input #branchFileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="xlImport($event)" />
               <button class="btn btn-primary btn-sm" (click)="newBranch()">＋ {{ 'org.newBranch' | t }}</button>
@@ -152,8 +154,10 @@ type OrgTab = 'areas' | 'branches' | 'departments';
         </div>
         @if (xlResult()) {
           <div class="import-bar" [class.has-errors]="(xlResult()?.failed ?? 0) > 0">
-            <span>✓ {{ xlResult()?.imported }} {{ 'xl.imported' | t }}
-              @if ((xlResult()?.failed ?? 0) > 0) { · ✗ {{ xlResult()?.failed }} {{ 'xl.failed' | t }} }
+            <span>
+              @if ((xlResult()?.imported ?? 0) > 0) { ✓ {{ xlResult()?.imported }} {{ 'xl.imported' | t }} }
+              @if ((xlResult()?.updated ?? 0) > 0) { &nbsp;· ✏ {{ xlResult()?.updated }} {{ 'xl.updated' | t }} }
+              @if ((xlResult()?.failed ?? 0) > 0) { &nbsp;· ✗ {{ xlResult()?.failed }} {{ 'xl.failed' | t }} }
             </span>
             <button class="btn btn-xs btn-ghost" (click)="xlResult.set(null)">✕</button>
           </div>
@@ -220,7 +224,7 @@ type OrgTab = 'areas' | 'branches' | 'departments';
           <p class="section-bar-hint">{{ i18n.lang() === 'ar' ? 'الأقسام الوظيفية التي يتبعها الموظفون' : 'Functional divisions that users belong to' }}</p>
           @if (isAdmin()) {
             <div class="flex gap-1 items-center">
-              <button class="btn btn-ghost btn-sm" (click)="xlDeptDownload()">{{ 'xl.template' | t }}</button>
+              <button class="btn btn-ghost btn-sm" (click)="xlDeptDownload()">{{ 'xl.export' | t }}</button>
               <button class="btn btn-ghost btn-sm" [class.loading]="xlDeptImporting()" (click)="deptFileInput.click()">{{ 'xl.import' | t }}</button>
               <input #deptFileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="xlDeptImport($event)" />
               <button class="btn btn-primary btn-sm" (click)="newDept()">＋ {{ 'dept.new' | t }}</button>
@@ -229,8 +233,10 @@ type OrgTab = 'areas' | 'branches' | 'departments';
         </div>
         @if (xlDeptResult()) {
           <div class="import-bar" [class.has-errors]="(xlDeptResult()?.failed ?? 0) > 0">
-            <span>✓ {{ xlDeptResult()?.imported }} {{ 'xl.imported' | t }}
-              @if ((xlDeptResult()?.failed ?? 0) > 0) { · ✗ {{ xlDeptResult()?.failed }} {{ 'xl.failed' | t }} }
+            <span>
+              @if ((xlDeptResult()?.imported ?? 0) > 0) { ✓ {{ xlDeptResult()?.imported }} {{ 'xl.imported' | t }} }
+              @if ((xlDeptResult()?.updated ?? 0) > 0) { &nbsp;· ✏ {{ xlDeptResult()?.updated }} {{ 'xl.updated' | t }} }
+              @if ((xlDeptResult()?.failed ?? 0) > 0) { &nbsp;· ✗ {{ xlDeptResult()?.failed }} {{ 'xl.failed' | t }} }
             </span>
             <button class="btn btn-xs btn-ghost" (click)="xlDeptResult.set(null)">✕</button>
           </div>
@@ -541,12 +547,12 @@ export class Organization implements OnInit {
   }
 
   // ── Excel areas ──
-  xlAreaDownload() { this.xlSvc.downloadTemplate('areas'); }
+  xlAreaDownload() { this.xlSvc.downloadExport('areas'); }
   xlAreaImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return;
     this.xlAreaImporting.set(true); this.xlAreaResult.set(null);
     this.xlSvc.import('areas', file).subscribe({
-      next: r => { this.xlAreaImporting.set(false); this.xlAreaResult.set(r); if (r.imported > 0) this.load(); },
+      next: r => { this.xlAreaImporting.set(false); this.xlAreaResult.set(r); if (r.imported > 0 || r.updated > 0) this.load(); },
       error: e => { this.xlAreaImporting.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
@@ -571,12 +577,12 @@ export class Organization implements OnInit {
   }
 
   // ── Excel branches ──
-  xlDownload() { this.xlSvc.downloadTemplate('branches'); }
+  xlDownload() { this.xlSvc.downloadExport('branches'); }
   xlImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return;
     this.xlImporting.set(true); this.xlResult.set(null);
     this.xlSvc.import('branches', file).subscribe({
-      next: r => { this.xlImporting.set(false); this.xlResult.set(r); if (r.imported > 0) this.load(); },
+      next: r => { this.xlImporting.set(false); this.xlResult.set(r); if (r.imported > 0 || r.updated > 0) this.load(); },
       error: e => { this.xlImporting.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';
@@ -597,12 +603,12 @@ export class Organization implements OnInit {
   }
 
   // ── Excel departments ──
-  xlDeptDownload() { this.xlSvc.downloadTemplate('departments'); }
+  xlDeptDownload() { this.xlSvc.downloadExport('departments'); }
   xlDeptImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return;
     this.xlDeptImporting.set(true); this.xlDeptResult.set(null);
     this.xlSvc.import('departments', file).subscribe({
-      next: r => { this.xlDeptImporting.set(false); this.xlDeptResult.set(r); if (r.imported > 0) this.load(); },
+      next: r => { this.xlDeptImporting.set(false); this.xlDeptResult.set(r); if (r.imported > 0 || r.updated > 0) this.load(); },
       error: e => { this.xlDeptImporting.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';

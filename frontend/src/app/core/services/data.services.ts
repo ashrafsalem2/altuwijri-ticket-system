@@ -213,13 +213,15 @@ export class DepartmentService {
   delete(id: number): Observable<void> { return this.http.delete<void>(`${this.base}/${id}`); }
 }
 
+type ExcelType = 'users' | 'branches' | 'areas' | 'projects' | 'ticket-categories' | 'departments';
+
 @Injectable({ providedIn: 'root' })
 export class ExcelService {
   private http = inject(HttpClient);
   private toast = inject(ToastService);
   private base = `${api}/api/excel`;
 
-  downloadTemplate(type: 'users' | 'branches' | 'areas' | 'projects' | 'ticket-categories' | 'departments'): void {
+  downloadTemplate(type: ExcelType): void {
     this.http.get(`${this.base}/${type}/template`, { responseType: 'blob' }).subscribe({
       next: blob => {
         const url = URL.createObjectURL(blob);
@@ -235,7 +237,23 @@ export class ExcelService {
     });
   }
 
-  import(type: 'users' | 'branches' | 'areas' | 'projects' | 'ticket-categories' | 'departments', file: File): Observable<ImportResult> {
+  downloadExport(type: ExcelType): void {
+    this.http.get(`${this.base}/${type}/export`, { responseType: 'blob' }).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${type}-data.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      error: e => this.toast.error(`Export failed: ${e?.status ?? ''} ${e?.statusText ?? 'Unknown error'}`)
+    });
+  }
+
+  import(type: ExcelType, file: File): Observable<ImportResult> {
     const form = new FormData();
     form.append('file', file);
     return this.http.post<ImportResult>(`${this.base}/${type}/import`, form);

@@ -21,7 +21,7 @@ import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
       <div class="flex gap-1 items-center flex-wrap">
         <label class="chk"><input type="checkbox" [(ngModel)]="includeInactive" (ngModelChange)="load()" /> {{ 'usr.showInactive' | t }}</label>
         @if (isAdmin()) {
-          <button class="btn btn-ghost" (click)="xlDownload()">{{ 'xl.template' | t }}</button>
+          <button class="btn btn-ghost" (click)="xlDownload()">{{ 'xl.export' | t }}</button>
           <label class="btn btn-ghost" [class.loading]="importing()">
             {{ 'xl.import' | t }}
             <input type="file" accept=".xlsx,.xls" style="display:none" (change)="xlImport($event)" />
@@ -34,8 +34,9 @@ import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
     @if (importResult()) {
       <div class="import-bar" [class.has-errors]="(importResult()?.failed ?? 0) > 0">
         <span>
-          ✓ {{ importResult()?.imported }} {{ 'xl.imported' | t }}
-          @if ((importResult()?.failed ?? 0) > 0) { · ✗ {{ importResult()?.failed }} {{ 'xl.failed' | t }} }
+          @if ((importResult()?.imported ?? 0) > 0) { ✓ {{ importResult()?.imported }} {{ 'xl.imported' | t }} }
+          @if ((importResult()?.updated ?? 0) > 0) { &nbsp;· ✏ {{ importResult()?.updated }} {{ 'xl.updated' | t }} }
+          @if ((importResult()?.failed ?? 0) > 0) { &nbsp;· ✗ {{ importResult()?.failed }} {{ 'xl.failed' | t }} }
         </span>
         <button class="btn btn-sm btn-ghost" (click)="importResult.set(null)">✕</button>
       </div>
@@ -403,7 +404,7 @@ export class Users implements OnInit {
     });
   }
 
-  xlDownload() { this.xlSvc.downloadTemplate('users'); }
+  xlDownload() { this.xlSvc.downloadExport('users'); }
 
   xlImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -411,7 +412,7 @@ export class Users implements OnInit {
     this.importing.set(true);
     this.importResult.set(null);
     this.xlSvc.import('users', file).subscribe({
-      next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0) this.load(); },
+      next: r => { this.importing.set(false); this.importResult.set(r); if (r.imported > 0 || r.updated > 0) this.load(); },
       error: e => { this.importing.set(false); this.toast.error(e?.error?.title ?? 'Import failed.'); }
     });
     (event.target as HTMLInputElement).value = '';

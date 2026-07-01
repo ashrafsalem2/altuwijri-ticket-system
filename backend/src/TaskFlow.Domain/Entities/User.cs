@@ -33,6 +33,9 @@ public class User : AuditableEntity
     /// <summary>For Cam-Employee: all branches they belong to (many-to-many).</summary>
     public ICollection<UserBranch> Branches { get; set; } = new List<UserBranch>();
 
+    /// <summary>Ticket categories this user is allowed to issue. Empty = no restriction (can issue any).</summary>
+    public ICollection<UserIssuableCategory> IssuableCategories { get; set; } = new List<UserIssuableCategory>();
+
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<WorkTask> AssignedTasks { get; set; } = new List<WorkTask>();
     public ICollection<WorkTask> ReportedTasks { get; set; } = new List<WorkTask>();

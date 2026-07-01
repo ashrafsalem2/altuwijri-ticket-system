@@ -27,6 +27,7 @@ public interface IApplicationDbContext
     DbSet<Guideline> Guidelines { get; }
     DbSet<TicketCategory> TicketCategories { get; }
     DbSet<UserCategory> UserCategories { get; }
+    DbSet<UserIssuableCategory> UserIssuableCategories { get; }
     DbSet<UserBranch> UserBranches { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

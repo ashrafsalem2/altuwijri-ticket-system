@@ -20,4 +20,5 @@ public class TicketCategory : AuditableEntity
 
     public ICollection<WorkTask> Tasks { get; set; } = new List<WorkTask>();
     public ICollection<UserCategory> UserCategories { get; set; } = new List<UserCategory>();
+    public ICollection<UserIssuableCategory> IssuableByUsers { get; set; } = new List<UserIssuableCategory>();
 }

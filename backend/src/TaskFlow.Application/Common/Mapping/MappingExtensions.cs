@@ -20,6 +20,8 @@ public static class MappingExtensions
         u.Categories?.Select(uc => uc.Category?.Name ?? string.Empty).ToList() ?? new(),
         u.Branches?.Select(ub => ub.BranchId).ToList() ?? new(),
         u.Branches?.Select(ub => ub.Branch?.Name ?? string.Empty).ToList() ?? new(),
+        u.IssuableCategories?.Select(ic => ic.CategoryId).ToList() ?? new(),
+        u.IssuableCategories?.Select(ic => ic.Category?.Name ?? string.Empty).ToList() ?? new(),
         u.LastLoginAt, u.CreatedAt);
 
     public static RoleDto ToDto(this Role r) => new(r.Id, r.Name, r.Description);

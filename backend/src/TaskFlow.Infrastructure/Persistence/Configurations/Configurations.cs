@@ -117,6 +117,16 @@ public class UserCategoryConfig : IEntityTypeConfiguration<UserCategory>
     }
 }
 
+public class UserIssuableCategoryConfig : IEntityTypeConfiguration<UserIssuableCategory>
+{
+    public void Configure(EntityTypeBuilder<UserIssuableCategory> b)
+    {
+        b.HasKey(x => new { x.UserId, x.CategoryId });
+        b.HasOne(x => x.User).WithMany(u => u.IssuableCategories).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Category).WithMany(c => c.IssuableByUsers).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public class TicketCategoryConfig : IEntityTypeConfiguration<TicketCategory>
 {
     public void Configure(EntityTypeBuilder<TicketCategory> b)

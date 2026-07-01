@@ -21,6 +21,8 @@ public record UserDto(
     List<string> CategoryNames,
     List<int> BranchIds,
     List<string> BranchNames,
+    List<int> IssuableCategoryIds,
+    List<string> IssuableCategoryNames,
     DateTime? LastLoginAt,
     DateTime CreatedAt);
 
@@ -33,6 +35,7 @@ public record CreateUserRequest(
     int? BranchId,
     List<int>? CategoryIds,
     List<int>? BranchIds,
+    List<int>? IssuableCategoryIds,
     string? JobTitle,
     int? DepartmentId,
     string? PhoneNumber);
@@ -44,6 +47,7 @@ public record UpdateUserRequest(
     int? BranchId,
     List<int>? CategoryIds,
     List<int>? BranchIds,
+    List<int>? IssuableCategoryIds,
     string? JobTitle,
     int? DepartmentId,
     string? PhoneNumber,

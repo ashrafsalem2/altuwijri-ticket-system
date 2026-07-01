@@ -114,6 +114,7 @@ export interface User {
   branchId?: number; branchName?: string; areaName?: string;
   categoryIds: number[]; categoryNames: string[];
   branchIds: number[]; branchNames: string[];
+  issuableCategoryIds: number[]; issuableCategoryNames: string[];
   lastLoginAt?: string; createdAt: string;
 }
 

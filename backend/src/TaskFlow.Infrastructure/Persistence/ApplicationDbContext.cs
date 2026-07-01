@@ -30,6 +30,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Guideline> Guidelines => Set<Guideline>();
     public DbSet<TicketCategory> TicketCategories => Set<TicketCategory>();
     public DbSet<UserCategory> UserCategories => Set<UserCategory>();
+    public DbSet<UserIssuableCategory> UserIssuableCategories => Set<UserIssuableCategory>();
     public DbSet<UserBranch> UserBranches => Set<UserBranch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

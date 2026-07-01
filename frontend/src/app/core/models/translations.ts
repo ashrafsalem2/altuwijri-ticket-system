@@ -216,6 +216,7 @@ export const EN = {
   'c.inactive': 'Inactive',
   // Task / User additions
   'task.category': 'Category', 'usr.category': 'Group / Category',
+  'usr.issuableCategories': 'Ticket Types (can issue)',
   // Nav additions
   'nav.ticketCats': 'Ticket Categories',
   // Reports additions (deduped — canonical values are in the Reports section above)
@@ -447,6 +448,7 @@ export const AR: Record<keyof typeof EN, string> = {
   'c.inactive': 'غير مفعّل',
   // Task / User additions
   'task.category': 'التصنيف', 'usr.category': 'المجموعة / التصنيف',
+  'usr.issuableCategories': 'أنواع التذاكر (يمكنه إصدارها)',
   // Nav additions
   'nav.ticketCats': 'تصنيفات التذاكر',
   // Reports additions (deduped — canonical values are in the Reports section above)

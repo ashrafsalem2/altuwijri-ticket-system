@@ -30,6 +30,7 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
         .Include(u => u.Department)
         .Include(u => u.Categories).ThenInclude(uc => uc.Category)
         .Include(u => u.Branches).ThenInclude(ub => ub.Branch)
+        .Include(u => u.IssuableCategories).ThenInclude(ic => ic.Category)
         .AsNoTracking();
 
     public async Task<IReadOnlyList<UserDto>> GetAllAsync(bool includeInactive, CancellationToken ct = default)
@@ -77,6 +78,7 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
 
         await SyncCategoriesAsync(user.Id, request.CategoryIds, ct);
         await SyncBranchesAsync(user.Id, request.BranchIds, ct);
+        await SyncIssuableCategoriesAsync(user.Id, request.IssuableCategoryIds, ct);
 
         return await GetByIdAsync(user.Id, ct);
     }
@@ -104,6 +106,7 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
 
         await SyncCategoriesAsync(id, request.CategoryIds, ct);
         await SyncBranchesAsync(id, request.BranchIds, ct);
+        await SyncIssuableCategoriesAsync(id, request.IssuableCategoryIds, ct);
 
         return await GetByIdAsync(id, ct);
     }
@@ -206,6 +209,18 @@ public class UserService(IApplicationDbContext db, IPasswordHasher hasher) : IUs
         {
             foreach (var catId in categoryIds.Distinct())
                 db.UserCategories.Add(new UserCategory { UserId = userId, CategoryId = catId });
+        }
+        await db.SaveChangesAsync(ct);
+    }
+
+    private async Task SyncIssuableCategoriesAsync(int userId, List<int>? categoryIds, CancellationToken ct)
+    {
+        var existing = await db.UserIssuableCategories.Where(ic => ic.UserId == userId).ToListAsync(ct);
+        db.UserIssuableCategories.RemoveRange(existing);
+        if (categoryIds?.Count > 0)
+        {
+            foreach (var catId in categoryIds.Distinct())
+                db.UserIssuableCategories.Add(new UserIssuableCategory { UserId = userId, CategoryId = catId });
         }
         await db.SaveChangesAsync(ct);
     }

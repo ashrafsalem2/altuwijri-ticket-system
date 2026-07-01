@@ -55,6 +55,8 @@ tr.inactive { opacity: .55; }
 }
 .cat-check-name { font-size: .85rem; font-weight: 500; }
 
+.field-hint { font-size: .78rem; color: var(--text-muted); margin: -.2rem 0 .35rem; }
+
 /* Purge confirmation modal */
 .purge-modal { max-width: 440px; }
 .purge-avatar {

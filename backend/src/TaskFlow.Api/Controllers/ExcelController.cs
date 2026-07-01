@@ -33,10 +33,15 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             .Select(d => d.Name)
             .ToListAsync(ct);
 
+        var roleNames = await db.Roles
+            .OrderBy(r => r.Name)
+            .Select(r => r.Name)
+            .ToListAsync(ct);
+
         using var wb = new XLWorkbook();
 
         // Hidden lookup sheets
-        AddLookupSheet(wb, "_Roles", ["Admin", "Manager", "Technician", "Employee"]);
+        AddLookupSheet(wb, "_Roles", roleNames);
         AddLookupSheet(wb, "_Branches", branches);
         AddLookupSheet(wb, "_Departments", departments);
 
@@ -70,7 +75,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         ws.Cell(2, 9).Value = "0501234567";
         StyleExampleRow(ws, cols.Length, "#fef9f9");
 
-        AddDropdown(ws, "E2:E10000", "_Roles",       4);
+        AddDropdown(ws, "E2:E10000", "_Roles",       roleNames.Count);
         AddDropdown(ws, "G2:G10000", "_Branches",    branches.Count);
         AddDropdown(ws, "H2:H10000", "_Departments", departments.Count);
 
@@ -101,12 +106,13 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         var users = await db.Users
             .IgnoreQueryFilters()
             .Where(u => !u.IsDeleted)
+            .Include(u => u.IssuableCategories).ThenInclude(ic => ic.Category)
             .OrderBy(u => u.FullName)
             .ToListAsync(ct);
 
         using var wb = new XLWorkbook();
 
-        AddLookupSheet(wb, "_Roles", ["Admin", "Manager", "Technician", "Employee"]);
+        AddLookupSheet(wb, "_Roles", roles.OrderBy(r => r.Name).Select(r => r.Name).ToList());
         AddLookupSheet(wb, "_Branches", branches.Select(b => b.Name).ToList());
         AddLookupSheet(wb, "_Departments", departments.Select(d => d.Name).ToList());
         AddLookupSheet(wb, "_Active", ["TRUE", "FALSE"]);
@@ -117,16 +123,17 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         WriteIdHeader(ws);
         var headers = new[]
         {
-            ("FullName",       true),
-            ("Email",          true),
-            ("Username",       false),
-            ("Password",       false),
-            ("Role",           true),
-            ("BranchName",     false),
-            ("DepartmentName", false),
-            ("JobTitle",       false),
-            ("Phone",          false),
-            ("IsActive",       false),
+            ("FullName",            true),
+            ("Email",               true),
+            ("Username",            false),
+            ("Password",            false),
+            ("Role",                true),
+            ("BranchName",          false),
+            ("DepartmentName",      false),
+            ("JobTitle",            false),
+            ("Phone",               false),
+            ("IsActive",            false),
+            ("IssuableCategories",  false),
         };
         WriteHeaders(ws, headers,
             required: XLColor.FromHtml("#6b1a1a"),
@@ -136,6 +143,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         // Modify Username and Password header labels
         ws.Cell(1, 4).Value = "Username (read-only)";
         ws.Cell(1, 5).Value = "Password (new rows only)";
+        ws.Cell(1, 12).Value = "IssuableCategories (comma-separated, empty = all)";
 
         int dataRows = users.Count;
         for (int i = 0; i < users.Count; i++)
@@ -153,6 +161,8 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             ws.Cell(row, 9).Value = u.JobTitle ?? "";
             ws.Cell(row, 10).Value = u.PhoneNumber ?? "";
             ws.Cell(row, 11).Value = u.IsActive ? "TRUE" : "FALSE";
+            ws.Cell(row, 12).Value = string.Join(", ",
+                u.IssuableCategories?.Select(ic => ic.Category?.Name ?? "").Where(n => n != "") ?? []);
         }
 
         StyleIdColumn(ws, dataRows);
@@ -164,7 +174,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             pwdRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#fef9c3");
         }
 
-        AddDropdown(ws, "F2:F10000", "_Roles", 4);
+        AddDropdown(ws, "F2:F10000", "_Roles", roles.Count);
         AddDropdown(ws, "G2:G10000", "_Branches", branches.Count);
         AddDropdown(ws, "H2:H10000", "_Departments", departments.Count);
         AddDropdown(ws, "K2:K10000", "_Active", 2);
@@ -172,7 +182,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         ws.Column(1).Width = 8;  ws.Column(2).Width = 26; ws.Column(3).Width = 30;
         ws.Column(4).Width = 22; ws.Column(5).Width = 22; ws.Column(6).Width = 18;
         ws.Column(7).Width = 26; ws.Column(8).Width = 24; ws.Column(9).Width = 22;
-        ws.Column(10).Width = 18; ws.Column(11).Width = 12;
+        ws.Column(10).Width = 18; ws.Column(11).Width = 12; ws.Column(12).Width = 40;
         ws.SheetView.FreezeRows(1);
 
         return ExcelFile(wb, "users-data.xlsx");
@@ -196,6 +206,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         var roles       = await db.Roles.ToListAsync(ct);
         var branches    = await db.Branches.Where(b => !b.IsDeleted).ToListAsync(ct);
         var departments = await db.Departments.Where(d => !d.IsDeleted).ToListAsync(ct);
+        var allCategories = await db.TicketCategories.Where(c => !c.IsDeleted).ToListAsync(ct);
         var colors      = new[] { "#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed", "#0891b2", "#be185d" };
         var rnd         = new Random();
 
@@ -205,6 +216,19 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
 
         var existingEmails    = await db.Users.Select(u => u.Email).ToHashSetAsync(ct);
         var existingUserNames = await db.Users.Select(u => u.UserName.ToLower()).ToHashSetAsync(ct);
+
+        // Track issuable categories to apply after SaveChanges (new user IDs are available then)
+        var issuableQueue = new List<(Func<int> GetUserId, string NamesStr)>();
+
+        List<int> ParseIssuableIds(string namesStr)
+        {
+            if (string.IsNullOrWhiteSpace(namesStr)) return [];
+            return namesStr.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries)
+                .Select(n => n.Trim())
+                .Select(n => allCategories.FirstOrDefault(c => c.Name.Equals(n, StringComparison.OrdinalIgnoreCase))?.Id ?? 0)
+                .Where(id => id > 0)
+                .Distinct().ToList();
+        }
 
         for (int row = 2; row <= lastRow; row++)
         {
@@ -275,6 +299,9 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
                 if (!string.IsNullOrEmpty(isActiveStr))
                     existing.IsActive = isActiveStr is "TRUE" or "1";
 
+                var capturedId = id;
+                issuableQueue.Add((() => capturedId, Get(11)));
+
                 updated++;
                 continue;
             }
@@ -329,7 +356,7 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
             var jobTitle   = isNewFormat ? Blank(Get(8)) : Blank(Get(6));
             var phone      = isNewFormat ? Blank(Get(9)) : Blank(Get(9));
 
-            db.Users.Add(new User
+            var newUser = new User
             {
                 FullName     = fullName,
                 UserName     = userName,
@@ -343,7 +370,9 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
                 AvatarColor  = colors[rnd.Next(colors.Length)],
                 IsActive     = true,
                 IsAvailable  = false
-            });
+            };
+            db.Users.Add(newUser);
+            issuableQueue.Add((() => newUser.Id, Get(11)));
 
             existingEmails.Add(email);
             existingUserNames.Add(userName);
@@ -351,6 +380,26 @@ public class ExcelController(IApplicationDbContext db, IPasswordHasher hasher) :
         }
 
         if (imported > 0 || updated > 0) await db.SaveChangesAsync(ct);
+
+        // Sync issuable categories (user IDs now available for new rows)
+        bool issuableChanged = false;
+        foreach (var (getUserId, namesStr) in issuableQueue)
+        {
+            var userId = getUserId();
+            if (userId == 0) continue;
+            var catIds = ParseIssuableIds(namesStr);
+            var existing2 = await db.UserIssuableCategories.Where(ic => ic.UserId == userId).ToListAsync(ct);
+            // Only touch rows where value differs to avoid unnecessary writes
+            var existingIds = existing2.Select(ic => ic.CategoryId).OrderBy(x => x).ToList();
+            var newIds = catIds.OrderBy(x => x).ToList();
+            if (existingIds.SequenceEqual(newIds)) continue;
+            db.UserIssuableCategories.RemoveRange(existing2);
+            foreach (var catId in catIds)
+                db.UserIssuableCategories.Add(new UserIssuableCategory { UserId = userId, CategoryId = catId });
+            issuableChanged = true;
+        }
+        if (issuableChanged) await db.SaveChangesAsync(ct);
+
         return Ok(new ImportResult(imported, updated, errors.Count, errors));
     }
 

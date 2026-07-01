@@ -212,6 +212,25 @@ import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
               </div>
             </div>
           }
+          @if (!isTechnicianRole()) {
+            <div class="field">
+              <label>{{ 'usr.issuableCategories' | t }}</label>
+              <p class="field-hint">{{ i18n.lang() === 'ar' ? 'اترك فارغاً للسماح بجميع الأنواع' : 'Leave empty to allow all ticket types' }}</p>
+              <div class="cat-check-list">
+                @for (c of categories(); track c.id) {
+                  @if (c.isActive) {
+                    <label class="cat-check-item">
+                      <input type="checkbox"
+                             [checked]="model.issuableCategoryIds?.includes(c.id)"
+                             (change)="toggleIssuableCat(c.id, $event)" />
+                      <span class="cat-check-icon" [style.background]="c.color + '22'" [style.border-color]="c.color + '55'">{{ c.icon }}</span>
+                      <span class="cat-check-name">{{ c.name }}</span>
+                    </label>
+                  }
+                }
+              </div>
+            </div>
+          }
           @if (editing) {
             <label class="chk"><input type="checkbox" [(ngModel)]="model.isActive" /> {{ 'usr.active' | t }}</label>
           }
@@ -349,12 +368,12 @@ export class Users implements OnInit {
 
   openNew() {
     this.editing = false; this.error.set('');
-    this.model = { fullName: '', userName: '', email: '', password: '', roleId: this.roles()[0]?.id, isActive: true, categoryIds: [], branchIds: [] };
+    this.model = { fullName: '', userName: '', email: '', password: '', roleId: this.roles()[0]?.id, isActive: true, categoryIds: [], branchIds: [], issuableCategoryIds: [] };
     this.showForm.set(true);
   }
   openEdit(u: User) {
     this.editing = true; this.editId = u.id; this.error.set('');
-    this.model = { ...u, categoryIds: [...(u.categoryIds ?? [])], branchIds: [...(u.branchIds ?? [])] };
+    this.model = { ...u, categoryIds: [...(u.categoryIds ?? [])], branchIds: [...(u.branchIds ?? [])], issuableCategoryIds: [...(u.issuableCategoryIds ?? [])] };
     this.showForm.set(true);
   }
 
@@ -363,6 +382,13 @@ export class Users implements OnInit {
     if (!this.model.categoryIds) this.model.categoryIds = [];
     if (checked) { if (!this.model.categoryIds.includes(id)) this.model.categoryIds.push(id); }
     else          { this.model.categoryIds = this.model.categoryIds.filter((x: number) => x !== id); }
+  }
+
+  toggleIssuableCat(id: number, e: Event) {
+    const checked = (e.target as HTMLInputElement).checked;
+    if (!this.model.issuableCategoryIds) this.model.issuableCategoryIds = [];
+    if (checked) { if (!this.model.issuableCategoryIds.includes(id)) this.model.issuableCategoryIds.push(id); }
+    else          { this.model.issuableCategoryIds = this.model.issuableCategoryIds.filter((x: number) => x !== id); }
   }
 
   toggleBranch(id: number, e: Event) {

@@ -8,10 +8,11 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { Branch, Department, ImportResult, Role, TicketCategory, User } from '../../core/models/models';
 import { initials } from '../../shared/util';
 import { ToastService } from '../../core/services/toast.service';
+import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
 
 @Component({
   selector: 'app-users',
-  imports: [FormsModule, DatePipe, TranslatePipe],
+  imports: [FormsModule, DatePipe, TranslatePipe, ColFilter],
   styleUrl: './users.scss',
   template: `
   <div class="page" [attr.dir]="i18n.dir()">
@@ -64,33 +65,47 @@ import { ToastService } from '../../core/services/toast.service';
               <th>{{ 'task.status' | t }}</th>@if (isAdmin()){<th></th>}
             </tr>
             <tr class="filter-row">
-              <th><input class="col-filter-input" placeholder="{{ 'usr.name' | t }}" [ngModel]="nameFilter()" (ngModelChange)="nameFilter.set($event)" /></th>
-              <th><input class="col-filter-input" placeholder="{{ 'usr.username' | t }}" [ngModel]="usernameFilter()" (ngModelChange)="usernameFilter.set($event)" /></th>
               <th>
-                <select class="col-filter-select" [ngModel]="roleFilter()" (ngModelChange)="roleFilter.set($event)">
-                  <option [ngValue]="null">{{ 'usr.allRoles' | t }}</option>
-                  @for (r of roles(); track r.id) { <option [ngValue]="r.id">{{ r.name }}</option> }
-                </select>
+                <input class="col-filter-input" placeholder="{{ 'usr.name' | t }}"
+                  [ngModel]="nameFilter()" (ngModelChange)="nameFilter.set($event)" />
               </th>
               <th>
-                <select class="col-filter-select" [ngModel]="branchFilter()" (ngModelChange)="branchFilter.set($event)">
-                  <option [ngValue]="null">{{ 'usr.allBranches' | t }}</option>
-                  @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
-                </select>
+                <input class="col-filter-input" placeholder="{{ 'usr.username' | t }}"
+                  [ngModel]="usernameFilter()" (ngModelChange)="usernameFilter.set($event)" />
               </th>
               <th>
-                <select class="col-filter-select" [ngModel]="deptFilter()" (ngModelChange)="deptFilter.set($event)">
-                  <option [ngValue]="null">{{ 'usr.allDepts' | t }}</option>
-                  @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
-                </select>
+                <app-col-filter
+                  [options]="roleOpts()"
+                  [multi]="true"
+                  [values]="roleFilter()"
+                  (valuesChange)="roleFilter.set($event)"
+                  [placeholder]="i18n.t('usr.allRoles')" />
+              </th>
+              <th>
+                <app-col-filter
+                  [options]="branchOpts()"
+                  [multi]="true"
+                  [values]="branchFilter()"
+                  (valuesChange)="branchFilter.set($event)"
+                  [placeholder]="i18n.t('usr.allBranches')" />
+              </th>
+              <th>
+                <app-col-filter
+                  [options]="deptOpts()"
+                  [multi]="true"
+                  [values]="deptFilter()"
+                  (valuesChange)="deptFilter.set($event)"
+                  [placeholder]="i18n.t('usr.allDepts')" />
               </th>
               <th></th>
               <th>
-                <select class="col-filter-select" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
-                  <option value="all">{{ 'usr.allStatuses' | t }}</option>
-                  <option value="active">{{ 'usr.active' | t }}</option>
-                  <option value="inactive">{{ 'usr.inactive' | t }}</option>
-                </select>
+                <app-col-filter
+                  [options]="statusOpts()"
+                  [multi]="true"
+                  [values]="statusFilter()"
+                  (valuesChange)="statusFilter.set($event)"
+                  [placeholder]="i18n.t('usr.allStatuses')"
+                  [alignEnd]="true" />
               </th>
               @if (isAdmin()){<th></th>}
             </tr>
@@ -243,19 +258,19 @@ export class Users implements OnInit {
   toast = inject(ToastService);
   i18n = inject(I18nService);
 
-  users = signal<User[]>([]);
-  roles = signal<Role[]>([]);
-  branches = signal<Branch[]>([]);
+  users      = signal<User[]>([]);
+  roles      = signal<Role[]>([]);
+  branches   = signal<Branch[]>([]);
   categories = signal<TicketCategory[]>([]);
   departments = signal<Department[]>([]);
-  loading = signal(true);
-  showForm = signal(false);
-  saving = signal(false);
-  error = signal('');
-  importing = signal(false);
+  loading    = signal(true);
+  showForm   = signal(false);
+  saving     = signal(false);
+  error      = signal('');
+  importing  = signal(false);
   importResult = signal<ImportResult | null>(null);
-  purgeTarget = signal<User | null>(null);
-  purging = signal(false);
+  purgeTarget  = signal<User | null>(null);
+  purging      = signal(false);
   includeInactive = false;
   editing = false;
   editId?: number;
@@ -266,38 +281,56 @@ export class Users implements OnInit {
   isTechnicianRole = () => this.roles().find(r => r.id === this.model.roleId)?.name === 'Technician';
   isCamRole        = () => this.roles().find(r => r.id === this.model.roleId)?.name === 'Cam-Employee';
 
-  // ── Per-column filters ──
-  nameFilter = signal('');
+  // ── Per-column filter signals (multi-select) ─────────────
+  nameFilter     = signal('');
   usernameFilter = signal('');
-  roleFilter = signal<number | null>(null);
-  branchFilter = signal<number | null>(null);
-  deptFilter = signal<number | null>(null);
-  statusFilter = signal<'all' | 'active' | 'inactive'>('all');
+  roleFilter     = signal<number[]>([]);
+  branchFilter   = signal<number[]>([]);
+  deptFilter     = signal<number[]>([]);
+  statusFilter   = signal<string[]>([]);
+
+  // ── Filter option arrays (reactive to data + i18n) ───────
+  roleOpts = computed<FilterOption[]>(() =>
+    this.roles().map(r => ({ value: r.id, label: r.name }))
+  );
+  branchOpts = computed<FilterOption[]>(() =>
+    this.branches().map(b => ({ value: b.id, label: b.name }))
+  );
+  deptOpts = computed<FilterOption[]>(() =>
+    this.departments().map(d => ({ value: d.id, label: d.name }))
+  );
+  statusOpts = computed<FilterOption[]>(() => [
+    { value: 'active',   label: this.i18n.t('usr.active') },
+    { value: 'inactive', label: this.i18n.t('usr.inactive') }
+  ]);
 
   filteredUsers = computed(() => {
-    const name = this.nameFilter().trim().toLowerCase();
-    const uname = this.usernameFilter().trim().toLowerCase();
-    const role = this.roleFilter();
-    const branch = this.branchFilter();
-    const dept = this.deptFilter();
-    const status = this.statusFilter();
+    const name   = this.nameFilter().trim().toLowerCase();
+    const uname  = this.usernameFilter().trim().toLowerCase();
+    const roles  = this.roleFilter();
+    const brnch  = this.branchFilter();
+    const depts  = this.deptFilter();
+    const stts   = this.statusFilter();
     return this.users().filter(u =>
-      (!name || u.fullName.toLowerCase().includes(name)) &&
-      (!uname || u.userName.toLowerCase().includes(uname)) &&
-      (!role || u.roleId === role) &&
-      (!branch || u.branchId === branch || u.branchIds?.includes(branch)) &&
-      (!dept || u.departmentId === dept) &&
-      (status === 'all' || (status === 'active' ? u.isActive : !u.isActive))
+      (!name   || u.fullName.toLowerCase().includes(name)) &&
+      (!uname  || u.userName.toLowerCase().includes(uname)) &&
+      (!roles.length  || roles.includes(u.roleId)) &&
+      (!brnch.length  || brnch.some(b => u.branchId === b || u.branchIds?.includes(b))) &&
+      (!depts.length  || (u.departmentId != null && depts.includes(u.departmentId))) &&
+      (!stts.length   || stts.includes(u.isActive ? 'active' : 'inactive'))
     );
   });
 
   hasActiveUserFilters(): boolean {
-    return !!(this.nameFilter() || this.usernameFilter() || this.roleFilter() ||
-      this.branchFilter() || this.deptFilter() || this.statusFilter() !== 'all');
+    return !!(this.nameFilter() || this.usernameFilter() ||
+      this.roleFilter().length || this.branchFilter().length ||
+      this.deptFilter().length || this.statusFilter().length);
   }
+
   clearUserFilters() {
-    this.nameFilter.set(''); this.usernameFilter.set(''); this.roleFilter.set(null);
-    this.branchFilter.set(null); this.deptFilter.set(null); this.statusFilter.set('all');
+    this.nameFilter.set(''); this.usernameFilter.set('');
+    this.roleFilter.set([]); this.branchFilter.set([]);
+    this.deptFilter.set([]); this.statusFilter.set([]);
   }
 
   ngOnInit() {
@@ -308,7 +341,10 @@ export class Users implements OnInit {
     this.load();
   }
 
-  load() { this.loading.set(true); this.svc.getAll(this.includeInactive).subscribe(u => { this.users.set(u); this.loading.set(false); }); }
+  load() {
+    this.loading.set(true);
+    this.svc.getAll(this.includeInactive).subscribe(u => { this.users.set(u); this.loading.set(false); });
+  }
 
   openNew() {
     this.editing = false; this.error.set('');

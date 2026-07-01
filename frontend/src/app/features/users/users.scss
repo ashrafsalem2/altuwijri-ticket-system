@@ -10,19 +10,21 @@ tr.inactive { opacity: .55; }
 
 /* ── Per-column header filter row ────────────────────────── */
 .filter-row th {
-  padding: .4rem .5rem;
+  padding: .35rem .45rem;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
   cursor: default;
+  vertical-align: middle;
 }
-.col-filter-input, .col-filter-select {
+/* Name / Username text inputs stay as plain inputs */
+.col-filter-input {
   width: 100%; box-sizing: border-box;
   font-size: .78rem; font-weight: 400;
-  padding: .32rem .45rem;
+  padding: .28rem .42rem;
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   background: var(--surface); color: var(--text);
-  outline: none;
-  &:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+  outline: none; min-height: 28px;
+  &:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,130,114,.18); }
 }
 
 .overlay { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 500; display: flex; align-items: flex-start; justify-content: center; padding: 2.5rem 1rem; overflow: auto; animation: overlay-fade-in .2s ease-in-out; }

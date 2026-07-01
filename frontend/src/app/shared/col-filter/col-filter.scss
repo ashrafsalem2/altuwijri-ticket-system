@@ -1,0 +1,162 @@
+/* ── Wrapper ─────────────────────────────────────────── */
+.cf-wrap {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+/* ── Trigger button ──────────────────────────────────── */
+.cf-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: .3rem;
+  width: 100%; min-height: 28px;
+  padding: .28rem .42rem;
+  font-size: .78rem; font-weight: 400;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: start;
+  transition: border-color .12s, background .12s, color .12s;
+
+  &:hover { border-color: var(--primary); }
+  &:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(0,130,114,.18); }
+
+  &.cf-active {
+    border-color: var(--primary);
+    background: rgba(0,130,114,.08);
+    color: var(--primary);
+    font-weight: 500;
+  }
+}
+
+.cf-lbl {
+  flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.cf-arrow {
+  font-size: .6rem; flex-shrink: 0; opacity: .5;
+  transition: transform .15s ease;
+  &.cf-open { transform: rotate(180deg); opacity: .85; }
+}
+
+/* ── Dropdown panel ──────────────────────────────────── */
+.cf-panel {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  z-index: 1000;
+  min-width: 170px; max-width: 260px;
+  width: max-content;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgba(0,0,0,.14);
+  display: flex; flex-direction: column;
+  max-height: 310px;
+  overflow: hidden;
+  animation: modal-pop-in .12s ease-out;
+
+  /* align to right edge for last columns */
+  &.cf-end { left: auto; right: 0; }
+}
+
+/* ── Search row (pinned) ─────────────────────────────── */
+.cf-search-row {
+  flex-shrink: 0;
+  padding: .38rem .4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cf-search {
+  display: block; width: 100%; box-sizing: border-box;
+  font-size: .77rem;
+  padding: .26rem .42rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  outline: none;
+  &:focus { border-color: var(--primary); }
+}
+
+/* ── Scrollable list ─────────────────────────────────── */
+.cf-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: .2rem 0;
+}
+
+/* ── Row item ────────────────────────────────────────── */
+.cf-item {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .36rem .55rem;
+  font-size: .81rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+
+  &:hover { background: var(--surface-2); }
+  &.cf-item-sel { color: var(--primary); }
+  &.cf-all {
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .42rem;
+  }
+}
+
+.cf-icon { flex-shrink: 0; font-size: .85rem; }
+.cf-item-lbl { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-hr { height: 1px; background: var(--border); margin: .1rem 0; }
+.cf-empty { padding: .55rem; font-size: .78rem; color: var(--muted, #94a3b8); text-align: center; }
+
+/* ── Radio (single-select indicator) ────────────────── */
+.cf-radio {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color .1s;
+
+  &.cf-radio-on {
+    border-color: var(--primary);
+    &::after {
+      content: '';
+      position: absolute; inset: 2px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+  }
+}
+
+/* ── Checkbox (multi-select indicator) ──────────────── */
+.cf-chk {
+  width: 14px; height: 14px; border-radius: 3px;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0; position: relative;
+  transition: background .1s, border-color .1s;
+
+  &.cf-chk-on {
+    background: var(--primary); border-color: var(--primary);
+    &::after {
+      content: '';
+      position: absolute; left: 2px; top: 0px;
+      width: 5px; height: 8px;
+      border: 2px solid white;
+      border-top: none; border-left: none;
+      transform: rotate(40deg);
+    }
+  }
+
+  &.cf-chk-part {
+    background: rgba(0,130,114,.12);
+    border-color: var(--primary);
+    &::after {
+      content: '';
+      position: absolute; left: 2px; top: 4px;
+      width: 8px; height: 2px;
+      background: var(--primary);
+    }
+  }
+}

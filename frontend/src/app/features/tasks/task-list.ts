@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TaskQuery, TaskService } from '../../core/services/task.service';
@@ -10,17 +10,18 @@ import { TaskForm } from './task-form';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TicketLifetime } from '../../shared/ticket-lifetime';
 import {
-  PRIORITIES, PagedResult, Project, STATUS_LABELS, TASK_STATUSES, TASK_TYPES, TYPE_LABELS,
+  PRIORITIES, PagedResult, Project, TASK_STATUSES, TASK_TYPES,
   TaskListItem, User, WorkTaskStatus, TaskType
 } from '../../core/models/models';
 import { initials, typeIcon } from '../../shared/util';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { CelebrationOverlay } from '../../shared/celebration-overlay';
+import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
 
 @Component({
   selector: 'app-task-list',
-  imports: [RouterLink, FormsModule, TaskForm, TranslatePipe, TicketLifetime, CelebrationOverlay],
+  imports: [RouterLink, FormsModule, TaskForm, TranslatePipe, TicketLifetime, CelebrationOverlay, ColFilter],
   styleUrl: './task-list.scss',
   template: `
   <div class="page" [attr.dir]="i18n.dir()">
@@ -53,44 +54,53 @@ import { CelebrationOverlay } from '../../shared/celebration-overlay';
             </tr>
             <tr class="filter-row no-print">
               <th>
-                <input class="col-filter-input" placeholder="{{ 'task.search' | t }}" [(ngModel)]="q.search" (keyup.enter)="apply()" />
+                <input class="col-filter-input" placeholder="{{ 'task.search' | t }}"
+                  [(ngModel)]="q.search" (ngModelChange)="applyDebounced()" />
               </th>
               <th>
-                <select class="col-filter-select" [(ngModel)]="q.projectId" (ngModelChange)="apply()">
-                  <option [ngValue]="undefined">{{ 'task.allProjects' | t }}</option>
-                  @for (p of projects(); track p.id) { <option [ngValue]="p.id">{{ p.name }}</option> }
-                </select>
+                <app-col-filter
+                  [options]="projectOpts()"
+                  [value]="q.projectId ?? null"
+                  (valueChange)="q.projectId = $event ?? undefined; apply()"
+                  [placeholder]="i18n.t('task.allProjects')" />
               </th>
               <th>
-                <select class="col-filter-select" [(ngModel)]="q.branchId" (ngModelChange)="apply()">
-                  <option [ngValue]="undefined">{{ 'task.allBranches' | t }}</option>
-                  @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
-                </select>
+                <app-col-filter
+                  [options]="branchOpts()"
+                  [value]="q.branchId ?? null"
+                  (valueChange)="q.branchId = $event ?? undefined; apply()"
+                  [placeholder]="i18n.t('task.allBranches')" />
               </th>
               <th>
-                <select class="col-filter-select" [(ngModel)]="q.status" (ngModelChange)="apply()">
-                  <option [ngValue]="undefined">{{ 'task.allStatuses' | t }}</option>
-                  @for (s of statuses; track s) { <option [ngValue]="s">{{ 'st.' + s | t }}</option> }
-                </select>
+                <app-col-filter
+                  [options]="statusOpts()"
+                  [multi]="true"
+                  [values]="statusValues()"
+                  (valuesChange)="statusValues.set($event); apply()"
+                  [placeholder]="i18n.t('task.allStatuses')" />
               </th>
               <th>
-                <select class="col-filter-select" [(ngModel)]="q.priority" (ngModelChange)="apply()">
-                  <option [ngValue]="undefined">{{ 'task.allPriorities' | t }}</option>
-                  @for (p of priorities; track p) { <option [ngValue]="p">{{ 'pr.' + p | t }}</option> }
-                </select>
+                <app-col-filter
+                  [options]="priorityOpts()"
+                  [value]="q.priority ?? null"
+                  (valueChange)="q.priority = $event ?? undefined; apply()"
+                  [placeholder]="i18n.t('task.allPriorities')" />
               </th>
               <th>
-                <select class="col-filter-select" [(ngModel)]="q.type" (ngModelChange)="apply()">
-                  <option [ngValue]="undefined">{{ 'task.allTypes' | t }}</option>
-                  @for (t of types; track t) { <option [ngValue]="t">{{ icon(t) }} {{ 'ty.' + t | t }}</option> }
-                </select>
+                <app-col-filter
+                  [options]="typeOpts()"
+                  [value]="q.type ?? null"
+                  (valueChange)="q.type = $event ?? undefined; apply()"
+                  [placeholder]="i18n.t('task.allTypes')" />
               </th>
               <th>
                 @if (!isTechnician()) {
-                  <select class="col-filter-select" [(ngModel)]="q.assigneeId" (ngModelChange)="apply()">
-                    <option [ngValue]="undefined">{{ 'task.anyone' | t }}</option>
-                    @for (u of users(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
-                  </select>
+                  <app-col-filter
+                    [options]="userOpts()"
+                    [value]="q.assigneeId ?? null"
+                    (valueChange)="q.assigneeId = $event ?? undefined; apply()"
+                    [placeholder]="i18n.t('task.anyone')"
+                    [alignEnd]="true" />
                 }
               </th>
               <th></th>
@@ -161,13 +171,33 @@ export class TaskList implements OnInit, OnDestroy {
   loading = signal(true);
   showForm = signal(false);
 
-  statuses = TASK_STATUSES; priorities = PRIORITIES; types = TASK_TYPES;
   q: TaskQuery = { page: 1, pageSize: 15, sortBy: 'createdAt', sortDescending: true };
+
+  // Multi-select status filter (backend supports q.statuses[])
+  statusValues = signal<WorkTaskStatus[]>([]);
+
+  // ── Filter option arrays (reactive to i18n language) ──
+  statusOpts = computed<FilterOption[]>(() =>
+    TASK_STATUSES.map(s => ({ value: s, label: this.i18n.t('st.' + s) }))
+  );
+  priorityOpts = computed<FilterOption[]>(() =>
+    PRIORITIES.map(p => ({ value: p, label: this.i18n.t('pr.' + p) }))
+  );
+  typeOpts = computed<FilterOption[]>(() =>
+    TASK_TYPES.map(t => ({ value: t, label: `${typeIcon(t as TaskType)}  ${this.i18n.t('ty.' + t)}` }))
+  );
+  projectOpts = computed<FilterOption[]>(() =>
+    this.projects().map(p => ({ value: p.id, label: p.name }))
+  );
+  branchOpts = computed<FilterOption[]>(() =>
+    this.branches().map(b => ({ value: b.id, label: b.name }))
+  );
+  userOpts = computed<FilterOption[]>(() =>
+    this.users().map(u => ({ value: u.id, label: u.fullName }))
+  );
 
   ini = initials;
   icon = (t: TaskType) => typeIcon(t);
-  label = (s: WorkTaskStatus) => STATUS_LABELS[s];
-  typeLabel = (t: TaskType) => TYPE_LABELS[t];
   canEdit = () => this.auth.hasRole('Admin', 'Technician');
   canClose = () => this.auth.hasRole('Admin');
   isTechnician = () => this.auth.user()?.role === 'Technician';
@@ -175,19 +205,20 @@ export class TaskList implements OnInit, OnDestroy {
   showCelebration = signal(false);
 
   private listPoll?: any;
-  ngOnDestroy() { clearInterval(this.listPoll); }
+  private searchTimer?: any;
+  ngOnDestroy() { clearInterval(this.listPoll); clearTimeout(this.searchTimer); }
 
   ngOnInit() {
-    // Pre-populate filters from query params (dashboard clickthrough)
     const params = this.route.snapshot.queryParams;
-    if (params['status']) this.q.status = params['status'] as WorkTaskStatus;
+    if (params['status'])   this.statusValues.set([params['status'] as WorkTaskStatus]);
     if (params['statuses']) {
       const raw = params['statuses'];
-      this.q.statuses = (Array.isArray(raw) ? raw : [raw]) as WorkTaskStatus[];
+      this.statusValues.set((Array.isArray(raw) ? raw : [raw]) as WorkTaskStatus[]);
     }
-    if (params['priority']) this.q.priority = params['priority'];
-    if (params['type']) this.q.type = params['type'];
+    if (params['priority'])   this.q.priority = params['priority'];
+    if (params['type'])       this.q.type = params['type'];
     if (params['assigneeId']) this.q.assigneeId = Number(params['assigneeId']);
+
     this.projectSvc.getAll().subscribe(p => this.projects.set(p));
     this.userSvc.getAll().subscribe(u => this.users.set(u));
     this.orgSvc.getBranches().subscribe(b => this.branches.set(b));
@@ -196,6 +227,9 @@ export class TaskList implements OnInit, OnDestroy {
   }
 
   load() {
+    // Sync statusValues → query object
+    this.q.status   = undefined;
+    this.q.statuses = this.statusValues().length ? this.statusValues() : undefined;
     this.loading.set(true);
     this.taskSvc.query(this.q).subscribe({
       next: r => { this.page.set(r); this.loading.set(false); },
@@ -204,12 +238,18 @@ export class TaskList implements OnInit, OnDestroy {
   }
 
   private silentRefresh() {
-    this.taskSvc.query(this.q).subscribe({
-      next: r => this.page.set(r)
-    });
+    this.q.statuses = this.statusValues().length ? this.statusValues() : undefined;
+    this.taskSvc.query(this.q).subscribe({ next: r => this.page.set(r) });
   }
 
   apply() { this.q.page = 1; this.load(); }
+
+  // Debounce text search so every keystroke doesn't fire an API call
+  applyDebounced() {
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.apply(), 350);
+  }
+
   go(p: number) { this.q.page = p; this.load(); }
   sort(by: string) {
     this.q.sortDescending = this.q.sortBy === by ? !this.q.sortDescending : false;
@@ -218,13 +258,14 @@ export class TaskList implements OnInit, OnDestroy {
   onSaved() { this.showForm.set(false); this.load(); }
 
   hasActiveFilters(): boolean {
-    return !!(this.q.search || this.q.status || this.q.priority || this.q.type ||
+    return !!(this.q.search || this.statusValues().length || this.q.priority || this.q.type ||
       this.q.projectId || this.q.branchId || this.q.assigneeId);
   }
   clearFilters() {
-    this.q.search = undefined; this.q.status = undefined; this.q.priority = undefined;
-    this.q.type = undefined; this.q.projectId = undefined; this.q.branchId = undefined;
-    this.q.assigneeId = undefined;
+    this.q.search = undefined; this.q.priority = undefined;
+    this.q.type = undefined; this.q.projectId = undefined;
+    this.q.branchId = undefined; this.q.assigneeId = undefined;
+    this.statusValues.set([]);
     this.apply();
   }
 

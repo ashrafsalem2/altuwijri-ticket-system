@@ -14,6 +14,7 @@ export const EN = {
   'c.newTag': 'New tag name', 'c.addTag': 'Add tag', 'c.post': 'Post', 'c.none': 'None',
   'c.saving': 'Saving…', 'c.prev': 'Prev', 'c.next': 'Next', 'c.page': 'Page',
   'c.new': 'New', 'c.all': 'All', 'c.never': 'Never', 'c.noDesc': 'No description.',
+  'c.selectAll': 'Select All', 'c.clearAll': 'Clear All', 'c.selected': 'selected',
   // Auth
   'auth.signIn': 'Sign In', 'auth.signOut': 'Sign Out', 'auth.username': 'Username or Email',
   'auth.password': 'Password', 'auth.welcome': 'Welcome back', 'auth.subtitle': 'Sign in to Altuwijri Ticket System',
@@ -243,6 +244,7 @@ export const AR: Record<keyof typeof EN, string> = {
   'c.newTag': 'اسم الوسم الجديد', 'c.addTag': 'إضافة وسم', 'c.post': 'إرسال', 'c.none': 'بلا',
   'c.saving': 'جارٍ الحفظ…', 'c.prev': 'السابق', 'c.next': 'التالي', 'c.page': 'صفحة',
   'c.new': 'جديد', 'c.all': 'الكل', 'c.never': 'لم يدخل', 'c.noDesc': 'لا يوجد وصف.',
+  'c.selectAll': 'تحديد الكل', 'c.clearAll': 'مسح الكل', 'c.selected': 'محدد',
   // Auth
   'auth.signIn': 'تسجيل الدخول', 'auth.signOut': 'تسجيل الخروج', 'auth.username': 'اسم المستخدم أو البريد',
   'auth.password': 'كلمة المرور', 'auth.welcome': 'مرحباً بعودتك', 'auth.subtitle': 'تسجيل الدخول إلى نظام تذاكر التويجري',

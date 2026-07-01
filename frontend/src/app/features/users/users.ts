@@ -176,7 +176,11 @@ import { ColFilter, FilterOption } from '../../shared/col-filter/col-filter';
             <div class="form-row">
               <div class="field"><label>{{ 'usr.role' | t }}</label>
                 <select [(ngModel)]="model.roleId">
-                  @for (r of roles(); track r.id) { <option [ngValue]="r.id">{{ r.name }}</option> }
+                  @for (r of roles(); track r.id) {
+                    @if (!['Employee','Viewer','Manager'].includes(r.name) || r.id === model.roleId) {
+                      <option [ngValue]="r.id">{{ r.name }}</option>
+                    }
+                  }
                 </select>
               </div>
               @if (!isCamRole()) {
